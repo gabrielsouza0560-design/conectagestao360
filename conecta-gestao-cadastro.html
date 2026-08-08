@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Criar Conta</title>
+<style>
+  :root{
+    --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0F172A;
+    --bg:#F8FAFC; --ink:#0F172A; --ink-soft:#475569; --line:rgba(15,23,42,.08);
+    --ok:#059669; --danger:#DC2626;
+    --sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .card{width:100%;max-width:440px;background:#fff;border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.08);overflow:hidden;}
+  .head{background:linear-gradient(150deg,var(--darkblue),var(--royal));color:#fff;padding:32px;text-align:center;}
+  .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;margin:0 auto 14px;box-shadow:0 4px 14px rgba(37,99,235,.4);}
+  .head h1{font-size:19px;margin:0 0 6px;font-weight:800;}
+  .head p{font-size:12.5px;color:#B6C4DD;margin:0;}
+  .body{padding:28px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+  .field input, .field select{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;font-family:var(--sans);}
+  .field input:focus, .field select:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .btn{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;}
+  .btn:disabled{opacity:.6;}
+  .msg{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:12.5px;line-height:1.6;display:none;}
+  .msg.show{display:block;}
+  .msg.error{background:#FEF2F2;color:#991B1B;border:1px solid #FCA5A5;}
+  .msg.success{background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7;}
+  .note{margin-top:20px;padding:13px 15px;background:#EFF6FF;border-radius:10px;font-size:12px;color:var(--royal);line-height:1.7;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="head">
+    <div class="logo">CG</div>
+    <h1>Criar conta — Conecta Gestão</h1>
+    <p>Cadastro de servidores da prefeitura</p>
+  </div>
+  <div class="body">
+    <div class="field"><label>Nome completo</label><input type="text" id="nome" placeholder="Seu nome"></div>
+    <div class="field"><label>E-mail institucional</label><input type="email" id="email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="senha" placeholder="Mínimo 6 caracteres"></div>
+    <div class="field"><label>Cargo</label><select id="cargo"><option value="">Carregando cargos...</option></select></div>
+    <div class="field"><label>Secretaria</label><select id="secretaria"><option value="">Carregando secretarias...</option></select></div>
+    <button class="btn" id="btn-signup" onclick="doSignup()">Criar conta</button>
+    <div class="msg" id="msg"></div>
+    <div class="note" id="note">ⓘ Depois de criar a conta com seu cargo e secretaria, o Administrador Master só precisa aprovar com um clique — sem precisar redigitar nada.</div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://kfvkembarvsbtveksiag.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+
+// Cargos de topo continuam exigindo aprovação manual do Admin Master —
+// não aparecem aqui de propósito.
+const CARGOS_AUTOCADASTRO = [
+  { valor: 'secretario', label: 'Secretário' },
+  { valor: 'diretor', label: 'Diretor' },
+  { valor: 'coordenador', label: 'Coordenador' },
+  { valor: 'comunicacao', label: 'Comunicação' },
+  { valor: 'controladoria', label: 'Controladoria' },
+  { valor: 'servidor', label: 'Servidor' },
+];
+
+async function carregarOpcoes(){
+  // cargos (lista fixa e restrita — ver comentário acima)
+  const cargoSel = document.getElementById('cargo');
+  cargoSel.innerHTML = '<option value="">Selecione</option>' +
+    CARGOS_AUTOCADASTRO.map(c => `<option value="${c.valor}">${c.label}</option>`).join('');
+
+  // secretarias (dinâmico, vem do banco)
+  const secSel = document.getElementById('secretaria');
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/secretarias?select=id,nome&order=nome.asc', {
+      headers: { apikey: SUPABASE_ANON_KEY, 'Accept-Profile': 'gestao360' },
+    });
+    const secretarias = await res.json();
+    secSel.innerHTML = '<option value="">Selecione</option>' +
+      secretarias.map(s => `<option value="${s.id}">${s.nome}</option>`).join('');
+  } catch (e) {
+    secSel.innerHTML = '<option value="">Não foi possível carregar</option>';
+  }
+}
+carregarOpcoes();
+
+async function doSignup(){
+  const nome = document.getElementById('nome').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value;
+  const cargo = document.getElementById('cargo').value;
+  const secretariaId = document.getElementById('secretaria').value;
+  const msg = document.getElementById('msg');
+  const btn = document.getElementById('btn-signup');
+  msg.className = 'msg';
+
+  if(!nome || !email || !senha || !cargo || !secretariaId){
+    msg.textContent = 'Preencha todos os campos.';
+    msg.className = 'msg error show';
+    return;
+  }
+  if(senha.length < 6){
+    msg.textContent = 'A senha precisa ter pelo menos 6 caracteres.';
+    msg.className = 'msg error show';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Criando conta...';
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha, data: { nome } }),
+    });
+    const data = await res.json();
+    if(!res.ok){
+      msg.textContent = data.msg || data.error_description || 'Não foi possível criar a conta.';
+      msg.className = 'msg error show';
+      return;
+    }
+
+    // Se confirmação de e-mail estiver desligada no Supabase, o signup já
+    // devolve access_token. Se estiver ligada, precisamos logar em seguida.
+    let accessToken = data.access_token;
+    if(!accessToken){
+      const loginRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: senha }),
+      });
+      const loginData = await loginRes.json();
+      if(!loginRes.ok){
+        msg.textContent = 'Conta criada, mas seu e-mail precisa ser confirmado antes de continuar. Verifique sua caixa de entrada e depois faça login normalmente.';
+        msg.className = 'msg success show';
+        return;
+      }
+      accessToken = loginData.access_token;
+    }
+
+    // Vincula automaticamente o usuário (cargo + secretaria) via RPC
+    const rpcRes = await fetch(SUPABASE_URL + '/rest/v1/rpc/autocadastrar_usuario', {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + accessToken,
+        'Content-Profile': 'gestao360',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ p_nome: nome, p_perfil_nome: cargo, p_secretaria_id: secretariaId }),
+    });
+    if(!rpcRes.ok){
+      const err = await rpcRes.json().catch(() => ({}));
+      msg.textContent = 'Conta criada, mas não foi possível vincular automaticamente: ' + (err.message || 'erro desconhecido') + '. Avise o Administrador Master.';
+      msg.className = 'msg error show';
+      return;
+    }
+
+    msg.textContent = 'Conta criada com seu cargo e secretaria! Assim que o Administrador Master aprovar, você já consegue entrar no Painel.';
+    msg.className = 'msg success show';
+  } catch (e) {
+    msg.textContent = 'Erro de conexão. Tente novamente.';
+    msg.className = 'msg error show';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Criar conta';
+  }
+}
+</script>
+<div id="cg-dev-credit" style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>

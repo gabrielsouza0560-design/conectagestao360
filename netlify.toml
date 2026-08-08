@@ -1,0 +1,17 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/painel"
+  to = "/conecta-gestao-painel-admin.html"
+  status = 302
+
+[[redirects]]
+  from = "/cadastro"
+  to = "/conecta-gestao-cadastro.html"
+  status = 302
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/conecta-gestao-dashboard-prefeito.html"
+  status = 302

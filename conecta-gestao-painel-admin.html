@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Painel Administrativo</title>
+<style>
+  :root{
+    --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0F172A;
+    --bg:#F8FAFC; --surface:#FFFFFF; --ink:#0F172A; --ink-soft:#475569; --line:rgba(15,23,42,.08);
+    --ok:#059669; --warn:#D97706; --danger:#DC2626; --muted:#94A3B8;
+    --radius:18px;
+    --sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  input,select,textarea{font-family:inherit;}
+
+  .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;flex-shrink:0;box-shadow:0 4px 14px rgba(37,99,235,.4);}
+
+  #login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+  @media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+  .login-brand{background:linear-gradient(150deg,var(--darkblue) 0%, #16265A 45%, var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+  .login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle, rgba(96,165,250,.25), transparent 70%);}
+  .brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+  .brand-name{font-size:19px;font-weight:800;}
+  .brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+  .brand-quote{position:relative;z-index:1;max-width:420px;}
+  .brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;letter-spacing:-.02em;}
+  .brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+  .brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+
+  .login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+  .login-form{width:100%;max-width:380px;}
+  .login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}
+  .login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+  .field input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);}
+  .field input:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(37,99,235,.35);transition:transform .15s;}
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-primary:disabled{opacity:.6;pointer-events:none;}
+  .login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}
+  .login-error.show{display:block;}
+  .setup-note{margin-top:22px;padding:14px 16px;background:#EFF6FF;border-radius:10px;font-size:12px;color:var(--royal);line-height:1.7;}
+  .setup-note b{font-weight:700;}
+  .setup-note code{background:rgba(37,99,235,.1);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:11px;}
+
+  #app{display:none;min-height:100vh;grid-template-columns:250px 1fr;}
+  #app.active{display:grid;}
+  .sidebar{background:linear-gradient(180deg,var(--darkblue) 0%,#132242 100%);color:#E2E8F0;display:flex;flex-direction:column;padding:22px 0;position:sticky;top:0;height:100vh;width:250px;min-width:250px;max-width:250px;overflow-x:hidden;}
+  .sb-brand{display:flex;align-items:center;gap:11px;padding:0 22px 22px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:14px;}
+  .sb-brand .brand-name{font-size:15px;}
+  .sb-role{margin:0 22px 18px;padding:10px 12px;background:rgba(59,130,246,.1);border-radius:10px;font-size:11.5px;}
+  .sb-role .role-label{color:#93A5C4;text-transform:uppercase;letter-spacing:1px;font-size:10px;display:block;margin-bottom:3px;font-weight:700;}
+  .sb-role .role-name{font-weight:700;font-size:13px;color:#fff;}
+  .nav-group{padding:0 12px;margin-bottom:6px;}
+  .nav-group-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#7E93B8;padding:14px 10px 6px;font-weight:700;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:#B6C4DD;font-size:13.5px;cursor:pointer;transition:background .15s;width:100%;text-align:left;}
+  .nav-item:hover{background:rgba(59,130,246,.12);}
+  .nav-item.active{background:linear-gradient(90deg,rgba(37,99,235,.4),rgba(59,130,246,.15));color:#fff;font-weight:700;box-shadow:inset 0 0 0 1px rgba(59,130,246,.3);}
+  .sb-foot{margin-top:auto;padding:14px 22px 0;border-top:1px solid rgba(255,255,255,.1);}
+  .logout-btn{background:none;border:1px solid rgba(255,255,255,.2);color:#B6C4DD;padding:8px 12px;border-radius:9px;font-size:12.5px;width:100%;}
+  .logout-btn:hover{border-color:var(--light);color:var(--light);}
+
+  .main{padding:30px 40px 60px;overflow-y:auto;height:100vh;min-width:0;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;}
+  .topbar h1{font-size:25px;margin:0 0 4px;font-weight:800;letter-spacing:-.01em;}
+  .topbar .path{font-size:12.5px;color:var(--muted);}
+  .btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(37,99,235,.35);}
+  .btn-ghost{background:#fff;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;color:var(--ink);}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:30px;}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);}
+  .kpi .num{font-size:28px;color:var(--royal);font-weight:800;}
+  .kpi .lbl{font-size:12px;color:var(--ink-soft);margin-top:4px;}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:24px;box-shadow:var(--shadow-sm);}
+  .panel h3{font-size:17px;margin:0 0 4px;font-weight:800;}
+  .panel .panel-sub{font-size:12.5px;color:var(--muted);margin:0 0 18px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 12px 10px;border-bottom:1px solid var(--line);font-weight:700;}
+  td{padding:13px 12px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  .status-pill{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+  .status-planejado{background:#F1F5F9;color:#64748B;}
+  .status-em_andamento{background:#FEF3C7;color:#B45309;}
+  .status-concluido{background:#D1FAE5;color:var(--ok);}
+  .status-cancelado{background:#FEE2E2;color:var(--danger);}
+  .status-parcialmente_cumprida{background:#DBEAFE;color:var(--royal);}
+  .status-nao_iniciada{background:#F1F5F9;color:#64748B;}
+  .status-cumprida{background:#D1FAE5;color:var(--ok);}
+  .status-select{border:none;background:none;font-size:11px;font-weight:700;padding:4px 8px;border-radius:20px;cursor:pointer;}
+  .status-prospectando{background:#F1F5F9;color:#64748B;}
+  .status-em_elaboracao{background:#FEF3C7;color:#B45309;}
+  .status-submetido{background:#DBEAFE;color:var(--royal);}
+  .status-aprovado{background:#D1FAE5;color:var(--ok);}
+  .status-reprovado{background:#FEE2E2;color:var(--danger);}
+  .status-em_execucao{background:#FEF3C7;color:#B45309;}
+  .prazo-urgente{color:var(--danger);font-weight:700;}
+  .notif-bell{margin:0 22px 12px;padding:9px 12px;border-radius:9px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#B6C4DD;font-size:12.5px;font-weight:700;text-align:left;display:flex;align-items:center;gap:6px;position:relative;}
+  .notif-bell:hover{background:rgba(59,130,246,.18);}
+  .notif-badge{background:var(--danger);color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:auto;}
+  .notif-panel{margin:0 22px 14px;background:#fff;border-radius:10px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+  .notif-item{padding:11px 13px;border-bottom:1px solid var(--line);}
+  .notif-item:last-child{border-bottom:none;}
+  .notif-item .nt{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+  .notif-item .nb{font-size:11px;color:var(--ink-soft);line-height:1.5;}
+  .notif-item.unread{background:#EFF6FF;}
+  .notif-empty{padding:16px;text-align:center;font-size:12px;color:var(--muted);}
+
+  .form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .form-grid .span-2{grid-column:span 2;}
+  .form-grid .span-3{grid-column:span 3;}
+  .fieldset-label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--royal);font-weight:800;margin:26px 0 14px;padding-top:16px;border-top:1px solid var(--line);}
+  .fieldset-label:first-child{margin-top:0;padding-top:0;border-top:none;}
+  .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:26px;padding-top:20px;border-top:1px solid var(--line);}
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+  .field input, .field select, .field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;background:#fff;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+
+  .diag{padding:16px 18px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;font-size:12.5px;color:#92400E;line-height:1.7;margin-bottom:20px;}
+  .diag code{background:rgba(217,119,6,.12);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:11px;}
+  .empty{padding:50px 20px;text-align:center;color:var(--muted);font-size:12.5px;}
+  .view{display:none;}
+  .view.active{display:block;}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top">
+      <div class="logo">CG</div>
+      <div class="brand-name">Conecta Gestão<small>Painel Administrativo</small></div>
+    </div>
+    <div class="brand-quote">
+      <h1>Gestão inteligente, do cadastro à transparência.</h1>
+      <p>Login real, conectado ao Supabase — cada perfil vê exatamente o que a política de acesso permite.</p>
+    </div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap">
+    <div class="login-form">
+      <h2>Acessar painel</h2>
+      <p class="sub">Entre com sua conta institucional.</p>
+      <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+      <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+      <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+      <div class="login-error" id="login-error"></div>
+      <div class="setup-note">
+        <b>Ainda não tem uma conta?</b> Crie a primeira em <code>Authentication → Users → Add User</code> no Dashboard do Supabase, me avise o e-mail usado, e eu vinculo essa conta a um perfil (Admin Master, Secretário etc.) no banco.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="logo" style="width:32px;height:32px;font-size:11px;">CG</div>
+      <div class="brand-name">Conecta Gestão</div>
+    </div>
+    <div class="sb-role">
+      <span class="role-label">Conectado como</span>
+      <span class="role-name" id="role-display">—</span>
+    </div>
+    <button class="notif-bell" id="notif-bell" onclick="toggleNotifPanel()">
+      🔔 Alertas <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
+    </button>
+    <div class="notif-panel" id="notif-panel" style="display:none;"></div>
+    <nav id="nav-container"></nav>
+    <div class="sb-foot">
+      <button class="logout-btn" onclick="doLogout()">Sair do sistema</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="view active" id="view-dashboard">
+      <div class="topbar">
+        <div><h1>Dashboard</h1><div class="path">Painel Administrativo / Visão Geral</div></div>
+      </div>
+      <div id="dash-diag"></div>
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="panel">
+        <h3>Últimas ações</h3>
+        <p class="panel-sub" id="dash-scope-note">Carregando...</p>
+        <table>
+          <thead><tr><th>Título</th><th>Secretaria</th><th>Status</th><th>Investimento</th></tr></thead>
+          <tbody id="tbl-recentes"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-acoes">
+      <div class="topbar">
+        <div><h1>Cadastro de Ações</h1><div class="path" id="acoes-path">Painel Administrativo / Ações</div></div>
+        <button class="btn-accent" onclick="toggleForm()">+ Nova ação</button>
+      </div>
+
+      <div class="panel" id="form-panel" style="display:none;">
+        <h3>Nova ação</h3>
+        <p class="panel-sub">Grava direto na tabela gestao360.acoes</p>
+        <div class="fieldset-label">Identificação</div>
+        <div class="form-grid">
+          <div class="field span-3"><label>Título</label><input id="f-titulo" placeholder="Ex.: Pavimentação da Rua das Palmeiras"></div>
+          <div class="field span-3"><label>Descrição</label><textarea id="f-descricao" rows="3"></textarea></div>
+          <div class="field"><label>Ano</label><input id="f-ano" type="number" value="2026"></div>
+          <div class="field"><label>Data</label><input id="f-data" type="date"></div>
+          <div class="field"><label>Secretaria</label><select id="f-secretaria"></select></div>
+        </div>
+        <div class="fieldset-label">Localização e financeiro</div>
+        <div class="form-grid">
+          <div class="field"><label>Bairro</label><input id="f-bairro"></div>
+          <div class="field"><label>Valor investido</label><input id="f-valor" type="number" step="0.01"></div>
+          <div class="field"><label>Origem do recurso</label><input id="f-origem"></div>
+        </div>
+        <div class="fieldset-label">Status</div>
+        <div class="form-grid">
+          <div class="field"><label>Status</label>
+            <select id="f-status"><option value="planejado">Planejado</option><option value="em_andamento">Em andamento</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select>
+          </div>
+          <div class="field span-2"><label>Quantidade de beneficiados</label><input id="f-beneficiados" type="number"></div>
+        </div>
+
+        <div class="fieldset-label">Evento (festa, feira, show...)</div>
+        <div class="form-grid">
+          <div class="field span-3">
+            <label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="checkbox" id="f-eh-evento" onchange="toggleEventoFields()" style="width:auto;margin-right:8px;vertical-align:middle;"> Este cadastro é um evento com público, fotos/vídeos e avaliação da população e dos comerciantes</label>
+          </div>
+        </div>
+        <div id="evento-fields" style="display:none;">
+          <div class="form-grid">
+            <div class="field"><label>Público estimado</label><input id="f-publico-estimado" type="number" placeholder="Ex.: 5000"></div>
+            <div class="field span-2"><label>Valor de retorno estimado (R$)</label><input id="f-valor-retorno" type="number" step="0.01" placeholder="Impacto econômico estimado"></div>
+          </div>
+          <p class="panel-sub" style="margin:2px 0 10px;">Use o campo "Origem do recurso" acima para registrar se veio de emenda (parlamentar/federal/estadual) ou de recurso próprio.</p>
+          <div class="form-grid">
+            <div class="field span-3"><label>Fotos do evento</label><input id="f-fotos" type="file" accept="image/*" multiple></div>
+            <div class="field span-3"><label>Vídeos do evento</label><input id="f-videos" type="file" accept="video/*" multiple></div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-ghost" onclick="toggleForm()">Cancelar</button>
+          <button class="btn-accent" onclick="submitAcao()" id="submit-btn">Salvar ação</button>
+        </div>
+      </div>
+
+      <div class="panel" id="evento-link-panel" style="display:none;">
+        <h3>Evento cadastrado — compartilhe o link de avaliação</h3>
+        <p class="panel-sub">Envie esse link para moradores e comerciantes das barracas avaliarem o evento (funciona sem login). Cole o link em qualquer gerador gratuito de QR Code se quiser imprimir um cartaz.</p>
+        <p id="evento-link-texto" style="font-family:var(--mono);font-size:12.5px;background:#F8FAFC;border:1px solid var(--line);padding:10px 12px;border-radius:8px;word-break:break-all;"></p>
+        <button class="btn-ghost" onclick="copiarLinkEvento()">Copiar link</button>
+      </div>
+
+      <div class="panel">
+        <h3>Ações cadastradas</h3>
+        <p class="panel-sub" id="acoes-scope-note">Carregando...</p>
+        <table>
+          <thead><tr><th>Título</th><th>Secretaria</th><th>Bairro</th><th>Status</th><th>Investimento</th><th>Evento</th></tr></thead>
+          <tbody id="tbl-acoes"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-importar">
+      <div class="topbar">
+        <div><h1>Importar Dados (Paraná)</h1><div class="path">Painel Administrativo / Importar Dados</div></div>
+      </div>
+
+      <div class="diag" style="background:#EFF6FF;border-color:rgba(37,99,235,.25);color:var(--royal);">
+        ⓘ O Portal da Transparência do Paraná não tem API automática — o CSV é gerado manualmente no site deles.
+        Baixe o arquivo em <a href="https://www.transparencia.pr.gov.br/pte/compras/convenios" target="_blank" style="color:var(--royal);font-weight:700;">transparencia.pr.gov.br</a> (filtrando pelo seu município, se possível) e envie aqui.
+      </div>
+
+      <div class="panel">
+        <h3>Enviar arquivo CSV</h3>
+        <p class="panel-sub">Convênios estaduais — usado como referência para basear novos pedidos de recurso</p>
+        <input type="file" id="csv-file-input" accept=".csv" style="margin-bottom:14px;">
+        <div id="csv-preview-wrap" style="display:none;">
+          <p class="panel-sub" id="csv-preview-note"></p>
+          <div style="overflow-x:auto;"><table id="csv-preview-table"></table></div>
+          <div class="form-actions">
+            <button class="btn-ghost" onclick="cancelCsvImport()">Cancelar</button>
+            <button class="btn-accent" onclick="confirmCsvImport()" id="csv-import-btn">Importar registros</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Dados já importados</h3>
+        <p class="panel-sub" id="importados-scope-note">Usado como referência histórica — não entra automaticamente em Ações ou Captação de Recursos</p>
+        <table>
+          <thead><tr><th>Objeto</th><th>Órgão concedente</th><th>Valor</th><th>Situação</th><th>Ano</th></tr></thead>
+          <tbody id="tbl-importados"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-recursos">
+      <div class="topbar">
+        <div><h1>Captação de Recursos</h1><div class="path">Painel Administrativo / Captação de Recursos</div></div>
+        <button class="btn-accent" onclick="toggleRecursoForm()">+ Nova oportunidade</button>
+      </div>
+
+      <div class="kpi-grid" id="recursos-kpi-grid"></div>
+
+      <div class="panel" id="recurso-form-panel" style="display:none;">
+        <h3>Nova oportunidade de recurso</h3>
+        <p class="panel-sub">Convênios, editais e emendas de governo federal, estadual ou parcerias</p>
+        <div class="form-grid">
+          <div class="field span-3"><label>Programa / Edital</label><input id="rc-programa" placeholder="Ex.: Novo PAC Saúde — Reforma de UBS"></div>
+          <div class="field"><label>Órgão concedente</label><input id="rc-orgao" placeholder="Ex.: Ministério da Saúde"></div>
+          <div class="field"><label>Esfera</label>
+            <select id="rc-esfera"><option>Federal</option><option>Estadual</option><option>Municipal</option><option>Privado/ONG</option></select>
+          </div>
+          <div class="field"><label>Secretaria responsável</label><select id="rc-secretaria"></select></div>
+          <div class="field"><label>Valor estimado</label><input id="rc-valor" type="number" step="0.01"></div>
+          <div class="field"><label>Prazo de submissão</label><input id="rc-prazo" type="date"></div>
+          <div class="field"><label>Status</label>
+            <select id="rc-status">
+              <option value="prospectando">Prospectando</option>
+              <option value="em_elaboracao">Em elaboração</option>
+              <option value="submetido">Submetido</option>
+              <option value="aprovado">Aprovado</option>
+              <option value="reprovado">Reprovado</option>
+              <option value="em_execucao">Em execução</option>
+              <option value="concluido">Concluído</option>
+            </select>
+          </div>
+          <div class="field span-3"><label>O que precisa ser apresentado (requisitos)</label><textarea id="rc-requisitos" rows="3" placeholder="Ex.: Plano de trabalho, projeto de engenharia aprovado, contrapartida municipal de 10%"></textarea></div>
+          <div class="field span-3"><label>Link do edital (opcional)</label><input id="rc-link" placeholder="https://..."></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-ghost" onclick="toggleRecursoForm()">Cancelar</button>
+          <button class="btn-accent" onclick="submitRecurso()" id="rc-submit-btn">Salvar oportunidade</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Oportunidades em acompanhamento</h3>
+        <p class="panel-sub" id="recursos-scope-note">Carregando...</p>
+        <table>
+          <thead><tr><th>Programa</th><th>Esfera</th><th>Secretaria</th><th>Valor</th><th>Prazo</th><th>Status</th></tr></thead>
+          <tbody id="tbl-recursos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-promessas">
+      <div class="topbar">
+        <div><h1>Plano de Governo</h1><div class="path">Painel Administrativo / Plano de Governo</div></div>
+        <button class="btn-accent" onclick="togglePromessaForm()">+ Nova promessa</button>
+      </div>
+
+      <div class="kpi-grid" id="promessas-kpi-grid"></div>
+
+      <div class="panel" id="promessa-form-panel" style="display:none;">
+        <h3>Nova promessa de campanha</h3>
+        <div class="form-grid">
+          <div class="field span-3"><label>Título</label><input id="pr-titulo" placeholder="Ex.: Reformar todas as UBS da rede municipal"></div>
+          <div class="field span-3"><label>Descrição</label><textarea id="pr-descricao" rows="2"></textarea></div>
+          <div class="field"><label>Eixo</label>
+            <select id="pr-eixo">
+              <option>Saúde</option><option>Educação</option><option>Infraestrutura</option><option>Segurança</option>
+              <option>Meio Ambiente</option><option>Assistência Social</option><option>Economia e Emprego</option>
+              <option>Cultura e Esporte</option><option>Gestão e Transparência</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="field"><label>Ano previsto</label><input id="pr-ano" type="number" value="2027"></div>
+          <div class="field"><label>Status inicial</label>
+            <select id="pr-status">
+              <option value="nao_iniciada">Não iniciada</option>
+              <option value="em_andamento">Em andamento</option>
+              <option value="parcialmente_cumprida">Parcialmente cumprida</option>
+              <option value="cumprida">Cumprida</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-ghost" onclick="togglePromessaForm()">Cancelar</button>
+          <button class="btn-accent" onclick="submitPromessa()" id="pr-submit-btn">Salvar promessa</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Promessas cadastradas</h3>
+        <p class="panel-sub">Clique no status para atualizar o cumprimento — reflete direto no Portal Público</p>
+        <table>
+          <thead><tr><th>Promessa</th><th>Eixo</th><th>Ano previsto</th><th>Status</th></tr></thead>
+          <tbody id="tbl-promessas"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-secretarias">
+      <div class="topbar">
+        <div><h1>Secretarias</h1><div class="path">Painel Administrativo / Secretarias</div></div>
+        <button class="btn-accent" onclick="toggleSecForm()">+ Nova secretaria</button>
+      </div>
+      <div class="panel" id="sec-form-panel" style="display:none;">
+        <h3>Nova secretaria</h3>
+        <div class="form-grid">
+          <div class="field span-2"><label>Nome</label><input id="sec-nome" placeholder="Ex.: Secretaria de Cultura"></div>
+          <div class="field"><label>Sigla</label><input id="sec-sigla" placeholder="Ex.: CUL"></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-ghost" onclick="toggleSecForm()">Cancelar</button>
+          <button class="btn-accent" onclick="submitSecretaria()" id="sec-submit-btn">Salvar secretaria</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Secretarias cadastradas</h3>
+        <p class="panel-sub">Dados reais de <code style="font-family:var(--mono);">gestao360.secretarias</code></p>
+        <table>
+          <thead><tr><th>Nome</th><th>Sigla</th><th>Status</th></tr></thead>
+          <tbody id="tbl-secretarias-admin"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-usuarios">
+      <div class="topbar">
+        <div><h1>Usuários e Permissões</h1><div class="path">Painel Administrativo / Usuários</div></div>
+        <button class="btn-accent" onclick="toggleVincularForm()">+ Cadastrar usuário</button>
+      </div>
+
+      <div class="diag" style="background:#EFF6FF;border-color:rgba(37,99,235,.25);color:var(--royal);">
+        ⓘ Cadastre a pessoa direto por aqui — nome, e-mail, senha, cargo e secretaria. A conta já entra ativa,
+        sem precisar que ela passe pela tela pública de cadastro nem esperar aprovação.
+      </div>
+
+      <div class="panel" id="vincular-form-panel" style="display:none;">
+        <h3>Cadastrar novo usuário</h3>
+        <div class="form-grid">
+          <div class="field span-2"><label>E-mail</label><input id="vc-email" placeholder="nome@prefeitura.gov.br"></div>
+          <div class="field"><label>Nome completo</label><input id="vc-nome" placeholder="Nome da pessoa"></div>
+          <div class="field"><label>Senha temporária</label><input id="vc-senha" type="text" placeholder="Mínimo 6 caracteres"></div>
+          <div class="field"><label>Perfil</label>
+            <select id="vc-perfil">
+              <option value="secretario">Secretário</option>
+              <option value="diretor">Diretor</option>
+              <option value="coordenador">Coordenador</option>
+              <option value="servidor">Servidor</option>
+              <option value="comunicacao">Comunicação</option>
+              <option value="controladoria">Controladoria</option>
+              <option value="vice_prefeito">Vice-Prefeito</option>
+              <option value="prefeito">Prefeito</option>
+              <option value="admin_master">Administrador Master</option>
+            </select>
+          </div>
+          <div class="field"><label>Secretaria (se aplicável)</label><select id="vc-secretaria"><option value="">Nenhuma / todas</option></select></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-ghost" onclick="toggleVincularForm()">Cancelar</button>
+          <button class="btn-accent" onclick="submitVincular()" id="vc-submit-btn">Cadastrar usuário</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Matriz de permissões por perfil</h3>
+        <p class="panel-sub">Vinda de <code style="font-family:var(--mono);">gestao360.perfil_permissoes</code></p>
+        <table>
+          <thead><tr id="perm-thead"><th>Permissão</th></tr></thead>
+          <tbody id="tbl-permissoes"></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h3>Usuários cadastrados</h3>
+        <p class="panel-sub" id="usuarios-scope-note">Carregando...</p>
+        <table>
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="tbl-usuarios"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = "https://kfvkembarvsbtveksiag.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+
+let session = null;
+
+function decodeJwt(token){
+  try {
+    const payload = token.split('.')[1];
+    const json = decodeURIComponent(atob(payload.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));
+    return JSON.parse(json);
+  } catch (e) { return {}; }
+}
+
+async function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const errBox = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  errBox.classList.remove('show');
+  if(!email || !senha){ errBox.textContent = 'Preencha e-mail e senha.'; errBox.classList.add('show'); return; }
+
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha }),
+    });
+    const data = await res.json();
+    if(!res.ok){
+      errBox.textContent = data.error_description || data.msg || 'E-mail ou senha inválidos.';
+      errBox.classList.add('show');
+      return;
+    }
+    const claims = decodeJwt(data.access_token);
+    session = { access_token: data.access_token, claims };
+    enterApp();
+  } catch (e) {
+    errBox.textContent = 'Não foi possível conectar ao servidor de autenticação.';
+    errBox.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+function doLogout(){
+  session = null;
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('login-screen').style.display = 'grid';
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-senha').value = '';
+}
+
+const NAV_ITEMS = {
+  dashboard: { label: 'Dashboard', view: 'view-dashboard' },
+  acoes: { label: 'Cadastro de Ações', view: 'view-acoes' },
+  recursos: { label: 'Captação de Recursos', view: 'view-recursos' },
+  importar: { label: 'Importar Dados (PR)', view: 'view-importar' },
+  promessas: { label: 'Plano de Governo', view: 'view-promessas' },
+  secretarias: { label: 'Secretarias', view: 'view-secretarias' },
+  usuarios: { label: 'Usuários e Permissões', view: 'view-usuarios' },
+};
+
+function enterApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+
+  const perfil = session.claims.perfil;
+  document.getElementById('role-display').textContent = perfil ? perfil.replace('_',' ') : 'perfil não definido';
+
+  const isAdmin = perfil === 'admin_master';
+  const canManagePromessas = ['admin_master','prefeito'].indexOf(perfil) !== -1;
+  const nav = document.getElementById('nav-container');
+  nav.innerHTML = '<div class="nav-group"><div class="nav-group-label">Menu</div>' +
+    '<button class="nav-item active" data-key="dashboard" onclick="navigateTo(\'dashboard\')"><span>Dashboard</span></button>' +
+    '<button class="nav-item" data-key="acoes" onclick="navigateTo(\'acoes\')"><span>Cadastro de Ações</span></button>' +
+    '<button class="nav-item" data-key="recursos" onclick="navigateTo(\'recursos\')"><span>Captação de Recursos</span></button>' +
+    '<button class="nav-item" data-key="importar" onclick="navigateTo(\'importar\')"><span>Importar Dados (PR)</span></button>' +
+    (canManagePromessas ? '<button class="nav-item" data-key="promessas" onclick="navigateTo(\'promessas\')"><span>Plano de Governo</span></button>' : '') +
+    (isAdmin ? '<button class="nav-item" data-key="secretarias" onclick="navigateTo(\'secretarias\')"><span>Secretarias</span></button>' : '') +
+    (isAdmin ? '<button class="nav-item" data-key="usuarios" onclick="navigateTo(\'usuarios\')"><span>Usuários e Permissões</span></button>' : '') +
+    '</div>';
+
+  if(!perfil){
+    document.getElementById('dash-diag').innerHTML = '<div class="diag">⚠️ Login funcionou, mas o token não trouxe perfil/tenant_id/secretaria_id. ' +
+      'Isso significa que o hook de claims customizadas ainda não está ativo, ou essa conta ainda não tem um registro em gestao360.usuarios. ' +
+      'Sem isso, as políticas de segurança do banco não liberam nenhum dado — é esperado que as listas abaixo apareçam vazias até isso ser resolvido.</div>';
+  } else {
+    document.getElementById('dash-diag').innerHTML = '';
+  }
+
+  loadSecretarias();
+  loadAcoes();
+  loadRecursos();
+  loadNotificacoes();
+  loadImportados();
+  if(canManagePromessas) loadPromessas();
+  if(isAdmin){
+    loadSecretariasAdmin();
+    loadUsuarios();
+    loadPermissoesMatrix();
+  }
+  navigateTo('dashboard');
+}
+
+let currentUsuarioId = null;
+
+async function loadNotificacoes(){
+  try {
+    if(!currentUsuarioId){
+      const sub = session.claims.sub;
+      const usuarios = await sbGet('usuarios', 'select=id&auth_user_id=eq.' + sub);
+      if(!usuarios.length) return;
+      currentUsuarioId = usuarios[0].id;
+    }
+    const notifs = await sbGet('notificacoes', 'select=id,titulo,corpo,lida,criado_em&usuario_id=eq.' + currentUsuarioId + '&order=criado_em.desc&limit=20');
+    const unread = notifs.filter(n => !n.lida).length;
+    const badge = document.getElementById('notif-badge');
+    badge.style.display = unread > 0 ? 'inline-block' : 'none';
+    badge.textContent = unread;
+    document.getElementById('notif-panel').innerHTML = notifs.length
+      ? notifs.map(n => '<div class="notif-item ' + (n.lida ? '' : 'unread') + '" onclick="marcarNotifLida(\'' + n.id + '\')"><div class="nt">' + n.titulo + '</div><div class="nb">' + (n.corpo||'') + '</div></div>').join('')
+      : '<div class="notif-empty">Nenhum alerta por enquanto.</div>';
+  } catch (e) {
+    document.getElementById('notif-panel').innerHTML = '<div class="notif-empty">Não foi possível carregar alertas.</div>';
+  }
+}
+
+function toggleNotifPanel(){
+  const panel = document.getElementById('notif-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+async function marcarNotifLida(id){
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/notificacoes?id=eq.' + id, {
+      method: 'PATCH',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + session.access_token,
+        'Content-Profile': 'gestao360',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ lida: true }),
+    });
+    loadNotificacoes();
+  } catch (e) {}
+}
+
+function navigateTo(key){
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.key === key));
+  const target = NAV_ITEMS[key].view;
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === target));
+}
+
+function toggleForm(){
+  const panel = document.getElementById('form-panel');
+  const opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if(opening){
+    document.getElementById('evento-link-panel').style.display = 'none';
+    document.getElementById('f-eh-evento').checked = false;
+    toggleEventoFields();
+  }
+}
+
+function fecharFormAcaoAposSalvar(){
+  document.getElementById('form-panel').style.display = 'none';
+}
+
+function toggleEventoFields(){
+  document.getElementById('evento-fields').style.display = document.getElementById('f-eh-evento').checked ? 'block' : 'none';
+}
+
+async function uploadMidiaEvento(file, tipo, acaoId){
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+  const path = session.claims.tenant_id + '/' + acaoId + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+  const res = await fetch(SUPABASE_URL + '/storage/v1/object/evento-midias/' + path, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + session.access_token,
+      'Content-Type': file.type || 'application/octet-stream',
+    },
+    body: file,
+  });
+  if(!res.ok) throw new Error(await res.text());
+  const url = SUPABASE_URL + '/storage/v1/object/public/evento-midias/' + path;
+  await sbPost('evento_midias', {
+    tenant_id: session.claims.tenant_id,
+    acao_id: acaoId,
+    tipo: tipo,
+    storage_path: path,
+    url: url,
+  });
+}
+
+function mostrarLinkAvaliacao(acaoId){
+  const link = new URL('conecta-gestao-avaliar-evento.html?acao=' + acaoId, location.href).href;
+  const panel = document.getElementById('evento-link-panel');
+  document.getElementById('evento-link-texto').textContent = link;
+  panel.dataset.link = link;
+  panel.style.display = 'block';
+}
+
+function copiarLinkEvento(){
+  const link = document.getElementById('evento-link-panel').dataset.link || '';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(() => alert('Link copiado!')).catch(() => prompt('Copie o link:', link));
+  } else {
+    prompt('Copie o link:', link);
+  }
+}
+
+async function sbGet(table, query){
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + (query || ''), {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + session.access_token,
+      'Accept-Profile': 'gestao360',
+    },
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function sbPost(table, body){
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + session.access_token,
+      'Content-Profile': 'gestao360',
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    },
+    body: JSON.stringify(body),
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+function statusPill(s){
+  const map = { planejado:'Planejado', em_andamento:'Em andamento', concluido:'Concluído', cancelado:'Cancelado' };
+  return '<span class="status-pill status-' + s + '">' + (map[s] || s) + '</span>';
+}
+function money(v){ return v ? 'R$ ' + Number(v).toLocaleString('pt-BR') : '—'; }
+
+async function loadSecretarias(){
+  try {
+    const secs = await sbGet('secretarias', 'select=id,nome&order=nome.asc');
+    document.getElementById('f-secretaria').innerHTML = secs.map(s => '<option value="' + s.id + '">' + s.nome + '</option>').join('') || '<option value="">Nenhuma secretaria visível</option>';
+  } catch (e) {
+    document.getElementById('f-secretaria').innerHTML = '<option value="">Não foi possível carregar</option>';
+  }
+}
+
+async function loadAcoes(){
+  const scopeNote = perfilEscopoTexto();
+  document.getElementById('dash-scope-note').textContent = scopeNote;
+  document.getElementById('acoes-scope-note').textContent = scopeNote;
+  try {
+    const acoes = await sbGet('acoes', 'select=id,titulo,bairro,status,valor_investido,eh_evento,secretarias(nome)&order=criado_em.desc&limit=20');
+    const eventoIds = acoes.filter(a => a.eh_evento).map(a => a.id);
+    let avaliacoesEvento = [];
+    if(eventoIds.length){
+      try {
+        avaliacoesEvento = await sbGet('evento_avaliacoes', 'select=acao_id,tipo_avaliador,nota&acao_id=in.(' + eventoIds.join(',') + ')');
+      } catch (e) { avaliacoesEvento = []; }
+    }
+    renderAcoes(acoes, avaliacoesEvento);
+    renderDashboard(acoes);
+  } catch (e) {
+    document.getElementById('tbl-acoes').innerHTML = '<tr><td colspan="6" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+    document.getElementById('tbl-recentes').innerHTML = '';
+    document.getElementById('kpi-grid').innerHTML = '';
+  }
+}
+
+function perfilEscopoTexto(){
+  const perfil = session && session.claims && session.claims.perfil;
+  if(!perfil) return 'Sem perfil no token — nada será retornado até o hook/usuário estar configurado.';
+  const total = ['admin_master','prefeito','vice_prefeito','controladoria','comunicacao'].indexOf(perfil) !== -1;
+  return total ? 'Todas as secretarias (perfil com escopo total)' : 'Apenas a sua secretaria (RLS aplicada pelo banco)';
+}
+
+function renderAcoes(acoes, avaliacoesEvento){
+  avaliacoesEvento = avaliacoesEvento || [];
+  document.getElementById('tbl-acoes').innerHTML = acoes.length
+    ? acoes.map(a => {
+        let eventoCell = '—';
+        if(a.eh_evento){
+          const doAcao = avaliacoesEvento.filter(v => v.acao_id === a.id);
+          const media = (tipo) => {
+            const notas = doAcao.filter(v => v.tipo_avaliador === tipo);
+            return notas.length ? (notas.reduce((s,v) => s + Number(v.nota), 0) / notas.length / 2).toFixed(1) : '—';
+          };
+          eventoCell = '<span title="Avaliação da população (0–5)">👥 ' + media('morador') + '</span> · <span title="Avaliação dos comerciantes/barracas (0–5)">🏪 ' + media('comerciante') + '</span>';
+        }
+        return '<tr><td>' + a.titulo + '</td><td>' + (a.secretarias ? a.secretarias.nome : '—') + '</td><td>' + (a.bairro||'—') + '</td><td>' + statusPill(a.status) + '</td><td style="font-family:var(--mono);">' + money(a.valor_investido) + '</td><td style="font-size:12.5px;">' + eventoCell + '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="6" class="empty">Nenhuma ação encontrada para o seu escopo de acesso.</td></tr>';
+}
+
+function renderDashboard(acoes){
+  const total = acoes.length;
+  const investimento = acoes.reduce(function(s,a){ return s + (Number(a.valor_investido)||0); }, 0);
+  const concluidas = acoes.filter(function(a){ return a.status === 'concluido'; }).length;
+  const andamento = acoes.filter(function(a){ return a.status === 'em_andamento'; }).length;
+  document.getElementById('kpi-grid').innerHTML =
+    '<div class="kpi"><div class="num">' + total + '</div><div class="lbl">Ações visíveis</div></div>' +
+    '<div class="kpi"><div class="num">' + money(investimento) + '</div><div class="lbl">Investimento (escopo)</div></div>' +
+    '<div class="kpi"><div class="num">' + concluidas + '</div><div class="lbl">Concluídas</div></div>' +
+    '<div class="kpi"><div class="num">' + andamento + '</div><div class="lbl">Em andamento</div></div>';
+  document.getElementById('tbl-recentes').innerHTML = acoes.slice(0,5).map(function(a){
+    return '<tr><td>' + a.titulo + '</td><td>' + (a.secretarias ? a.secretarias.nome : '—') + '</td><td>' + statusPill(a.status) + '</td><td style="font-family:var(--mono);">' + money(a.valor_investido) + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" class="empty">Nenhuma ação ainda.</td></tr>';
+}
+
+let parsedCsvRows = [];
+let csvColumnMap = { objeto: null, orgao: null, valor: null, situacao: null, data: null };
+
+document.getElementById('csv-file-input')?.addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    encoding: 'ISO-8859-1',
+    complete: function(results){
+      parsedCsvRows = results.data;
+      autoDetectColumns(results.meta.fields || []);
+      renderCsvPreview();
+    },
+    error: function(err){
+      alert('Não foi possível ler o arquivo: ' + err.message);
+    }
+  });
+});
+
+function autoDetectColumns(fields){
+  const find = (candidates) => fields.find(f => candidates.some(c => f.toLowerCase().includes(c))) || null;
+  csvColumnMap.objeto = find(['objeto','descri']);
+  csvColumnMap.orgao = find(['concedente','órgão','orgao','entidade']);
+  csvColumnMap.valor = find(['valor']);
+  csvColumnMap.situacao = find(['situa','status']);
+  csvColumnMap.data = find(['data']);
+}
+
+function renderCsvPreview(){
+  const wrap = document.getElementById('csv-preview-wrap');
+  wrap.style.display = 'block';
+  document.getElementById('csv-preview-note').textContent = parsedCsvRows.length + ' linha(s) encontrada(s). Mostrando as 5 primeiras — confira se as colunas fazem sentido antes de importar.';
+  const fields = Object.keys(parsedCsvRows[0] || {});
+  const table = document.getElementById('csv-preview-table');
+  table.innerHTML = '<thead><tr>' + fields.map(f => '<th>' + f + '</th>').join('') + '</tr></thead>' +
+    '<tbody>' + parsedCsvRows.slice(0,5).map(row => '<tr>' + fields.map(f => '<td>' + (row[f]||'') + '</td>').join('') + '</tr>').join('') + '</tbody>';
+}
+
+function cancelCsvImport(){
+  parsedCsvRows = [];
+  document.getElementById('csv-preview-wrap').style.display = 'none';
+  document.getElementById('csv-file-input').value = '';
+}
+
+function parseValorBR(v){
+  if(!v) return null;
+  const n = String(v).replace(/[R$\s.]/g,'').replace(',','.');
+  const f = parseFloat(n);
+  return isNaN(f) ? null : f;
+}
+
+async function confirmCsvImport(){
+  if(!parsedCsvRows.length) return;
+  const btn = document.getElementById('csv-import-btn');
+  btn.disabled = true; btn.textContent = 'Importando...';
+  try {
+    const registros = parsedCsvRows.map(row => {
+      const dataStr = csvColumnMap.data ? row[csvColumnMap.data] : null;
+      let dataRef = null, ano = null;
+      if(dataStr){
+        const m = dataStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if(m){ dataRef = m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0'); ano = parseInt(m[3]); }
+        else { const y = dataStr.match(/(\d{4})/); if(y) ano = parseInt(y[1]); }
+      }
+      return {
+        tenant_id: session.claims.tenant_id,
+        objeto: csvColumnMap.objeto ? row[csvColumnMap.objeto] : null,
+        orgao_concedente: csvColumnMap.orgao ? row[csvColumnMap.orgao] : null,
+        valor: csvColumnMap.valor ? parseValorBR(row[csvColumnMap.valor]) : null,
+        situacao: csvColumnMap.situacao ? row[csvColumnMap.situacao] : null,
+        data_referencia: dataRef,
+        ano: ano,
+      };
+    }).filter(r => r.objeto);
+
+    const chunkSize = 200;
+    for(let i=0; i<registros.length; i += chunkSize){
+      await sbPost('recursos_referencia_estadual', registros.slice(i, i+chunkSize));
+    }
+    alert(registros.length + ' registro(s) importado(s) com sucesso.');
+    cancelCsvImport();
+    loadImportados();
+  } catch (e) {
+    alert('Não foi possível importar: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Importar registros';
+  }
+}
+
+async function loadImportados(){
+  try {
+    const registros = await sbGet('recursos_referencia_estadual', 'select=objeto,orgao_concedente,valor,situacao,ano&order=importado_em.desc&limit=50');
+    document.getElementById('tbl-importados').innerHTML = registros.length
+      ? registros.map(r => '<tr><td>' + (r.objeto||'—') + '</td><td>' + (r.orgao_concedente||'—') + '</td><td style="font-family:var(--mono);">' + moneyR(r.valor) + '</td><td>' + (r.situacao||'—') + '</td><td>' + (r.ano||'—') + '</td></tr>').join('')
+      : '<tr><td colspan="5" class="empty">Nenhum dado importado ainda.</td></tr>';
+  } catch (e) {
+    document.getElementById('tbl-importados').innerHTML = '<tr><td colspan="5" class="empty">Não foi possível carregar.</td></tr>';
+  }
+}
+
+const RECURSO_STATUS_LABEL = { prospectando:'Prospectando', em_elaboracao:'Em elaboração', submetido:'Submetido', aprovado:'Aprovado', reprovado:'Reprovado', em_execucao:'Em execução', concluido:'Concluído' };
+
+function toggleRecursoForm(){
+  const panel = document.getElementById('recurso-form-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function moneyR(v){ return v ? 'R$ ' + Number(v).toLocaleString('pt-BR') : '—'; }
+
+async function loadRecursos(){
+  document.getElementById('recursos-scope-note').textContent = perfilEscopoTexto();
+  try {
+    const secs = await sbGet('secretarias', 'select=id,nome&order=nome.asc');
+    document.getElementById('rc-secretaria').innerHTML = '<option value="">Toda a prefeitura</option>' + secs.map(s => '<option value="' + s.id + '">' + s.nome + '</option>').join('');
+
+    const recursos = await sbGet('oportunidades_recursos', 'select=id,programa,esfera,valor_estimado,prazo_submissao,status,secretarias(nome)&order=prazo_submissao.asc.nullslast');
+
+    const totalCaptado = recursos.filter(r => r.status === 'aprovado' || r.status === 'em_execucao' || r.status === 'concluido').reduce((s,r) => s + (Number(r.valor_estimado)||0), 0);
+    const emAndamento = recursos.filter(r => ['prospectando','em_elaboracao','submetido'].indexOf(r.status) !== -1).length;
+    const hoje = new Date();
+    const proximos30 = recursos.filter(r => {
+      if(!r.prazo_submissao || ['aprovado','reprovado','concluido'].indexOf(r.status) !== -1) return false;
+      const dias = (new Date(r.prazo_submissao) - hoje) / 86400000;
+      return dias >= 0 && dias <= 30;
+    }).length;
+
+    document.getElementById('recursos-kpi-grid').innerHTML =
+      '<div class="kpi"><div class="num">' + recursos.length + '</div><div class="lbl">Oportunidades no funil</div></div>' +
+      '<div class="kpi"><div class="num">' + moneyR(totalCaptado) + '</div><div class="lbl">Total captado/aprovado</div></div>' +
+      '<div class="kpi"><div class="num">' + emAndamento + '</div><div class="lbl">Em elaboração/análise</div></div>' +
+      '<div class="kpi"><div class="num">' + proximos30 + '</div><div class="lbl">Prazos nos próximos 30 dias</div></div>';
+
+    document.getElementById('tbl-recursos').innerHTML = recursos.length
+      ? recursos.map(r => {
+          let prazoTxt = '—';
+          let prazoClass = '';
+          if(r.prazo_submissao){
+            const dias = Math.round((new Date(r.prazo_submissao) - hoje) / 86400000);
+            prazoTxt = new Date(r.prazo_submissao).toLocaleDateString('pt-BR');
+            if(dias >= 0 && dias <= 15 && ['aprovado','reprovado','concluido'].indexOf(r.status) === -1) prazoClass = 'prazo-urgente';
+          }
+          return '<tr><td>' + r.programa + '</td><td>' + r.esfera + '</td><td>' + (r.secretarias ? r.secretarias.nome : 'Toda a prefeitura') + '</td><td style="font-family:var(--mono);">' + moneyR(r.valor_estimado) + '</td><td class="' + prazoClass + '">' + prazoTxt + '</td><td><span class="status-pill status-' + r.status + '">' + RECURSO_STATUS_LABEL[r.status] + '</span></td></tr>';
+        }).join('')
+      : '<tr><td colspan="6" class="empty">Nenhuma oportunidade cadastrada ainda.</td></tr>';
+  } catch (e) {
+    document.getElementById('tbl-recursos').innerHTML = '<tr><td colspan="6" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
+async function submitRecurso(){
+  const programa = document.getElementById('rc-programa').value.trim();
+  if(!programa){ alert('Informe o nome do programa/edital.'); return; }
+  const btn = document.getElementById('rc-submit-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    await sbPost('oportunidades_recursos', {
+      tenant_id: session.claims.tenant_id,
+      secretaria_id: document.getElementById('rc-secretaria').value || null,
+      programa: programa,
+      orgao_concedente: document.getElementById('rc-orgao').value.trim() || null,
+      esfera: document.getElementById('rc-esfera').value,
+      valor_estimado: parseFloat(document.getElementById('rc-valor').value) || null,
+      prazo_submissao: document.getElementById('rc-prazo').value || null,
+      status: document.getElementById('rc-status').value,
+      requisitos: document.getElementById('rc-requisitos').value.trim() || null,
+      link_edital: document.getElementById('rc-link').value.trim() || null,
+    });
+    toggleRecursoForm();
+    document.getElementById('rc-programa').value = '';
+    document.getElementById('rc-orgao').value = '';
+    document.getElementById('rc-requisitos').value = '';
+    document.getElementById('rc-link').value = '';
+    loadRecursos();
+  } catch (e) {
+    alert('Não foi possível salvar: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar oportunidade';
+  }
+}
+
+const PROMESSA_STATUS_LABEL = { nao_iniciada:'Não iniciada', em_andamento:'Em andamento', parcialmente_cumprida:'Parcialmente cumprida', cumprida:'Cumprida' };
+
+function togglePromessaForm(){
+  const panel = document.getElementById('promessa-form-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+async function loadPromessas(){
+  try {
+    const promessas = await sbGet('promessas_campanha', 'select=id,titulo,eixo,ano_previsto,status&order=criado_em.desc');
+    const total = promessas.length;
+    const cumpridas = promessas.filter(p => p.status === 'cumprida').length;
+    const andamento = promessas.filter(p => p.status === 'em_andamento' || p.status === 'parcialmente_cumprida').length;
+    const naoIniciadas = promessas.filter(p => p.status === 'nao_iniciada').length;
+    const pct = total ? Math.round((cumpridas / total) * 100) : 0;
+    document.getElementById('promessas-kpi-grid').innerHTML =
+      '<div class="kpi"><div class="num">' + total + '</div><div class="lbl">Promessas cadastradas</div></div>' +
+      '<div class="kpi"><div class="num">' + pct + '%</div><div class="lbl">Cumpridas</div></div>' +
+      '<div class="kpi"><div class="num">' + andamento + '</div><div class="lbl">Em andamento</div></div>' +
+      '<div class="kpi"><div class="num">' + naoIniciadas + '</div><div class="lbl">Não iniciadas</div></div>';
+
+    document.getElementById('tbl-promessas').innerHTML = promessas.length
+      ? promessas.map(p => '<tr><td>' + p.titulo + '</td><td>' + p.eixo + '</td><td>' + (p.ano_previsto||'—') + '</td><td>' +
+          '<select class="status-select status-' + p.status + '" onchange="updatePromessaStatus(\'' + p.id + '\', this.value, this)">' +
+            Object.keys(PROMESSA_STATUS_LABEL).map(k => '<option value="' + k + '"' + (k===p.status?' selected':'') + '>' + PROMESSA_STATUS_LABEL[k] + '</option>').join('') +
+          '</select></td></tr>').join('')
+      : '<tr><td colspan="4" class="empty">Nenhuma promessa cadastrada ainda.</td></tr>';
+  } catch (e) {
+    document.getElementById('tbl-promessas').innerHTML = '<tr><td colspan="4" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
+async function submitPromessa(){
+  const titulo = document.getElementById('pr-titulo').value.trim();
+  if(!titulo){ alert('Informe o título da promessa.'); return; }
+  const btn = document.getElementById('pr-submit-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    await sbPost('promessas_campanha', {
+      tenant_id: session.claims.tenant_id,
+      titulo: titulo,
+      descricao: document.getElementById('pr-descricao').value.trim() || null,
+      eixo: document.getElementById('pr-eixo').value,
+      ano_previsto: parseInt(document.getElementById('pr-ano').value) || null,
+      status: document.getElementById('pr-status').value,
+    });
+    togglePromessaForm();
+    document.getElementById('pr-titulo').value = '';
+    document.getElementById('pr-descricao').value = '';
+    loadPromessas();
+  } catch (e) {
+    alert('Não foi possível salvar: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar promessa';
+  }
+}
+
+async function updatePromessaStatus(id, novoStatus, selectEl){
+  selectEl.className = 'status-select status-' + novoStatus;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/promessas_campanha?id=eq.' + id, {
+      method: 'PATCH',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + session.access_token,
+        'Content-Profile': 'gestao360',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status: novoStatus, atualizado_em: new Date().toISOString() }),
+    });
+    if(!res.ok) throw new Error(await res.text());
+    loadPromessas();
+  } catch (e) {
+    alert('Não foi possível atualizar: ' + e.message.slice(0,200));
+  }
+}
+
+async function sbRpc(fn, args){
+  const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + session.access_token,
+      'Content-Profile': 'gestao360',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(args),
+  });
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.message || data.error || 'Erro ao chamar ' + fn);
+  return data;
+}
+
+function toggleVincularForm(){
+  const panel = document.getElementById('vincular-form-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+async function submitVincular(){
+  const email = document.getElementById('vc-email').value.trim();
+  const nome = document.getElementById('vc-nome').value.trim();
+  const senha = document.getElementById('vc-senha').value;
+  const perfil = document.getElementById('vc-perfil').value;
+  const secretariaId = document.getElementById('vc-secretaria').value || null;
+  if(!email || !nome || !senha){ alert('Preencha e-mail, nome e senha.'); return; }
+  if(senha.length < 6){ alert('A senha precisa ter pelo menos 6 caracteres.'); return; }
+
+  const btn = document.getElementById('vc-submit-btn');
+  btn.disabled = true; btn.textContent = 'Cadastrando...';
+  try {
+    // 1. Cria o login (Auth) da pessoa
+    const signupRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha, data: { nome } }),
+    });
+    const signupData = await signupRes.json();
+    if(!signupRes.ok){
+      throw new Error(signupData.msg || signupData.error_description || 'Não foi possível criar o login.');
+    }
+    const novoAuthId = signupData.id || (signupData.user && signupData.user.id);
+    if(!novoAuthId){ throw new Error('Login criado, mas não veio o ID do usuário na resposta.'); }
+
+    // 2. Vincula cargo/secretaria e ativa, usando a sessão do Admin Master
+    await sbRpc('admin_criar_usuario', {
+      p_auth_user_id: novoAuthId, p_nome: nome, p_perfil_nome: perfil, p_secretaria_id: secretariaId,
+    });
+
+    alert('Usuário cadastrado e ativo! Se a confirmação de e-mail estiver ligada no Supabase, a pessoa precisa confirmar o e-mail antes do primeiro login.');
+    toggleVincularForm();
+    document.getElementById('vc-email').value = '';
+    document.getElementById('vc-nome').value = '';
+    document.getElementById('vc-senha').value = '';
+    loadUsuarios();
+  } catch (e) {
+    alert('Não foi possível cadastrar: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Cadastrar usuário';
+  }
+}
+
+async function loadSecretariasAdmin(){
+  try {
+    const secs = await sbGet('secretarias', 'select=id,nome,sigla,ativa&order=nome.asc');
+    document.getElementById('tbl-secretarias-admin').innerHTML = secs.length
+      ? secs.map(s => '<tr><td>' + s.nome + '</td><td>' + (s.sigla||'—') + '</td><td>' + (s.ativa ? '<span class="status-pill status-concluido">Ativa</span>' : '<span class="status-pill status-cancelado">Inativa</span>') + '</td></tr>').join('')
+      : '<tr><td colspan="3" class="empty">Nenhuma secretaria cadastrada.</td></tr>';
+  } catch (e) {
+    document.getElementById('tbl-secretarias-admin').innerHTML = '<tr><td colspan="3" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
+function toggleSecForm(){
+  const panel = document.getElementById('sec-form-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+async function submitSecretaria(){
+  const nome = document.getElementById('sec-nome').value.trim();
+  const sigla = document.getElementById('sec-sigla').value.trim();
+  if(!nome){ alert('Informe o nome da secretaria.'); return; }
+  const btn = document.getElementById('sec-submit-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    await sbPost('secretarias', { tenant_id: session.claims.tenant_id, nome: nome, sigla: sigla || null });
+    toggleSecForm();
+    document.getElementById('sec-nome').value = '';
+    document.getElementById('sec-sigla').value = '';
+    loadSecretariasAdmin();
+    loadSecretarias();
+  } catch (e) {
+    alert('Não foi possível salvar: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar secretaria';
+  }
+}
+
+async function aprovarUsuario(id){
+  if(!confirm('Aprovar este usuário? Ele passa a ter acesso imediatamente.')) return;
+  try {
+    await sbRpc('aprovar_usuario', { p_usuario_id: id });
+    loadUsuarios();
+  } catch (e) {
+    alert('Não foi possível aprovar: ' + e.message);
+  }
+}
+
+async function loadUsuarios(){
+  document.getElementById('usuarios-scope-note').textContent = 'Usuários cadastrados no tenant atual';
+  try {
+    const usuarios = await sbGet('usuarios', 'select=id,nome,email,status,perfis(nome)&order=nome.asc');
+    document.getElementById('tbl-usuarios').innerHTML = usuarios.length
+      ? usuarios.map(u => '<tr><td>' + u.nome + '</td><td>' + u.email + '</td><td>' + (u.perfis ? u.perfis.nome.replace('_',' ') : '—') + '</td><td>' + (u.status === 'ativo' ? '<span class="status-pill status-concluido">Ativo</span>' : '<span class="status-pill status-pendente">' + u.status + '</span>') + '</td><td>' + (u.status === 'pendente' ? '<button class="btn-ghost" onclick="aprovarUsuario(\'' + u.id + '\')">Aprovar</button>' : '—') + '</td></tr>').join('')
+      : '<tr><td colspan="5" class="empty">Nenhum usuário cadastrado.</td></tr>';
+
+    const secs = await sbGet('secretarias', 'select=id,nome&order=nome.asc');
+    const vcSel = document.getElementById('vc-secretaria');
+    if(vcSel) vcSel.innerHTML = '<option value="">Nenhuma / todas</option>' + secs.map(s => '<option value="' + s.id + '">' + s.nome + '</option>').join('');
+  } catch (e) {
+    document.getElementById('tbl-usuarios').innerHTML = '<tr><td colspan="4" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
+async function loadPermissoesMatrix(){
+  try {
+    const [perfis, permissoes, vinculos] = await Promise.all([
+      sbGet('perfis', 'select=id,nome&order=nome.asc'),
+      sbGet('permissoes', 'select=id,chave,descricao&order=modulo.asc'),
+      sbGet('perfil_permissoes', 'select=perfil_id,permissao_id,concedida'),
+    ]);
+    const thead = document.getElementById('perm-thead');
+    thead.innerHTML = '<th>Permissão</th>' + perfis.map(p => '<th>' + p.nome.replace('_',' ') + '</th>').join('');
+
+    const grantSet = new Set(vinculos.filter(v => v.concedida).map(v => v.perfil_id + '|' + v.permissao_id));
+    document.getElementById('tbl-permissoes').innerHTML = permissoes.map(perm => {
+      const cells = perfis.map(p => {
+        const granted = grantSet.has(p.id + '|' + perm.id);
+        return '<td style="text-align:center;">' + (granted ? '<span style="color:var(--ok);font-weight:800;">●</span>' : '<span style="color:var(--line);">—</span>') + '</td>';
+      }).join('');
+      return '<tr><td>' + (perm.descricao || perm.chave) + '</td>' + cells + '</tr>';
+    }).join('') || '<tr><td class="empty">Nenhuma permissão cadastrada.</td></tr>';
+  } catch (e) {
+    document.getElementById('tbl-permissoes').innerHTML = '<tr><td class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
+async function submitAcao(){
+  const titulo = document.getElementById('f-titulo').value.trim();
+  const secretariaId = document.getElementById('f-secretaria').value;
+  const ano = parseInt(document.getElementById('f-ano').value);
+  if(!titulo || !secretariaId || !ano){ alert('Preencha ao menos título, secretaria e ano.'); return; }
+
+  const ehEvento = document.getElementById('f-eh-evento').checked;
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const rows = await sbPost('acoes', {
+      tenant_id: session.claims.tenant_id,
+      secretaria_id: secretariaId,
+      titulo: titulo,
+      descricao: document.getElementById('f-descricao').value.trim() || null,
+      ano: ano,
+      data: document.getElementById('f-data').value || null,
+      bairro: document.getElementById('f-bairro').value.trim() || null,
+      valor_investido: parseFloat(document.getElementById('f-valor').value) || 0,
+      origem_recurso: document.getElementById('f-origem').value.trim() || null,
+      status: document.getElementById('f-status').value,
+      quantidade_beneficiados: parseInt(document.getElementById('f-beneficiados').value) || null,
+      eh_evento: ehEvento,
+      publico_estimado: ehEvento ? (parseInt(document.getElementById('f-publico-estimado').value) || null) : null,
+      valor_retorno_estimado: ehEvento ? (parseFloat(document.getElementById('f-valor-retorno').value) || null) : null,
+    });
+    const novaAcao = rows && rows[0];
+
+    if(ehEvento && novaAcao){
+      btn.textContent = 'Enviando fotos/vídeos...';
+      const fotos = Array.from(document.getElementById('f-fotos').files || []);
+      const videos = Array.from(document.getElementById('f-videos').files || []);
+      const falhas = [];
+      for(const f of fotos){ try { await uploadMidiaEvento(f, 'foto', novaAcao.id); } catch(e){ falhas.push(f.name); } }
+      for(const v of videos){ try { await uploadMidiaEvento(v, 'video', novaAcao.id); } catch(e){ falhas.push(v.name); } }
+      if(falhas.length) alert('Ação salva, mas não foi possível enviar: ' + falhas.join(', '));
+      mostrarLinkAvaliacao(novaAcao.id);
+    }
+
+    fecharFormAcaoAposSalvar();
+    loadAcoes();
+  } catch (e) {
+    alert('Não foi possível salvar: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar ação';
+  }
+}
+</script>
+<div id="cg-dev-credit" style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>

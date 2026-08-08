@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Relatórios</title>
+<style>
+  :root{
+    --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0F172A;
+    --bg:#F8FAFC; --surface:#FFFFFF; --ink:#0F172A; --ink-soft:#475569; --line:rgba(15,23,42,.08);
+    --ok:#059669; --danger:#DC2626; --muted:#94A3B8; --radius:18px;
+    --pdf:#DC2626; --xlsx:#059669; --docx:#2563EB;
+    --sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}
+  button{font-family:inherit;cursor:pointer;}
+  select,input{font-family:inherit;}
+
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
+
+  header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:16px 40px;display:flex;justify-content:space-between;align-items:center;}
+  @media(max-width:700px){header{padding:16px 20px;}}
+  .hd-left{display:flex;align-items:center;gap:12px;}
+  .hd-left .name{font-size:16px;font-weight:800;}
+  .hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+  .hd-role{background:rgba(59,130,246,.15);padding:7px 14px;border-radius:20px;font-size:12px;color:#B6C4DD;font-weight:600;}
+
+  main{max-width:1240px;margin:0 auto;padding:32px 40px 70px;}
+  @media(max-width:700px){main{padding:24px 20px 50px;}}
+  .topbar h1{font-size:27px;margin:0 0 4px;font-weight:800;letter-spacing:-.01em;}
+  .topbar .sub{font-size:12.5px;color:var(--muted);margin:0 0 26px;}
+
+  .work-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:22px;align-items:start;}
+  @media(max-width:960px){.work-grid{grid-template-columns:1fr;}}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:22px;box-shadow:var(--shadow-sm);}
+  .panel h3{font-size:16px;margin:0 0 4px;font-weight:800;}
+  .panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 18px;}
+
+  .type-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+  .type-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .type-item.sel{border-color:var(--royal);background:#EFF6FF;color:var(--royal);}
+  .type-item input{margin:0;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+  .field select, .field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;background:#fff;color:var(--ink);}
+
+  .format-row{display:flex;gap:10px;margin-bottom:20px;}
+  .format-btn{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:14px 10px;text-align:center;background:#fff;font-size:12.5px;font-weight:700;color:var(--ink-soft);}
+  .format-btn.sel-pdf{border-color:var(--pdf);background:#FEF2F2;color:var(--pdf);}
+  .format-btn.sel-xlsx{border-color:var(--xlsx);background:#ECFDF5;color:var(--xlsx);}
+  .format-btn.sel-docx{border-color:var(--docx);background:#EFF6FF;color:var(--docx);}
+  .format-btn .ext{display:block;font-family:var(--mono);font-size:10px;margin-top:3px;opacity:.7;}
+
+  .btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px 20px;border-radius:10px;font-size:13.5px;font-weight:700;width:100%;box-shadow:0 6px 18px rgba(37,99,235,.35);}
+  .gen-status{display:none;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-soft);margin-top:14px;}
+  .gen-status.show{display:flex;}
+  .dot-pulse{width:8px;height:8px;border-radius:50%;background:var(--royal);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
+
+  .preview-doc{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;}
+  .preview-head{background:linear-gradient(150deg,var(--darkblue),var(--royal));color:#E2E8F0;padding:20px 24px;}
+  .preview-head .eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--light);font-weight:700;margin-bottom:6px;}
+  .preview-head h4{font-size:19px;margin:0;font-weight:800;}
+  .preview-head .period{font-size:12px;color:#B6C4DD;margin-top:6px;}
+  .preview-body{padding:22px 24px;}
+  .preview-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+  .pk{background:#EFF6FF;border-radius:10px;padding:12px;text-align:center;}
+  .pk .n{font-size:18px;color:var(--royal);font-weight:800;}
+  .pk .l{font-size:10px;color:var(--ink-soft);margin-top:2px;}
+  .preview-section{margin-bottom:16px;}
+  .preview-section h5{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--royal);font-weight:800;margin:0 0 8px;}
+  .preview-section p{font-size:12.5px;color:var(--ink-soft);line-height:1.7;margin:0;}
+  .preview-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+  .preview-table th{text-align:left;color:var(--muted);padding:0 8px 6px;border-bottom:1px solid var(--line);font-weight:700;text-transform:uppercase;font-size:9.5px;}
+  .preview-table td{padding:8px;border-bottom:1px solid var(--line);}
+  .preview-placeholder{display:flex;align-items:center;justify-content:center;min-height:340px;color:var(--muted);font-size:12.5px;text-align:center;padding:20px;}
+
+  .btn-ghost{background:#fff;border:1px solid var(--line);padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--ink);}
+  .preview-actions{display:flex;gap:10px;padding:16px 24px;border-top:1px solid var(--line);}
+
+  .history-panel table{width:100%;border-collapse:collapse;font-size:13px;}
+  .history-panel th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 10px 10px;border-bottom:1px solid var(--line);font-weight:700;}
+  .history-panel td{padding:12px 10px;border-bottom:1px solid var(--line);}
+  .history-panel tr:last-child td{border-bottom:none;}
+  .fmt-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;}
+  .fmt-pdf{background:#FEF2F2;color:var(--pdf);}
+  .fmt-xlsx{background:#ECFDF5;color:var(--xlsx);}
+  .fmt-docx{background:#EFF6FF;color:var(--docx);}
+  .dl-link{background:none;border:none;color:var(--royal);font-weight:700;font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-left">
+    <div class="logo">CG</div>
+    <div class="name">Conecta Gestão<small>Relatórios</small></div>
+  </div>
+  <div class="hd-role">Administrador Master</div>
+</header>
+
+<main>
+  <div class="topbar">
+    <h1>Central de Relatórios</h1>
+    <div class="sub">Gere relatórios consolidados e exporte em PDF, Excel ou Word.</div>
+  </div>
+
+  <div class="work-grid">
+    <div>
+      <div class="panel">
+        <h3>Tipo de relatório</h3>
+        <p class="panel-sub">Selecione o período de referência</p>
+        <div class="type-list" id="type-list"></div>
+
+        <div class="field">
+          <label>Secretaria</label>
+          <select id="f-secretaria"><option>Todas as secretarias</option></select>
+        </div>
+        <div class="field">
+          <label>Ano de referência</label>
+          <select><option>2026</option><option>2025</option></select>
+        </div>
+
+        <h3 style="margin-top:22px;">Formato de exportação</h3>
+        <div class="format-row" id="format-row">
+          <button class="format-btn" data-fmt="pdf" onclick="selFormat('pdf')">PDF<span class="ext">.pdf</span></button>
+          <button class="format-btn" data-fmt="xlsx" onclick="selFormat('xlsx')">Excel<span class="ext">.xlsx</span></button>
+          <button class="format-btn" data-fmt="docx" onclick="selFormat('docx')">Word<span class="ext">.docx</span></button>
+        </div>
+
+        <button class="btn-accent" onclick="gerarRelatorio()">Gerar relatório</button>
+        <div class="gen-status" id="gen-status"><span class="dot-pulse"></span> Consolidando dados de todas as secretarias...</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" style="padding:0;">
+        <div class="preview-placeholder" id="preview-placeholder">Configure o relatório ao lado e clique em "Gerar relatório" para pré-visualizar</div>
+        <div class="preview-doc" id="preview-doc" style="display:none;">
+          <div class="preview-head">
+            <div class="eyebrow" id="prev-eyebrow">Relatório Mensal</div>
+            <h4 id="prev-title">Relatório de Gestão — Julho 2026</h4>
+            <div class="period" id="prev-period">Todas as secretarias · Ano de referência 2026</div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-kpis">
+              <div class="pk"><div class="n">1.284</div><div class="l">Ações</div></div>
+              <div class="pk"><div class="n">R$ 214,7M</div><div class="l">Investido</div></div>
+              <div class="pk"><div class="n">392</div><div class="l">Concluídas</div></div>
+            </div>
+            <div class="preview-section">
+              <h5>Resumo executivo</h5>
+              <p>Documento gerado automaticamente a partir dos dados cadastrados na plataforma, consolidando ações, investimentos e indicadores do período selecionado, organizados por secretaria, categoria e status.</p>
+            </div>
+            <div class="preview-section">
+              <h5>Ações por secretaria</h5>
+              <table class="preview-table">
+                <thead><tr><th>Secretaria</th><th>Ações</th><th>Investimento</th></tr></thead>
+                <tbody>
+                  <tr><td>Educação</td><td>264</td><td>R$ 42,1M</td></tr>
+                  <tr><td>Saúde</td><td>231</td><td>R$ 38,6M</td></tr>
+                  <tr><td>Obras e Serviços Públicos</td><td>198</td><td>R$ 51,3M</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="preview-actions">
+            <button class="btn-accent" id="download-btn" onclick="baixarRelatorio()">Baixar arquivo</button>
+            <button class="btn-ghost" onclick="resetPreview()">Gerar outro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel history-panel">
+    <h3>Relatórios gerados recentemente</h3>
+    <p class="panel-sub">Histórico disponível para novo download a qualquer momento</p>
+    <table>
+      <thead><tr><th>Relatório</th><th>Secretaria</th><th>Formato</th><th>Gerado por</th><th>Data</th><th></th></tr></thead>
+      <tbody id="history-tbl"></tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+const SECRETARIAS = ["Gabinete","Administração","Finanças","Educação","Saúde","Agricultura","Indústria e Comércio","Turismo","Cultura","Esporte","Meio Ambiente","Assistência Social","Obras e Serviços Públicos","Planejamento","Inovação e Tecnologia","Defesa Civil"];
+const TYPES = ["Mensal","Trimestral","Semestral","Anual","Final de Gestão"];
+const HISTORY = [
+  ["Relatório Mensal — Julho 2026", "Todas", "pdf", "Sistema (IA)", "01/08/2026"],
+  ["Relatório Trimestral — 2º Trim. 2026", "Educação", "xlsx", "Helena Duarte", "15/07/2026"],
+  ["Relatório Anual — 2025", "Todas", "docx", "Marcos Aurélio", "10/01/2026"],
+  ["Relatório Mensal — Junho 2026", "Saúde", "pdf", "Sistema (IA)", "01/07/2026"],
+];
+
+let tipoSel = "Mensal";
+let fmtSel = null;
+
+function buildTypes(){
+  document.getElementById('type-list').innerHTML = TYPES.map((t,i) => `
+    <label class="type-item ${i===0?'sel':''}" onclick="selType(this,'${t}')">
+      <input type="radio" name="tipo" ${i===0?'checked':''}> ${t}
+    </label>`).join('');
+  document.getElementById('f-secretaria').innerHTML += SECRETARIAS.map(s => `<option>${s}</option>`).join('');
+}
+
+function selType(el, t){
+  document.querySelectorAll('.type-item').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+  tipoSel = t;
+}
+
+function selFormat(f){
+  fmtSel = f;
+  document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('sel-pdf','sel-xlsx','sel-docx'));
+  document.querySelector(`.format-btn[data-fmt="${f}"]`).classList.add(`sel-${f}`);
+}
+
+function gerarRelatorio(){
+  if(!fmtSel){ alert('Selecione um formato de exportação (PDF, Excel ou Word).'); return; }
+  const status = document.getElementById('gen-status');
+  const placeholder = document.getElementById('preview-placeholder');
+  const doc = document.getElementById('preview-doc');
+  placeholder.style.display = 'flex';
+  placeholder.textContent = '';
+  doc.style.display = 'none';
+  status.classList.add('show');
+
+  setTimeout(() => {
+    status.classList.remove('show');
+    placeholder.style.display = 'none';
+    doc.style.display = 'block';
+    document.getElementById('prev-eyebrow').textContent = `Relatório ${tipoSel}`;
+    document.getElementById('prev-title').textContent = `Relatório de Gestão — ${tipoSel === 'Final de Gestão' ? 'Mandato 2025–2028' : tipoSel + ' 2026'}`;
+    const sec = document.getElementById('f-secretaria').value;
+    document.getElementById('prev-period').textContent = `${sec} · Formato ${fmtSel.toUpperCase()}`;
+  }, 1400);
+}
+
+function resetPreview(){
+  document.getElementById('preview-doc').style.display = 'none';
+  document.getElementById('preview-placeholder').style.display = 'flex';
+  document.getElementById('preview-placeholder').textContent = 'Configure o relatório ao lado e clique em "Gerar relatório" para pré-visualizar';
+}
+
+function baixarRelatorio(){
+  const btn = document.getElementById('download-btn');
+  const original = btn.textContent;
+  btn.textContent = '✓ Download iniciado (demonstração)';
+  const tbl = document.getElementById('history-tbl');
+  const row = document.createElement('tr');
+  const sec = document.getElementById('f-secretaria').value;
+  row.innerHTML = `<td>Relatório ${tipoSel} — 2026</td><td>${sec}</td><td><span class="fmt-badge fmt-${fmtSel}">${fmtSel.toUpperCase()}</span></td><td>Você</td><td>agora</td><td><button class="dl-link">Baixar</button></td>`;
+  tbl.prepend(row);
+  setTimeout(() => { btn.textContent = original; }, 2000);
+}
+
+function populateHistory(){
+  document.getElementById('history-tbl').innerHTML = HISTORY.map(h => `
+    <tr><td>${h[0]}</td><td>${h[1]}</td><td><span class="fmt-badge fmt-${h[2]}">${h[2].toUpperCase()}</span></td><td>${h[3]}</td><td>${h[4]}</td><td><button class="dl-link">Baixar</button></td></tr>`).join('');
+}
+
+buildTypes();
+populateHistory();
+</script>
+<div id="cg-dev-credit" style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>

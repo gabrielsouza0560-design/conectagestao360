@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Inteligência Artificial</title>
+<style>
+  :root{
+    --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0F172A;
+    --bg:#F8FAFC; --surface:#FFFFFF; --ink:#0F172A; --ink-soft:#475569; --line:rgba(15,23,42,.08);
+    --ok:#059669; --danger:#DC2626; --muted:#94A3B8; --radius:18px;
+    --sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}
+  button{font-family:inherit;cursor:pointer;}
+  select,input,textarea{font-family:inherit;}
+
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
+
+  header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:16px 40px;display:flex;justify-content:space-between;align-items:center;}
+  @media(max-width:700px){header{padding:16px 20px;}}
+  .hd-left{display:flex;align-items:center;gap:12px;}
+  .hd-left .name{font-size:16px;font-weight:800;}
+  .hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+  .hd-role{background:rgba(59,130,246,.15);padding:7px 14px;border-radius:20px;font-size:12px;color:#B6C4DD;font-weight:600;}
+
+  main{max-width:1240px;margin:0 auto;padding:32px 40px 70px;}
+  @media(max-width:700px){main{padding:24px 20px 50px;}}
+
+  .topbar h1{font-size:27px;margin:0 0 4px;font-weight:800;letter-spacing:-.01em;}
+  .topbar .sub{font-size:12.5px;color:var(--muted);margin:0 0 26px;}
+
+  .flow-note{display:flex;align-items:center;gap:10px;padding:13px 16px;background:#EFF6FF;border-radius:12px;font-size:12.5px;color:var(--royal);margin-bottom:26px;font-weight:600;}
+
+  .type-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:28px;}
+  @media(max-width:960px){.type-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:620px){.type-grid{grid-template-columns:repeat(2,1fr);}}
+  .type-card{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius);padding:16px 14px;text-align:center;transition:border-color .15s,transform .15s;box-shadow:var(--shadow-sm);}
+  .type-card:hover{border-color:var(--royal);transform:translateY(-2px);}
+  .type-card.sel{border-color:var(--royal);background:#EFF6FF;}
+  .type-card .ti{font-size:20px;margin-bottom:8px;}
+  .type-card .tn{font-size:12px;font-weight:700;color:var(--ink);}
+
+  .work-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  @media(max-width:960px){.work-grid{grid-template-columns:1fr;}}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-sm);}
+  .panel h3{font-size:16px;margin:0 0 4px;font-weight:800;}
+  .panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 18px;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+  .field select, .field input, .field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;background:#fff;color:var(--ink);}
+  .field select:focus, .field input:focus, .field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+
+  .btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:12px 20px;border-radius:10px;font-size:13.5px;font-weight:700;width:100%;box-shadow:0 6px 18px rgba(37,99,235,.35);transition:transform .15s;}
+  .btn-accent:hover{transform:translateY(-1px);}
+  .btn-accent:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  .btn-ghost{background:#fff;border:1px solid var(--line);padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--ink);}
+
+  .gen-status{display:none;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-soft);margin-top:14px;}
+  .gen-status.show{display:flex;}
+  .dot-pulse{width:8px;height:8px;border-radius:50%;background:var(--royal);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
+
+  .output-box{border:1px solid var(--line);border-radius:12px;padding:18px;background:#F8FAFC;min-height:220px;font-size:13.5px;line-height:1.7;color:var(--ink);white-space:pre-wrap;}
+  .output-box.empty{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12.5px;text-align:center;min-height:220px;}
+  .output-meta{display:flex;justify-content:space-between;align-items:center;margin:14px 0;}
+  .badge-ia{display:inline-flex;align-items:center;gap:6px;background:#EFF6FF;color:var(--royal);font-size:11px;font-weight:700;padding:5px 10px;border-radius:20px;}
+  .output-actions{display:flex;gap:8px;margin-top:16px;}
+
+  .queue-panel{margin-top:26px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 10px 10px;border-bottom:1px solid var(--line);font-weight:700;}
+  td{padding:12px 10px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  .status-pill{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+  .status-pendente{background:#FEF3C7;color:#B45309;}
+  .status-aprovado{background:#D1FAE5;color:var(--ok);}
+  .status-reprovado{background:#FEE2E2;color:var(--danger);}
+
+  .book-card{background:linear-gradient(135deg,var(--darkblue),var(--royal));color:#fff;border-radius:var(--radius);padding:26px;margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+  .book-card h3{font-size:18px;margin:0 0 6px;color:#fff;font-weight:800;}
+  .book-card p{font-size:12.5px;color:#B6C4DD;margin:0;max-width:420px;}
+  .book-card button{background:linear-gradient(135deg,var(--light),var(--neon));color:#0F172A;border:none;padding:11px 20px;border-radius:9px;font-size:13px;font-weight:700;}
+  .spinner{width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite;display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-left">
+    <div class="logo">CG</div>
+    <div class="name">Conecta Gestão<small>Inteligência Artificial</small></div>
+  </div>
+  <div class="hd-role">Comunicação · Priscila Nogueira</div>
+</header>
+
+<main>
+  <div class="topbar">
+    <h1>Central de Inteligência Artificial</h1>
+    <div class="sub">Gere conteúdo automaticamente a partir de ações e indicadores já cadastrados na plataforma.</div>
+  </div>
+
+  <div class="flow-note">ⓘ Todo conteúdo gerado por IA entra como pendente e segue o mesmo fluxo de aprovação humano — nada é publicado no Portal Público automaticamente.</div>
+
+  <div class="type-grid" id="type-grid"></div>
+
+  <div class="work-grid">
+    <div class="panel">
+      <h3>Configurar geração</h3>
+      <p class="panel-sub" id="config-sub">Selecione um tipo de conteúdo acima para começar</p>
+
+      <div class="field">
+        <label>Ação de referência</label>
+        <select id="ref-acao">
+          <option>Reforma da UBS Vila Nova</option>
+          <option>Pavimentação da Av. Brasil</option>
+          <option>Plantio de mudas nativas</option>
+          <option>Matrículas — Escola Municipal Sul</option>
+          <option>Campanha de vacinação (indicadores do mês)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tom de voz</label>
+        <select id="ref-tom">
+          <option>Institucional</option>
+          <option>Próximo e acessível</option>
+          <option>Técnico</option>
+          <option>Comemorativo</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Instruções adicionais (opcional)</label>
+        <textarea rows="3" placeholder="Ex.: mencionar o prazo de conclusão e o bairro atendido"></textarea>
+      </div>
+
+      <button class="btn-accent" id="gen-btn" onclick="gerar()" disabled>Selecione um tipo de conteúdo</button>
+      <div class="gen-status" id="gen-status"><span class="dot-pulse"></span> Gerando conteúdo com IA...</div>
+    </div>
+
+    <div class="panel">
+      <h3>Resultado</h3>
+      <p class="panel-sub">Revise antes de enviar para aprovação</p>
+      <div class="output-box empty" id="output-box">O conteúdo gerado aparecerá aqui</div>
+      <div class="output-meta" id="output-meta" style="display:none;">
+        <span class="badge-ia">✦ Gerado por IA</span>
+        <span style="font-size:11.5px;color:var(--muted);">Rastreado em Logs de IA</span>
+      </div>
+      <div class="output-actions" id="output-actions" style="display:none;">
+        <button class="btn-accent" onclick="enviarAprovacao()">Enviar para aprovação</button>
+        <button class="btn-ghost" onclick="gerar()">Gerar novamente</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel queue-panel">
+    <h3>Fila de aprovação de conteúdo IA</h3>
+    <p class="panel-sub">Conteúdos gerados aguardando ou já revisados pela Comunicação</p>
+    <table>
+      <thead><tr><th>Conteúdo</th><th>Tipo</th><th>Ação de referência</th><th>Gerado</th><th>Status</th></tr></thead>
+      <tbody id="fila-tbl"></tbody>
+    </table>
+  </div>
+
+  <div class="book-card">
+    <div>
+      <h3>Livro da Gestão</h3>
+      <p>Ao final do mandato, a IA consolida automaticamente todas as ações, fotos, gráficos, indicadores e a linha do tempo completa em um único documento.</p>
+    </div>
+    <button onclick="gerarLivro()">Gerar prévia do Livro da Gestão</button>
+  </div>
+</main>
+
+<script>
+const TYPES = [
+  ["📰","Notícia"], ["📘","Facebook"], ["📸","Instagram"], ["💬","WhatsApp"],
+  ["🎙️","Discurso"], ["💰","Prestação de contas"], ["📊","Relatório mensal"], ["📈","Relatório anual"],
+  ["📝","Resumo automático"], ["📌","Indicadores"],
+];
+
+const TEMPLATES = {
+  "Notícia": (acao,tom) => `Prefeitura entrega ${acao}\n\nA administração municipal concluiu mais uma etapa do seu plano de investimentos com a entrega de "${acao}". A ação faz parte do compromisso da gestão em ampliar a qualidade dos serviços públicos oferecidos à população.\n\nCom tom ${tom.toLowerCase()}, a comunicação destaca os benefícios diretos para os moradores da região e reforça o cronograma das próximas etapas previstas para o ano.\n\n[Texto gerado a partir dos dados cadastrados da ação — pronto para revisão da Comunicação antes da publicação.]`,
+  "Facebook": (acao) => `📢 Mais uma entrega para a nossa cidade!\n\n${acao} já é realidade. Um passo a mais rumo a uma gestão mais próxima de você. 💙\n\n#Prefeitura #GestãoQueEntrega`,
+  "Instagram": (acao) => `${acao} ✅\n\nMais uma ação da nossa gestão que sai do papel e chega até você. Continue acompanhando tudo o que estamos construindo juntos.\n\n#Transparência #ConectaGestão`,
+  "WhatsApp": (acao) => `📍 *${acao}*\n\nOlá! Passando para avisar que essa ação já está disponível para a população. Acesse o Portal da Transparência para ver fotos, valores investidos e todos os detalhes.`,
+  "Discurso": (acao) => `Prezados munícipes,\n\nÉ com grande satisfação que apresento à população mais um resultado do nosso trabalho: ${acao}.\n\nCada ação como esta representa o compromisso desta gestão com uma administração transparente, eficiente e voltada às reais necessidades da nossa cidade. Seguimos trabalhando, lado a lado com cada secretaria, para transformar planejamento em resultado concreto.\n\n[Rascunho gerado por IA — revisar antes do uso oficial.]`,
+  "Prestação de contas": (acao) => `Prestação de contas — ${acao}\n\nValor investido, origem do recurso, empresa executora e status de execução foram compilados automaticamente a partir do cadastro da ação, seguindo o padrão de transparência exigido pela Lei de Acesso à Informação.`,
+  "Relatório mensal": () => `Relatório mensal consolidado\n\nResumo automático das ações cadastradas no mês, agrupadas por secretaria, com totais de investimento, obras concluídas e indicadores atualizados. Documento pronto para exportação em PDF, Excel ou Word.`,
+  "Relatório anual": () => `Relatório anual consolidado\n\nCompilação de todas as ações do ano corrente, indicadores por secretaria, linha do tempo e prestação de contas. Base para o Relatório Final de Gestão.`,
+  "Resumo automático": (acao) => `Resumo: ${acao} foi cadastrada com todos os dados de localização, investimento e mídia necessários para publicação no Portal da Transparência.`,
+  "Indicadores": () => `Indicadores atualizados automaticamente a partir das ações cadastradas no período selecionado, prontos para exibição no Dashboard Executivo.`,
+};
+
+const FILA_INICIAL = [
+  ["Prefeitura entrega Reforma da UBS Vila Nova", "Notícia", "Reforma da UBS Vila Nova", "há 2h", "aprovado"],
+  ["Mais uma entrega para a nossa cidade!", "Facebook", "Pavimentação da Av. Brasil", "há 5h", "pendente"],
+  ["Relatório mensal consolidado — Julho", "Relatório mensal", "—", "ontem", "aprovado"],
+  ["Discurso — Inauguração do CRAS Sul", "Discurso", "Ampliação do CRAS Sul", "ontem", "reprovado"],
+];
+
+let tipoSelecionado = null;
+
+function buildTypes(){
+  document.getElementById('type-grid').innerHTML = TYPES.map(([ico,name]) => `
+    <div class="type-card" onclick="selecionarTipo(this,'${name}')">
+      <div class="ti">${ico}</div><div class="tn">${name}</div>
+    </div>`).join('');
+}
+
+function selecionarTipo(el, tipo){
+  document.querySelectorAll('.type-card').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+  tipoSelecionado = tipo;
+  document.getElementById('config-sub').textContent = `Gerando: ${tipo}`;
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = false;
+  btn.textContent = `Gerar ${tipo.toLowerCase()} com IA`;
+}
+
+function gerar(){
+  if(!tipoSelecionado) return;
+  const status = document.getElementById('gen-status');
+  const outputBox = document.getElementById('output-box');
+  const meta = document.getElementById('output-meta');
+  const actions = document.getElementById('output-actions');
+  status.classList.add('show');
+  meta.style.display = 'none';
+  actions.style.display = 'none';
+  outputBox.classList.remove('empty');
+  outputBox.textContent = '';
+
+  const acao = document.getElementById('ref-acao').value;
+  const tom = document.getElementById('ref-tom').value;
+
+  setTimeout(() => {
+    status.classList.remove('show');
+    const templateFn = TEMPLATES[tipoSelecionado] || (() => 'Conteúdo gerado.');
+    outputBox.textContent = templateFn(acao, tom);
+    meta.style.display = 'flex';
+    actions.style.display = 'flex';
+  }, 1100);
+}
+
+function enviarAprovacao(){
+  const tbl = document.getElementById('fila-tbl');
+  const acao = document.getElementById('ref-acao').value;
+  const row = document.createElement('tr');
+  row.innerHTML = `<td>${tipoSelecionado} gerado — ${acao}</td><td>${tipoSelecionado}</td><td>${acao}</td><td>agora</td><td><span class="status-pill status-pendente">Pendente</span></td>`;
+  tbl.prepend(row);
+  const btn = document.querySelector('.output-actions .btn-accent');
+  btn.textContent = '✓ Enviado para aprovação';
+  btn.style.background = 'linear-gradient(135deg,#059669,#10B981)';
+  setTimeout(() => { btn.textContent = 'Enviar para aprovação'; btn.style.background = ''; }, 1800);
+}
+
+function gerarLivro(){
+  const btn = event.target;
+  const original = btn.textContent;
+  btn.innerHTML = '<span class="spinner"></span> Compilando ações...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✓ Prévia gerada — 1.284 ações compiladas';
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2200);
+  }, 1800);
+}
+
+function populateFila(){
+  document.getElementById('fila-tbl').innerHTML = FILA_INICIAL.map(f => `
+    <tr><td>${f[0]}</td><td>${f[1]}</td><td>${f[2]}</td><td>${f[3]}</td><td><span class="status-pill status-${f[4]}">${f[4]==='pendente'?'Pendente':f[4]==='aprovado'?'Aprovado':'Reprovado'}</span></td></tr>`).join('');
+}
+
+buildTypes();
+populateFila();
+</script>
+<div id="cg-dev-credit" style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>

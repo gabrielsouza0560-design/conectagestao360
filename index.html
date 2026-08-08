@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Portal da Transparência</title>
+<style>
+  :root{
+    --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0F172A;
+    --bg:#F8FAFC; --surface:#FFFFFF; --ink:#0F172A; --ink-soft:#475569; --line:rgba(15,23,42,.08);
+    --gray-mid:#CBD5E1;
+    --ok:#059669; --warn:#D97706; --danger:#DC2626; --muted:#94A3B8;
+    --radius:18px; --radius-sm:12px;
+    --sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+    --shadow-glow:0 0 0 1px rgba(37,99,235,.08), 0 12px 32px rgba(37,99,235,.16);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+  a{color:inherit;}
+
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
+
+  header.site{position:sticky;top:0;z-index:50;background:rgba(15,23,42,.85);backdrop-filter:blur(14px);color:#E2E8F0;}
+  .topstrip{background:#0B1220;font-size:11px;color:#93A5C4;padding:6px 40px;display:flex;justify-content:space-between;}
+  @media(max-width:820px){.topstrip{display:none;}}
+  .navbar{display:flex;align-items:center;justify-content:space-between;padding:14px 40px;}
+  .nav-brand{display:flex;align-items:center;gap:11px;}
+  .nav-brand .name{font-size:15.5px;font-weight:700;}
+  .nav-brand .name small{display:block;font-family:var(--sans);font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:500;}
+  .nav-links{display:flex;gap:2px;flex-wrap:wrap;}
+  .nav-links button{background:none;border:none;color:#B6C4DD;font-size:13px;padding:9px 12px;border-radius:9px;font-weight:600;transition:background .15s,color .15s;}
+  .nav-links button:hover{background:rgba(59,130,246,.14);color:#fff;}
+  .nav-links button.active{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.4);}
+  @media(max-width:1200px){.nav-links{display:none;}}
+  .nav-cta{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 12px rgba(37,99,235,.4);transition:transform .15s;}
+  .nav-cta:hover{transform:translateY(-1px);}
+
+  .conn-banner{display:flex;align-items:center;gap:8px;justify-content:center;padding:8px;font-size:11.5px;font-weight:600;}
+  .conn-banner.live{background:rgba(5,150,105,.08);color:var(--ok);}
+  .conn-banner.demo{background:rgba(217,119,6,.08);color:var(--warn);}
+  .conn-dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+  .conn-dot.live{animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+
+  main{max-width:1180px;margin:0 auto;padding:0 40px 80px;}
+  @media(max-width:820px){main{padding:0 20px 60px;}}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .hero{background:linear-gradient(135deg,var(--darkblue) 0%, #16265A 45%, var(--royal) 100%);color:#fff;margin:0 -1000px;padding:60px 1000px 54px;position:relative;overflow:hidden;}
+  .hero::after{content:'';position:absolute;right:-120px;top:-120px;width:360px;height:360px;background:radial-gradient(circle, rgba(96,165,250,.25), transparent 70%);}
+  .hero-inner{max-width:1180px;margin:0 auto;padding:0 40px;position:relative;z-index:1;}
+  @media(max-width:820px){.hero-inner{padding:0 20px;}}
+  .hero h1{font-size:36px;line-height:1.25;max-width:640px;margin:0 0 14px;font-weight:800;letter-spacing:-.02em;}
+  .hero p{color:#B6C4DD;font-size:15px;max-width:560px;line-height:1.7;margin:0 0 26px;}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+  .btn-primary{background:linear-gradient(135deg,var(--royal),var(--light));color:#fff;border:none;padding:12px 20px;border-radius:11px;font-size:13.5px;font-weight:700;box-shadow:0 6px 18px rgba(37,99,235,.4);transition:transform .15s;}
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-outline{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);color:#fff;padding:12px 20px;border-radius:11px;font-size:13.5px;font-weight:600;backdrop-filter:blur(6px);}
+
+  .hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.1);margin-top:42px;border-radius:14px;overflow:hidden;}
+  @media(max-width:820px){.hero-stats{grid-template-columns:1fr 1fr;}}
+  .hstat{background:rgba(255,255,255,.04);padding:20px 22px;}
+  .hstat .n{font-size:24px;font-weight:800;color:var(--light);}
+  .hstat .l{font-size:11px;color:#93A5C4;margin-top:4px;}
+
+  .section-head{margin:54px 0 22px;}
+  .section-head .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--royal);font-weight:800;margin-bottom:6px;}
+  .section-head h2{font-size:23px;margin:0;font-weight:800;letter-spacing:-.01em;}
+  .section-head p{color:var(--ink-soft);font-size:13.5px;margin:6px 0 0;max-width:560px;}
+  main > .view > .section-head:first-child{margin-top:40px;}
+
+  .card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:900px){.card-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:620px){.card-grid{grid-template-columns:1fr;}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-sm);transition:transform .2s,box-shadow .2s;}
+  .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-glow);}
+  .card-img{height:120px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);display:flex;align-items:center;justify-content:center;color:var(--royal);font-weight:700;font-size:12.5px;}
+  .card-body{padding:16px 18px 18px;}
+  .card .tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--royal);font-weight:800;}
+  .card h3{font-size:15.5px;margin:8px 0 6px;line-height:1.4;font-weight:700;}
+  .card p{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin:0;}
+  .card .meta{margin-top:12px;font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;}
+
+  .status-pill{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+  .status-planejado{background:#F1F5F9;color:#64748B;}
+  .status-em_andamento{background:#FEF3C7;color:#B45309;}
+  .status-concluido{background:#D1FAE5;color:var(--ok);}
+  .status-cancelado{background:#FEE2E2;color:var(--danger);}
+  .status-nao_iniciada{background:#F1F5F9;color:#64748B;}
+  .status-parcialmente_cumprida{background:#DBEAFE;color:var(--royal);}
+  .status-cumprida{background:#D1FAE5;color:var(--ok);}
+
+  .sec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media(max-width:900px){.sec-grid{grid-template-columns:repeat(2,1fr);}}
+  .sec-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;cursor:pointer;transition:border-color .15s,transform .15s;}
+  .sec-card:hover{border-color:var(--royal);transform:translateY(-2px);}
+  .sec-card .ico{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--royal),var(--light));color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-bottom:10px;}
+  .sec-card h4{font-size:13.5px;margin:0 0 4px;font-weight:700;}
+  .sec-card .cnt{font-size:11.5px;color:var(--muted);}
+
+  .filter-bar{display:flex;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:22px;box-shadow:var(--shadow-sm);}
+  .filter-bar select, .filter-bar input{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:12.5px;background:#fff;}
+  .filter-bar .fb-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);display:block;margin-bottom:5px;font-weight:700;}
+
+  .timeline{position:relative;padding-left:28px;border-left:2px solid var(--line);}
+  .tl-item{position:relative;padding-bottom:30px;}
+  .tl-item::before{content:'';position:absolute;left:-34px;top:3px;width:11px;height:11px;border-radius:50%;background:var(--royal);border:2px solid var(--surface);box-shadow:0 0 0 3px rgba(37,99,235,.25);}
+  .tl-year{color:var(--royal);font-size:13.5px;font-weight:800;margin-bottom:4px;}
+  .tl-item h4{margin:0 0 4px;font-size:14.5px;font-weight:700;}
+  .tl-item p{margin:0;font-size:12.5px;color:var(--ink-soft);}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px;}
+  @media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);}
+  .kpi .num{font-size:24px;color:var(--royal);font-weight:800;}
+  .kpi .lbl{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:22px;box-shadow:var(--shadow-sm);}
+  .bars{display:flex;flex-direction:column;gap:12px;}
+  .bar-row{display:grid;grid-template-columns:150px 1fr 50px;align-items:center;gap:12px;font-size:12.5px;}
+  .bar-track{background:#EFF6FF;border-radius:5px;height:9px;overflow:hidden;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--royal),var(--light));border-radius:5px;}
+  .bar-row .val{text-align:right;color:var(--ink-soft);font-family:var(--mono);}
+
+  .map-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);}
+  .map-canvas{height:420px;background:linear-gradient(var(--line) 1px, transparent 1px) 0 0/40px 40px, linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0/40px 40px,#F8FAFC;position:relative;}
+  .map-pin{position:absolute;width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;cursor:pointer;}
+  .map-legend{display:flex;gap:14px;flex-wrap:wrap;padding:14px 18px;border-top:1px solid var(--line);font-size:11.5px;}
+  .map-legend .li{display:flex;align-items:center;gap:6px;color:var(--ink-soft);}
+  .map-legend .dot{width:9px;height:9px;border-radius:50%;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 12px 10px;border-bottom:1px solid var(--line);font-weight:700;}
+  td{padding:13px 12px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+
+  .gal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  @media(max-width:820px){.gal-grid{grid-template-columns:repeat(2,1fr);}}
+  .gal-item{aspect-ratio:1;border-radius:12px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);display:flex;align-items:center;justify-content:center;color:var(--royal);font-weight:700;font-size:11px;text-align:center;padding:8px;}
+
+  .dl-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);}
+  .dl-row:last-child{border-bottom:none;}
+  .dl-name{font-size:13.5px;font-weight:700;}
+  .dl-meta{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .dl-btn{background:#EFF6FF;color:var(--royal);border:none;padding:8px 14px;border-radius:9px;font-size:12px;font-weight:700;}
+
+  .voz-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+  @media(max-width:900px){.voz-grid{grid-template-columns:1fr;}}
+  .voz-types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
+  .voz-type{border:1.5px solid var(--line);border-radius:10px;padding:12px 8px;text-align:center;font-size:12px;font-weight:700;color:var(--ink-soft);background:#fff;transition:border-color .15s;}
+  .voz-type.sel{border-color:var(--royal);background:#EFF6FF;color:var(--royal);}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+  .field input, .field select, .field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:#fff;color:var(--ink);}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .toggle-row{display:flex;gap:10px;}
+  .toggle-row button{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;color:var(--ink-soft);}
+  .toggle-row button.sel{border-color:var(--royal);background:#EFF6FF;color:var(--royal);}
+  .voz-note{background:#EFF6FF;border-radius:12px;padding:14px 16px;font-size:12px;color:var(--royal);line-height:1.6;margin-bottom:18px;}
+
+  .stars{display:flex;gap:6px;font-size:28px;color:var(--line);cursor:pointer;}
+  .stars span.on{color:var(--royal);}
+
+  footer{background:var(--darkblue);color:#93A5C4;padding:40px;margin-top:60px;font-size:12px;}
+  .footer-inner{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+  .footer-inner .cols{display:flex;gap:60px;flex-wrap:wrap;}
+  .footer-inner h5{color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;}
+  .footer-inner ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--darkblue);color:#fff;padding:14px 22px;border-radius:11px;font-size:13.5px;font-weight:600;transition:transform .25s;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.25);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="topstrip">
+    <span>Conecta Gestão — Portal Oficial da Transparência</span>
+    <span>Acesso à Informação · Lei nº 12.527/2011</span>
+  </div>
+  <div class="navbar">
+    <div class="nav-brand">
+      <div class="logo">CG</div>
+      <div class="name">Conecta Gestão<small>Portal Público</small></div>
+    </div>
+    <div class="nav-links" id="nav-links"></div>
+    <button class="nav-cta" onclick="nav('voz')">Sua Voz</button>
+  </div>
+</header>
+<div class="conn-banner demo" id="conn-banner"><span class="conn-dot"></span><span id="conn-text">Verificando conexão com o banco de dados...</span></div>
+
+<main>
+
+  <section class="view active" id="view-home">
+    <div class="hero">
+      <div class="hero-inner">
+        <h1>Tudo o que a Prefeitura fez, você pode conferir aqui.</h1>
+        <p>Obras, investimentos, indicadores e prestação de contas de toda a gestão municipal, em um único lugar — atualizado em tempo real e aberto a qualquer cidadão.</p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="nav('obras')">Ver obras e ações</button>
+          <button class="btn-outline" onclick="nav('contas')">Prestação de contas</button>
+        </div>
+        <div class="hero-stats" id="hero-stats"></div>
+      </div>
+    </div>
+
+    <div class="section-head"><div class="eyebrow">Últimas notícias</div><h2>O que está acontecendo na cidade</h2></div>
+    <div class="card-grid" id="home-noticias"></div>
+
+    <div class="section-head"><div class="eyebrow">Secretarias</div><h2>Navegue por pasta</h2><p>Cada secretaria mantém seu próprio histórico de ações, investimentos e resultados.</p></div>
+    <div class="sec-grid" id="home-secretarias"></div>
+  </section>
+
+  <section class="view" id="view-noticias">
+    <div class="section-head"><div class="eyebrow">Comunicação</div><h2>Notícias</h2><p>Publicações oficiais, aprovadas pela Secretaria de Comunicação.</p></div>
+    <div class="card-grid" id="noticias-full"></div>
+  </section>
+
+  <section class="view" id="view-secretarias">
+    <div class="section-head"><div class="eyebrow">Estrutura</div><h2>Secretarias</h2><p>Secretarias que organizam toda a atuação da gestão municipal.</p></div>
+    <div class="sec-grid" id="secretarias-full"></div>
+  </section>
+
+  <section class="view" id="view-obras">
+    <div class="section-head"><div class="eyebrow">Consulta pública</div><h2>Obras e ações de governo</h2><p>Pesquise por secretaria, bairro ou status.</p></div>
+    <div class="filter-bar">
+      <div><span class="fb-label">Ano</span><select id="f-ano" onchange="applyObrasFilter()"><option value="">Todos</option></select></div>
+      <div><span class="fb-label">Secretaria</span><select id="f-secretaria" onchange="applyObrasFilter()"><option>Todas</option></select></div>
+      <div><span class="fb-label">Categoria</span><select id="f-categoria" onchange="applyObrasFilter()"><option value="">Todas</option></select></div>
+      <div><span class="fb-label">Status</span><select id="f-status" onchange="applyObrasFilter()"><option value="">Todos</option><option value="planejado">Planejado</option><option value="em_andamento">Em andamento</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select></div>
+      <div><span class="fb-label">Bairro</span><input id="f-bairro" placeholder="Ex.: Centro" oninput="applyObrasFilter()"></div>
+    </div>
+    <div class="card-grid" id="obras-grid"></div>
+  </section>
+
+  <section class="view" id="view-plano">
+    <div class="section-head"><div class="eyebrow">Prestação de contas política</div><h2>Plano de Governo</h2><p>Acompanhe o cumprimento de cada promessa de campanha desta gestão.</p></div>
+    <div class="kpi-grid" id="plano-kpis"></div>
+    <div class="panel">
+      <h3 style="margin:0 0 4px;font-weight:800;">Progresso geral</h3>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 18px;">Percentual de promessas cumpridas até o momento</p>
+      <div class="bar-track" style="height:16px;"><div class="bar-fill" id="plano-progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="panel">
+      <h3 style="margin:0 0 4px;font-weight:800;">Promessas por eixo</h3>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 18px;">Clique em um eixo para ver os detalhes</p>
+      <table>
+        <thead><tr><th>Promessa</th><th>Eixo</th><th>Ano previsto</th><th>Status</th></tr></thead>
+        <tbody id="plano-tbl"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="view" id="view-linha">
+    <div class="section-head"><div class="eyebrow">Mandato 2025–2028</div><h2>Linha do tempo</h2><p>Principais marcos da gestão, em ordem cronológica.</p></div>
+    <div class="timeline" id="timeline-list"></div>
+  </section>
+
+  <section class="view" id="view-indicadores">
+    <div class="section-head"><div class="eyebrow">Dados abertos</div><h2>Indicadores da gestão</h2><p>Números atualizados de toda a administração municipal.</p></div>
+    <div class="kpi-grid" id="ind-kpis"></div>
+    <div class="panel">
+      <h3 style="margin:0 0 4px;font-weight:800;">Investimento por secretaria</h3>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 18px;">Ano corrente</p>
+      <div class="bars" id="ind-bars"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-mapa">
+    <div class="section-head"><div class="eyebrow">Território</div><h2>Mapa interativo</h2><p>Escolas, UBS, praças, obras e mais, geolocalizados.</p></div>
+    <div class="map-wrap">
+      <div class="map-canvas" id="map-canvas"></div>
+      <div class="map-legend" id="map-legend"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-contas">
+    <div class="section-head"><div class="eyebrow">Transparência</div><h2>Prestação de contas</h2><p>Origem dos recursos e valores investidos por ação.</p></div>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Ação</th><th>Secretaria</th><th>Origem do recurso</th><th>Valor investido</th><th>Status</th></tr></thead>
+        <tbody id="contas-tbl"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="view" id="view-galeria">
+    <div class="section-head"><div class="eyebrow">Registro visual</div><h2>Galeria</h2><p>Fotos, vídeos e comparativos antes e depois.</p></div>
+    <div class="gal-grid" id="gal-grid"></div>
+  </section>
+
+  <section class="view" id="view-downloads">
+    <div class="section-head"><div class="eyebrow">Documentos</div><h2>Downloads</h2><p>Relatórios e documentos públicos disponíveis para consulta.</p></div>
+    <div class="panel" id="downloads-list"></div>
+  </section>
+
+  <section class="view" id="view-voz">
+    <div class="section-head"><div class="eyebrow">Participação do cidadão</div><h2>Sua Voz</h2><p>Envie sugestões, elogios, críticas, reclamações, denúncias ou solicitações diretamente às secretarias.</p></div>
+    <div class="voz-grid">
+      <div>
+        <div class="field"><label>Tipo de manifestação</label></div>
+        <div class="voz-types" id="voz-types"></div>
+        <div class="field"><label>Secretaria destinatária</label><select id="voz-secretaria"><option value="">Selecione a secretaria</option></select></div>
+        <div class="field"><label>Descrição</label><textarea id="voz-desc" rows="5" placeholder="Descreva sua manifestação com o máximo de detalhes possível"></textarea></div>
+        <div class="field">
+          <label>Identificação</label>
+          <div class="toggle-row">
+            <button class="sel" id="btn-anonimo" onclick="setIdent(true)">Enviar como anônimo</button>
+            <button id="btn-identificado" onclick="setIdent(false)">Identificar-me</button>
+          </div>
+        </div>
+        <div class="field" id="nome-field" style="display:none;"><label>Nome completo</label><input id="voz-nome" placeholder="Seu nome"></div>
+        <div class="field">
+          <label>Foto (opcional)</label>
+          <input type="file" id="voz-foto" accept="image/*">
+          <div id="voz-foto-preview" style="margin-top:8px;"></div>
+        </div>
+        <div class="field">
+          <label>Localização (opcional)</label>
+          <button type="button" class="btn-outline" style="color:var(--royal);border-color:var(--royal);background:#EFF6FF;width:100%;" onclick="capturarLocalizacao()" id="btn-localizacao">📍 Usar minha localização atual</button>
+          <div id="voz-loc-status" style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;"></div>
+        </div>
+        <button class="btn-primary" onclick="submitVoz()">Enviar manifestação</button>
+      </div>
+      <div>
+        <div class="panel">
+          <h3 style="margin:0 0 10px;font-weight:800;">Avalie a gestão</h3>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;">Sua nota é confidencial — vista apenas pelo Prefeito e pela Administração.</p>
+          <div class="field"><label>Gestão municipal geral</label><div class="stars" id="stars-geral"></div></div>
+          <div class="field"><label>Comentário (opcional)</label><textarea id="aval-comentario" rows="3" placeholder="Conte mais sobre sua avaliação"></textarea></div>
+          <button class="btn-outline" style="color:var(--royal);border-color:var(--royal);background:#EFF6FF;" onclick="submitAvaliacao()">Enviar avaliação</button>
+        </div>
+        <div class="voz-note">ⓘ Avaliações não aparecem publicamente no portal. Servem para a Prefeitura acompanhar a satisfação da população.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="cols">
+      <div><h5>Portal</h5><ul><li>Página Inicial</li><li>Notícias</li><li>Obras</li><li>Prestação de Contas</li></ul></div>
+      <div><h5>Participação</h5><ul><li>Sua Voz</li><li>Avaliação da Gestão</li></ul></div>
+      <div><h5>Acesso à informação</h5><ul><li>Lei de Acesso à Informação</li><li>LGPD</li><li>Downloads</li></ul></div>
+    </div>
+    <div>
+      <div>Conecta Gestão © 2026 — Plataforma de Gestão e Transparência Municipal</div>
+      <div style="margin-top:8px;font-size:11px;color:#7E93B8;">Desenvolvido por <strong style="color:#B6C4DD;">Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// SUPABASE CONNECTION
+// Chaves públicas (anon) — seguras para uso no client-side.
+// Requer: schema "gestao360" exposto em Project Settings > API > Exposed schemas.
+// ============================================================
+const SUPABASE_URL = "https://kfvkembarvsbtveksiag.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+const DEMO_TENANT_ID = "00000000-0000-0000-0000-000000000001";
+
+async function sbGet(table, query = "") {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Accept-Profile": "gestao360",
+    },
+  });
+  if (!res.ok) throw new Error(`Supabase GET ${table} failed: ${res.status}`);
+  return res.json();
+}
+
+async function sbPost(table, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Profile": "gestao360",
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Supabase POST ${table} failed: ${res.status}`);
+  return res.json();
+}
+
+// ============================================================
+// FALLBACK (usado só se a API ainda não estiver acessível)
+// ============================================================
+const FALLBACK = {
+  secretarias: ["Gabinete","Administração","Finanças","Educação","Saúde","Agricultura","Indústria e Comércio","Turismo","Cultura","Esporte","Meio Ambiente","Assistência Social","Obras e Serviços Públicos","Planejamento","Inovação e Tecnologia","Defesa Civil"].map(nome => ({nome})),
+  acoes: [
+    {titulo:"Reforma da UBS Vila Nova", secretarias:{nome:"Saúde"}, categorias:{nome:"Reformas"}, bairro:"Vila Nova", ano:2026, status:"concluido", valor_investido:480000, origem_recurso:"Recurso próprio"},
+    {titulo:"Pavimentação da Av. Brasil", secretarias:{nome:"Obras e Serviços Públicos"}, categorias:{nome:"Pavimentação"}, bairro:"Centro", ano:2026, status:"em_andamento", valor_investido:2100000, origem_recurso:"Convênio Estadual"},
+  ],
+  publicacoes: [
+    {titulo:"Reforma da UBS Vila Nova é concluída", corpo:"Unidade reformada amplia atendimento à população da região."},
+    {titulo:"Matrículas abertas para o ano letivo", corpo:"Rede municipal amplia vagas em creches e ensino fundamental."},
+  ],
+  indicadores: [{chave:"alunos_atendidos",valor:14230,secretarias:{nome:"Educação"}},{chave:"consultas_realizadas",valor:89400,secretarias:{nome:"Saúde"}}],
+  mapa_pontos: [{categoria:"ubs",nome:"UBS Vila Nova",latitude:-25.4284,longitude:-49.2733}],
+  promessas: [
+    {titulo:"Reformar todas as UBS da rede municipal", eixo:"Saúde", ano_previsto:2027, status:"em_andamento"},
+    {titulo:"Implantar Portal da Transparência", eixo:"Gestão e Transparência", ano_previsto:2025, status:"cumprida"},
+  ],
+};
+
+let LIVE = false;
+let DATA = { secretarias: [], acoes: [], publicacoes: [], indicadores: [], mapa_pontos: [], promessas: [] };
+
+async function loadData(){
+  try {
+    const [secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas] = await Promise.all([
+      sbGet("secretarias", "select=id,nome&order=nome.asc"),
+      sbGet("acoes", "select=titulo,bairro,ano,status,valor_investido,origem_recurso,secretarias(nome),categorias(nome)&publicada_no_portal=eq.true&order=criado_em.desc"),
+      sbGet("publicacoes", "select=titulo,corpo,tipo&status_aprovacao=eq.aprovado&order=publicado_em.desc"),
+      sbGet("indicadores", "select=chave,valor,secretarias(nome)"),
+      sbGet("mapa_pontos", "select=categoria,nome,latitude,longitude"),
+      sbGet("promessas_campanha", "select=titulo,eixo,ano_previsto,status&order=eixo.asc"),
+    ]);
+    DATA = { secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas };
+    LIVE = true;
+  } catch (err) {
+    console.warn("Não foi possível carregar dados ao vivo do Supabase — usando dados de demonstração.", err.message);
+    DATA = FALLBACK;
+    LIVE = false;
+  }
+  updateConnBanner();
+  populate();
+}
+
+function updateConnBanner(){
+  const banner = document.getElementById('conn-banner');
+  const text = document.getElementById('conn-text');
+  banner.className = `conn-banner ${LIVE ? 'live' : 'demo'}`;
+  banner.querySelector('.conn-dot').classList.toggle('live', LIVE);
+  text.textContent = LIVE
+    ? "Conectado ao banco de dados — exibindo dados reais do Supabase"
+    : "Exibindo dados de demonstração — API do Supabase ainda não acessível (verifique o schema exposto e o hook de autenticação)";
+}
+
+// ============================================================
+// UI
+// ============================================================
+const NAV = [
+  {key:'home', label:'Página Inicial'}, {key:'noticias', label:'Notícias'}, {key:'secretarias', label:'Secretarias'},
+  {key:'obras', label:'Obras'}, {key:'plano', label:'Plano de Governo'}, {key:'linha', label:'Linha do Tempo'}, {key:'indicadores', label:'Indicadores'},
+  {key:'mapa', label:'Mapa'}, {key:'contas', label:'Prestação de Contas'}, {key:'galeria', label:'Galeria'}, {key:'downloads', label:'Downloads'},
+];
+const TIMELINE = [
+  ["2025", "Início do mandato", "Posse da nova gestão e apresentação do plano de governo."],
+  ["2025", "Lançamento do Portal da Transparência", "Primeira versão do sistema de acompanhamento público."],
+  ["2026", "Reforma de UBS concluída", "Ampliação da capacidade de atendimento na rede básica de saúde."],
+  ["2027 (previsto)", "Entrega do novo Terminal Rodoviário", "Obra estruturante para a região central da cidade."],
+];
+const MAP_CATS = { escola:"#059669", ubs:"#DC2626", praca:"#D97706", obra:"#2563EB", estrada:"#475569", turismo:"#7C3AED", ponte:"#0891B2", iluminacao:"#CA8A04", agricultura:"#65A30D" };
+const DOWNLOADS = [["Relatório Anual de Gestão 2025", "PDF · 4,2 MB"], ["Balanço Orçamentário — 1º Trimestre 2026", "XLSX · 890 KB"], ["Livro da Gestão 2025–2028 (parcial)", "PDF · 22 MB"]];
+
+let vozTipo = null, vozIdent = true, starsValue = 0;
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function nav(key){
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.toggle('active', b.dataset.key === key));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + key));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function statusPill(s){
+  const map = { planejado:"Planejado", em_andamento:"Em andamento", concluido:"Concluído", cancelado:"Cancelado" };
+  return `<span class="status-pill status-${s}">${map[s] || s}</span>`;
+}
+function money(v){
+  return v ? "R$ " + Number(v).toLocaleString("pt-BR") : "—";
+}
+function buildNav(){
+  document.getElementById('nav-links').innerHTML = NAV.map(n => `<button data-key="${n.key}" onclick="nav('${n.key}')">${n.label}</button>`).join('');
+  document.querySelector('.nav-links button').classList.add('active');
+}
+function newsCard(n){
+  return `<div class="card"><div class="card-img">${(n.tipo||'Notícia').toUpperCase()}</div><div class="card-body"><div class="tag">Comunicação</div><h3>${n.titulo}</h3><p>${n.corpo || ''}</p></div></div>`;
+}
+function obraCard(a){
+  const sec = a.secretarias?.nome || a.secretaria || '—';
+  const cat = a.categorias?.nome || a.categoria || '—';
+  return `<div class="card"><div class="card-img">${cat}</div><div class="card-body">
+    <div class="tag">${sec}</div><h3>${a.titulo}</h3><p>${a.bairro || '—'} · ${a.ano || ''}</p>
+    <div class="meta">${statusPill(a.status)}<span style="font-family:var(--mono);">${money(a.valor_investido)}</span></div>
+  </div></div>`;
+}
+
+function populate(){
+  const secs = DATA.secretarias;
+  const acoes = DATA.acoes;
+  const pubs = DATA.publicacoes;
+
+  document.getElementById('hero-stats').innerHTML = `
+    <div class="hstat"><div class="n">${acoes.length}</div><div class="l">Ações publicadas</div></div>
+    <div class="hstat"><div class="n">${money(acoes.reduce((s,a)=>s+(Number(a.valor_investido)||0),0))}</div><div class="l">Investimento total</div></div>
+    <div class="hstat"><div class="n">${acoes.filter(a=>a.status==='concluido').length}</div><div class="l">Obras concluídas</div></div>
+    <div class="hstat"><div class="n">${secs.length}</div><div class="l">Secretarias</div></div>`;
+
+  document.getElementById('home-noticias').innerHTML = pubs.slice(0,3).map(newsCard).join('') || '<p class="dl-meta">Nenhuma notícia publicada ainda.</p>';
+  document.getElementById('noticias-full').innerHTML = pubs.map(newsCard).join('') || '<p class="dl-meta">Nenhuma notícia publicada ainda.</p>';
+
+  const secCard = s => `<div class="sec-card" onclick="nav('obras')"><div class="ico">${s.nome[0]}</div><h4>${s.nome}</h4><div class="cnt">Ver ações →</div></div>`;
+  document.getElementById('home-secretarias').innerHTML = secs.slice(0,8).map(secCard).join('');
+  document.getElementById('secretarias-full').innerHTML = secs.map(secCard).join('');
+
+  document.getElementById('obras-grid').innerHTML = acoes.map(obraCard).join('') || '<p class="dl-meta">Nenhuma ação publicada ainda.</p>';
+  document.getElementById('f-secretaria').innerHTML = '<option value="">Todas</option>' + secs.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
+  document.getElementById('voz-secretaria').innerHTML = '<option value="">Selecione a secretaria</option>' + secs.map(s => `<option value="${s.id||''}">${s.nome}</option>`).join('');
+  const anos = [...new Set(acoes.map(a => a.ano).filter(Boolean))].sort((a,b) => b-a);
+  document.getElementById('f-ano').innerHTML = '<option value="">Todos</option>' + anos.map(a => `<option value="${a}">${a}</option>`).join('');
+  const categorias = [...new Set(acoes.map(a => a.categorias?.nome || a.categoria).filter(Boolean))].sort();
+  document.getElementById('f-categoria').innerHTML = '<option value="">Todas</option>' + categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  document.getElementById('timeline-list').innerHTML = TIMELINE.map(t => `<div class="tl-item"><div class="tl-year">${t[0]}</div><h4>${t[1]}</h4><p>${t[2]}</p></div>`).join('');
+
+  const kpiVals = DATA.indicadores;
+  document.getElementById('ind-kpis').innerHTML = kpiVals.length
+    ? kpiVals.map(k => `<div class="kpi"><div class="num">${Number(k.valor).toLocaleString('pt-BR')}</div><div class="lbl">${k.chave.replace(/_/g,' ')}</div></div>`).join('')
+    : '<div class="kpi"><div class="num">—</div><div class="lbl">Nenhum indicador cadastrado</div></div>';
+
+  const bySec = {};
+  acoes.forEach(a => { const n = a.secretarias?.nome || 'Outros'; bySec[n] = (bySec[n]||0) + (Number(a.valor_investido)||0); });
+  const entries = Object.entries(bySec);
+  const max = Math.max(1, ...entries.map(e => e[1]));
+  document.getElementById('ind-bars').innerHTML = entries.length
+    ? entries.map(([n,v]) => `<div class="bar-row"><span>${n}</span><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(0)}%"></div></div><span class="val">${money(v)}</span></div>`).join('')
+    : '<p class="dl-meta">Sem dados de investimento ainda.</p>';
+
+  const legend = document.getElementById('map-legend');
+  const pts = DATA.mapa_pontos;
+  legend.innerHTML = Object.entries(MAP_CATS).map(([k,c]) => `<div class="li"><span class="dot" style="background:${c}"></span>${k}</div>`).join('');
+  document.getElementById('map-canvas').innerHTML = pts.map((p,i) => {
+    const color = MAP_CATS[p.categoria] || '#2563EB';
+    const top = 10 + (i * 37) % 80, left = 8 + (i * 53) % 84;
+    return `<div class="map-pin" title="${p.nome}" style="top:${top}%;left:${left}%;background:${color}" onclick="toast('${p.nome}')"></div>`;
+  }).join('');
+
+  document.getElementById('contas-tbl').innerHTML = acoes.map(a => `
+    <tr><td>${a.titulo}</td><td>${a.secretarias?.nome||'—'}</td><td>${a.origem_recurso||'—'}</td><td style="font-family:var(--mono);">${money(a.valor_investido)}</td><td>${statusPill(a.status)}</td></tr>`).join('') || '<tr><td colspan="5">Nenhuma ação publicada ainda.</td></tr>';
+
+  document.getElementById('gal-grid').innerHTML = Array.from({length:8}).map((_,i) => `<div class="gal-item">${["Foto","Vídeo","Drone","Antes/Depois"][i%4]}<br>#${i+1}</div>`).join('');
+  document.getElementById('downloads-list').innerHTML = DOWNLOADS.map(d => `<div class="dl-row"><div><div class="dl-name">${d[0]}</div><div class="dl-meta">${d[1]}</div></div><button class="dl-btn" onclick="toast('Download iniciado (demonstração)')">Baixar</button></div>`).join('');
+
+  const VOZ_TYPES = ["Sugestão","Elogio","Crítica","Reclamação","Pedido de melhoria","Denúncia","Solicitação"];
+  document.getElementById('voz-types').innerHTML = VOZ_TYPES.map(t => `<div class="voz-type" onclick="selectVozTipo(this,'${t}')">${t}</div>`).join('');
+
+  document.getElementById('stars-geral').innerHTML = [1,2,3,4,5].map(i => `<span data-v="${i}" onclick="setStars(${i})">★</span>`).join('');
+
+  const PROMESSA_LABEL = { nao_iniciada:'Não iniciada', em_andamento:'Em andamento', parcialmente_cumprida:'Parcialmente cumprida', cumprida:'Cumprida' };
+  const promessas = DATA.promessas || [];
+  const totalP = promessas.length;
+  const cumpridasP = promessas.filter(p => p.status === 'cumprida').length;
+  const andamentoP = promessas.filter(p => p.status === 'em_andamento' || p.status === 'parcialmente_cumprida').length;
+  const naoIniciadasP = promessas.filter(p => p.status === 'nao_iniciada').length;
+  const pctP = totalP ? Math.round((cumpridasP / totalP) * 100) : 0;
+  document.getElementById('plano-kpis').innerHTML = `
+    <div class="kpi"><div class="num">${totalP}</div><div class="lbl">Promessas no plano</div></div>
+    <div class="kpi"><div class="num">${pctP}%</div><div class="lbl">Cumpridas</div></div>
+    <div class="kpi"><div class="num">${andamentoP}</div><div class="lbl">Em andamento</div></div>
+    <div class="kpi"><div class="num">${naoIniciadasP}</div><div class="lbl">Não iniciadas</div></div>`;
+  const fillEl = document.getElementById('plano-progress-fill');
+  if(fillEl) fillEl.style.width = pctP + '%';
+  document.getElementById('plano-tbl').innerHTML = promessas.length
+    ? promessas.map(p => `<tr><td>${p.titulo}</td><td>${p.eixo}</td><td>${p.ano_previsto||'—'}</td><td><span class="status-pill status-${p.status}">${PROMESSA_LABEL[p.status]||p.status}</span></td></tr>`).join('')
+    : '<tr><td colspan="4">Nenhuma promessa cadastrada ainda.</td></tr>';
+}
+
+function applyObrasFilter(){
+  const ano = document.getElementById('f-ano').value;
+  const secretaria = document.getElementById('f-secretaria').value;
+  const categoria = document.getElementById('f-categoria').value;
+  const status = document.getElementById('f-status').value;
+  const bairro = document.getElementById('f-bairro').value.trim().toLowerCase();
+
+  const filtradas = (DATA.acoes || []).filter(a => {
+    if(ano && String(a.ano) !== ano) return false;
+    if(secretaria && (a.secretarias?.nome || a.secretaria) !== secretaria) return false;
+    if(categoria && (a.categorias?.nome || a.categoria) !== categoria) return false;
+    if(status && a.status !== status) return false;
+    if(bairro && !(a.bairro || '').toLowerCase().includes(bairro)) return false;
+    return true;
+  });
+
+  document.getElementById('obras-grid').innerHTML = filtradas.map(obraCard).join('') || '<p class="dl-meta">Nenhuma obra encontrada com esses filtros.</p>';
+}
+
+function selectVozTipo(el, tipo){
+  document.querySelectorAll('.voz-type').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+  vozTipo = { "Sugestão":"sugestao","Elogio":"elogio","Crítica":"critica","Reclamação":"reclamacao","Pedido de melhoria":"pedido_melhoria","Denúncia":"denuncia","Solicitação":"solicitacao" }[tipo];
+}
+function setIdent(anon){
+  vozIdent = !anon;
+  document.getElementById('btn-anonimo').classList.toggle('sel', anon);
+  document.getElementById('btn-identificado').classList.toggle('sel', !anon);
+  document.getElementById('nome-field').style.display = anon ? 'none' : 'block';
+}
+function setStars(v){
+  starsValue = v;
+  document.querySelectorAll('#stars-geral span').forEach(s => s.classList.toggle('on', parseInt(s.dataset.v) <= v));
+}
+
+let vozFotoBase64 = null;
+let vozLat = null, vozLng = null;
+
+document.getElementById('voz-foto')?.addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 2 * 1024 * 1024){
+    toast('Foto muito grande — escolha uma de até 2MB');
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    vozFotoBase64 = ev.target.result;
+    document.getElementById('voz-foto-preview').innerHTML = `<img src="${vozFotoBase64}" style="max-width:140px;border-radius:10px;border:1px solid var(--line);">`;
+  };
+  reader.readAsDataURL(file);
+});
+
+function capturarLocalizacao(){
+  const status = document.getElementById('voz-loc-status');
+  if(!navigator.geolocation){
+    status.textContent = 'Seu navegador não suporta localização automática.';
+    return;
+  }
+  status.textContent = 'Obtendo localização...';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      vozLat = pos.coords.latitude;
+      vozLng = pos.coords.longitude;
+      status.textContent = '✓ Localização capturada';
+    },
+    err => { status.textContent = 'Não foi possível obter sua localização (' + err.message + ')'; }
+  );
+}
+
+async function submitVoz(){
+  if(!vozTipo){ toast('Selecione o tipo de manifestação'); return; }
+  const desc = document.getElementById('voz-desc').value.trim();
+  if(!desc){ toast('Descreva sua manifestação antes de enviar'); return; }
+  const secretariaId = document.getElementById('voz-secretaria').value || null;
+  const nome = document.getElementById('voz-nome').value.trim();
+
+  if(!LIVE){ toast('Manifestação registrada (modo demonstração — conecte a API para gravar de verdade)'); return; }
+  try {
+    await sbPost('manifestacoes', {
+      tenant_id: DEMO_TENANT_ID, secretaria_id: secretariaId, tipo: vozTipo, descricao: desc,
+      identificado: vozIdent, nome_cidadao: vozIdent ? nome : null,
+      foto_url: vozFotoBase64, latitude: vozLat, longitude: vozLng,
+    });
+    toast('Manifestação enviada com sucesso — protocolo gerado');
+    document.getElementById('voz-desc').value = '';
+    document.getElementById('voz-foto').value = '';
+    document.getElementById('voz-foto-preview').innerHTML = '';
+    document.getElementById('voz-loc-status').textContent = '';
+    vozFotoBase64 = null; vozLat = null; vozLng = null;
+  } catch (err) {
+    toast('Não foi possível enviar agora. Tente novamente em instantes.');
+  }
+}
+
+async function submitAvaliacao(){
+  if(starsValue === 0){ toast('Selecione uma nota antes de enviar'); return; }
+  const comentario = document.getElementById('aval-comentario').value.trim();
+  if(!LIVE){ toast('Avaliação registrada (modo demonstração — conecte a API para gravar de verdade)'); return; }
+  try {
+    await sbPost('avaliacoes', { tenant_id: DEMO_TENANT_ID, nota: starsValue * 2, comentario: comentario || null });
+    toast('Avaliação enviada — obrigado pela participação');
+  } catch (err) {
+    toast('Não foi possível enviar agora. Tente novamente em instantes.');
+  }
+}
+
+buildNav();
+setIdent(true);
+loadData();
+</script>
+</body>
+</html>
