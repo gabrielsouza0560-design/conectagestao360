@@ -1,0 +1,17 @@
+{
+  "name": "Conecta Gestão — Avaliar Evento",
+  "short_name": "CG Avaliar",
+  "description": "Avaliação pública de eventos do Conecta Gestão.",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#2563EB",
+  "background_color": "#F8FAFC",
+  "start_url": "/conecta-gestao-avaliar-evento.html",
+  "scope": "/",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
