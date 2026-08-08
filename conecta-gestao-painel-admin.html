@@ -239,6 +239,11 @@
           </div>
           <div class="field span-2"><label>Quantidade de beneficiados</label><input id="f-beneficiados" type="number"></div>
         </div>
+        <div class="form-grid">
+          <div class="field span-3">
+            <label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="checkbox" id="f-publicar-portal" checked style="width:auto;margin-right:8px;vertical-align:middle;"> Publicar essa ação no Portal Público (visível pra população)</label>
+          </div>
+        </div>
 
         <div class="fieldset-label">Evento (festa, feira, show...)</div>
         <div class="form-grid">
@@ -1085,8 +1090,9 @@ async function sbRpc(fn, args){
     },
     body: JSON.stringify(args),
   });
-  const data = await res.json();
-  if(!res.ok) throw new Error(data.message || data.error || 'Erro ao chamar ' + fn);
+  const raw = await res.text();
+  const data = raw ? JSON.parse(raw) : null; // RPCs que retornam void vêm com corpo vazio (204)
+  if(!res.ok) throw new Error((data && (data.message || data.error)) || 'Erro ao chamar ' + fn);
   return data;
 }
 
@@ -1245,6 +1251,7 @@ async function submitAcao(){
       origem_recurso: document.getElementById('f-origem').value.trim() || null,
       status: document.getElementById('f-status').value,
       quantidade_beneficiados: parseInt(document.getElementById('f-beneficiados').value) || null,
+      publicada_no_portal: document.getElementById('f-publicar-portal').checked,
       eh_evento: ehEvento,
       publico_estimado: ehEvento ? (parseInt(document.getElementById('f-publico-estimado').value) || null) : null,
       valor_retorno_estimado: ehEvento ? (parseFloat(document.getElementById('f-valor-retorno').value) || null) : null,
