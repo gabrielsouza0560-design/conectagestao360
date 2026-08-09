@@ -200,14 +200,65 @@
 </main>
 
 <script>
+const SUPABASE_URL = "https://kfvkembarvsbtveksiag.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
 const SECRETARIAS = ["Gabinete","Administração","Finanças","Educação","Saúde","Agricultura","Indústria e Comércio","Turismo","Cultura","Esporte","Meio Ambiente","Assistência Social","Obras e Serviços Públicos","Planejamento","Inovação e Tecnologia","Defesa Civil"];
 const TYPES = ["Mensal","Trimestral","Semestral","Anual","Final de Gestão"];
-const HISTORY = [
-  ["Relatório Mensal — Julho 2026", "Todas", "pdf", "Sistema (IA)", "01/08/2026"],
-  ["Relatório Trimestral — 2º Trim. 2026", "Educação", "xlsx", "Helena Duarte", "15/07/2026"],
-  ["Relatório Anual — 2025", "Todas", "docx", "Marcos Aurélio", "10/01/2026"],
-  ["Relatório Mensal — Junho 2026", "Saúde", "pdf", "Sistema (IA)", "01/07/2026"],
-];
+const TIPO_LABEL = { acoes: 'Ações Cadastradas', promessas: 'Plano de Governo' };
+
+let session = null;
+
+function decodeJwt(token){
+  try {
+    const payload = token.split('.')[1];
+    const json = decodeURIComponent(atob(payload.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));
+    return JSON.parse(json);
+  } catch (e) { return {}; }
+}
+
+async function ensureSession(){
+  const email = prompt('Entre com seu e-mail pra ver o histórico de relatórios já gerados:');
+  if(!email) return null;
+  const senha = prompt('Senha:');
+  if(!senha) return null;
+  const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: senha }),
+  });
+  if(!res.ok){ alert('Login inválido — a lista de relatórios já gerados vai ficar vazia, mas o gerador de demonstração continua funcionando.'); return null; }
+  const data = await res.json();
+  return { access_token: data.access_token, claims: decodeJwt(data.access_token) };
+}
+
+async function sbGet(table, query){
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + (query || ''), {
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Accept-Profile': 'gestao360' },
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function baixarArquivoSalvo(path, titulo, btnEl){
+  const original = btnEl.textContent;
+  btnEl.textContent = 'Baixando...';
+  try {
+    const res = await fetch(SUPABASE_URL + '/storage/v1/object/relatorios/' + path, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token },
+    });
+    if(!res.ok) throw new Error(await res.text());
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = titulo.replace(/[^\w\- ]/g,'') + '.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Não foi possível baixar: ' + e.message.slice(0,200));
+  } finally {
+    btnEl.textContent = original;
+  }
+}
 
 let tipoSel = "Mensal";
 let fmtSel = null;
@@ -271,9 +322,27 @@ function baixarRelatorio(){
   setTimeout(() => { btn.textContent = original; }, 2000);
 }
 
-function populateHistory(){
-  document.getElementById('history-tbl').innerHTML = HISTORY.map(h => `
-    <tr><td>${h[0]}</td><td>${h[1]}</td><td><span class="fmt-badge fmt-${h[2]}">${h[2].toUpperCase()}</span></td><td>${h[3]}</td><td>${h[4]}</td><td><button class="dl-link">Baixar</button></td></tr>`).join('');
+async function populateHistory(){
+  session = await ensureSession();
+  const tbl = document.getElementById('history-tbl');
+  if(!session){
+    tbl.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Faça login pra ver os relatórios já gerados no sistema (os PDFs baixados em Cadastro de Ações e Plano de Governo ficam salvos aqui automaticamente).</td></tr>';
+    return;
+  }
+  try {
+    const relatorios = await sbGet('relatorios_gerados', 'select=id,titulo,tipo,formato,storage_path,gerado_por,criado_em&order=criado_em.desc&limit=30');
+    tbl.innerHTML = relatorios.length
+      ? relatorios.map(r => {
+          const idx = 'btn-dl-' + r.id;
+          return '<tr><td>' + r.titulo + '</td><td>' + (TIPO_LABEL[r.tipo] || r.tipo) + '</td>' +
+            '<td><span class="fmt-badge fmt-' + r.formato + '">' + r.formato.toUpperCase() + '</span></td>' +
+            '<td>' + (r.gerado_por || '—') + '</td><td>' + new Date(r.criado_em).toLocaleDateString('pt-BR') + '</td>' +
+            '<td><button class="dl-link" id="' + idx + '" onclick="baixarArquivoSalvo(\'' + r.storage_path + '\', \'' + r.titulo.replace(/'/g,"") + '\', document.getElementById(\'' + idx + '\'))">Baixar</button></td></tr>';
+        }).join('')
+      : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Nenhum relatório gerado ainda. Use o botão "Baixar PDF" em Cadastro de Ações ou Plano de Governo — eles ficam salvos aqui automaticamente.</td></tr>';
+  } catch (e) {
+    tbl.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
 }
 
 buildTypes();

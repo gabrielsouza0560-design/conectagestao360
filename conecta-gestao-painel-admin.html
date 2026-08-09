@@ -797,6 +797,25 @@ function statusPill(s){
 }
 function money(v){ return v ? 'R$ ' + Number(v).toLocaleString('pt-BR') : '—'; }
 
+async function salvarRelatorioNaPlataforma(doc, titulo, tipo){
+  try {
+    const blob = doc.output('blob');
+    const path = session.claims.tenant_id + '/' + tipo + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.pdf';
+    const upRes = await fetch(SUPABASE_URL + '/storage/v1/object/relatorios/' + path, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/pdf' },
+      body: blob,
+    });
+    if(!upRes.ok) throw new Error(await upRes.text());
+    await sbPost('relatorios_gerados', {
+      tenant_id: session.claims.tenant_id, titulo: titulo, tipo: tipo, formato: 'pdf',
+      storage_path: path, gerado_por: session.claims.perfil,
+    });
+  } catch (e) {
+    console.warn('Não foi possível salvar o relatório na plataforma (o download local funcionou normalmente):', e.message);
+  }
+}
+
 async function baixarPdfAcoes(){
   const btn = document.getElementById('pdf-acoes-btn');
   btn.disabled = true; btn.textContent = 'Gerando PDF...';
@@ -824,6 +843,7 @@ async function baixarPdfAcoes(){
       styles: { fontSize: 9 },
       headStyles: { fillColor: [37,99,235] },
     });
+    await salvarRelatorioNaPlataforma(doc, 'Ações Cadastradas — ' + new Date().toLocaleDateString('pt-BR'), 'acoes');
     doc.save('conecta-gestao-acoes-' + new Date().toISOString().slice(0,10) + '.pdf');
   } catch (e) {
     alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
@@ -854,6 +874,7 @@ async function baixarPdfPromessas(){
       styles: { fontSize: 9 },
       headStyles: { fillColor: [37,99,235] },
     });
+    await salvarRelatorioNaPlataforma(doc, 'Plano de Governo — ' + new Date().toLocaleDateString('pt-BR'), 'promessas');
     doc.save('conecta-gestao-plano-governo-' + new Date().toISOString().slice(0,10) + '.pdf');
   } catch (e) {
     alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
