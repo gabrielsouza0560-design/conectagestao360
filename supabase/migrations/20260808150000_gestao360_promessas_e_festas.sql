@@ -16,11 +16,15 @@ create table if not exists gestao360.promessa_metas (
 
 alter table gestao360.promessa_metas enable row level security;
 
+drop policy if exists promessa_metas_select_public on gestao360.promessa_metas;
 create policy promessa_metas_select_public on gestao360.promessa_metas for select to anon, authenticated using (true);
+drop policy if exists promessa_metas_insert_gestao on gestao360.promessa_metas;
 create policy promessa_metas_insert_gestao on gestao360.promessa_metas for insert to authenticated
   with check (tenant_id = gestao360.jwt_tenant_id() and gestao360.jwt_perfil() in ('admin_master','prefeito'));
+drop policy if exists promessa_metas_update_gestao on gestao360.promessa_metas;
 create policy promessa_metas_update_gestao on gestao360.promessa_metas for update to authenticated
   using (tenant_id = gestao360.jwt_tenant_id() and gestao360.jwt_perfil() in ('admin_master','prefeito'));
+drop policy if exists promessa_metas_delete_gestao on gestao360.promessa_metas;
 create policy promessa_metas_delete_gestao on gestao360.promessa_metas for delete to authenticated
   using (tenant_id = gestao360.jwt_tenant_id() and gestao360.jwt_perfil() in ('admin_master','prefeito'));
 

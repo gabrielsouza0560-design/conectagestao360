@@ -12,8 +12,10 @@ create table if not exists gestao360.relatorios_gerados (
 
 alter table gestao360.relatorios_gerados enable row level security;
 
+drop policy if exists relatorios_gerados_select_staff on gestao360.relatorios_gerados;
 create policy relatorios_gerados_select_staff on gestao360.relatorios_gerados for select to authenticated
   using (tenant_id = gestao360.jwt_tenant_id());
+drop policy if exists relatorios_gerados_insert_staff on gestao360.relatorios_gerados;
 create policy relatorios_gerados_insert_staff on gestao360.relatorios_gerados for insert to authenticated
   with check (tenant_id = gestao360.jwt_tenant_id());
 
@@ -22,7 +24,9 @@ grant select, insert on gestao360.relatorios_gerados to authenticated;
 -- bucket privado — só quem está logado no sistema consegue baixar
 insert into storage.buckets (id, name, public) values ('relatorios', 'relatorios', false) on conflict (id) do nothing;
 
+drop policy if exists relatorios_storage_select on storage.objects;
 create policy relatorios_storage_select on storage.objects for select to authenticated
   using (bucket_id = 'relatorios');
+drop policy if exists relatorios_storage_insert on storage.objects;
 create policy relatorios_storage_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'relatorios');
