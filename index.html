@@ -266,7 +266,7 @@
       <h3 style="margin:0 0 4px;font-weight:800;">Promessas por eixo</h3>
       <p style="font-size:12.5px;color:var(--muted);margin:0 0 18px;">Clique em um eixo para ver os detalhes</p>
       <table>
-        <thead><tr><th>Promessa</th><th>Eixo</th><th>Ano previsto</th><th>Status</th></tr></thead>
+        <thead><tr><th>Promessa</th><th>Secretaria</th><th>Eixo</th><th>Ano previsto</th><th>Status</th></tr></thead>
         <tbody id="plano-tbl"></tbody>
       </table>
     </div>
@@ -444,7 +444,7 @@ async function loadData(){
       sbGet("publicacoes", "select=titulo,corpo,tipo&status_aprovacao=eq.aprovado&order=publicado_em.desc"),
       sbGet("indicadores", "select=chave,valor,secretarias(nome)"),
       sbGet("mapa_pontos", "select=categoria,nome,latitude,longitude"),
-      sbGet("promessas_campanha", "select=titulo,eixo,ano_previsto,status&order=eixo.asc"),
+      sbGet("promessas_campanha", "select=titulo,eixo,ano_previsto,status,secretarias(nome)&order=eixo.asc"),
     ]);
     DATA = { secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas };
     LIVE = true;
@@ -595,8 +595,8 @@ function populate(){
   const fillEl = document.getElementById('plano-progress-fill');
   if(fillEl) fillEl.style.width = pctP + '%';
   document.getElementById('plano-tbl').innerHTML = promessas.length
-    ? promessas.map(p => `<tr><td>${p.titulo}</td><td>${p.eixo}</td><td>${p.ano_previsto||'—'}</td><td><span class="status-pill status-${p.status}">${PROMESSA_LABEL[p.status]||p.status}</span></td></tr>`).join('')
-    : '<tr><td colspan="4">Nenhuma promessa cadastrada ainda.</td></tr>';
+    ? promessas.map(p => `<tr><td>${p.titulo}</td><td>${p.secretarias ? p.secretarias.nome : 'Gestão geral'}</td><td>${p.eixo}</td><td>${p.ano_previsto||'—'}</td><td><span class="status-pill status-${p.status}">${PROMESSA_LABEL[p.status]||p.status}</span></td></tr>`).join('')
+    : '<tr><td colspan="5">Nenhuma promessa cadastrada ainda.</td></tr>';
 }
 
 function applyObrasFilter(){

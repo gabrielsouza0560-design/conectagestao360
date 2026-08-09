@@ -45,6 +45,11 @@
   .msg.show{display:block;}
   .msg.error{background:#FEF2F2;color:#991B1B;border:1px solid #FCA5A5;}
   .msg.success{background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7;}
+  .resultados{display:none;padding:16px 28px 0;gap:12px;}
+  .resultados.show{display:flex;}
+  .resultado-item{flex:1;text-align:center;padding:12px 8px;background:#F8FAFC;border-radius:12px;}
+  .resultado-item .val{font-size:20px;font-weight:800;color:var(--royal);}
+  .resultado-item .lbl{font-size:10.5px;color:var(--ink-soft);margin-top:2px;}
 </style>
 </head>
 <body>
@@ -54,6 +59,11 @@
     <div class="logo">CG</div>
     <h1 id="titulo-evento">Avaliar evento</h1>
     <p>Sua opinião ajuda a melhorar os próximos eventos</p>
+  </div>
+  <div class="resultados" id="resultados">
+    <div class="resultado-item"><div class="val" id="res-morador">—</div><div class="lbl">👥 Moradores</div></div>
+    <div class="resultado-item"><div class="val" id="res-comerciante">—</div><div class="lbl">🏪 Comerciantes</div></div>
+    <div class="resultado-item"><div class="val" id="res-total">—</div><div class="lbl">Total de avaliações</div></div>
   </div>
   <div class="body" id="form-body">
     <div class="field">
@@ -132,6 +142,22 @@ async function carregarTitulo(){
   } catch (e) { /* mantém título genérico se não conseguir carregar */ }
 }
 
+async function carregarResultados(){
+  if(!acaoId) return;
+  try {
+    const avaliacoes = await sbGet('evento_avaliacoes', 'select=tipo_avaliador,nota&acao_id=eq.' + acaoId);
+    if(!avaliacoes.length) return; // sem avaliações ainda — deixa o bloco escondido
+    const media = (tipo) => {
+      const notas = avaliacoes.filter(a => a.tipo_avaliador === tipo);
+      return notas.length ? (notas.reduce((s,a) => s + Number(a.nota), 0) / notas.length / 2).toFixed(1) : '—';
+    };
+    document.getElementById('res-morador').textContent = media('morador');
+    document.getElementById('res-comerciante').textContent = media('comerciante');
+    document.getElementById('res-total').textContent = avaliacoes.length;
+    document.getElementById('resultados').classList.add('show');
+  } catch (e) { /* mantém escondido se não conseguir carregar */ }
+}
+
 async function enviarAvaliacao(){
   const msg = document.getElementById('msg');
   msg.className = 'msg';
@@ -163,6 +189,7 @@ async function enviarAvaliacao(){
       comentario: document.getElementById('comentario').value.trim() || null,
     });
     document.getElementById('form-body').innerHTML = '<div class="msg success show">Avaliação enviada — obrigado pela participação! 🎉</div>';
+    carregarResultados();
   } catch (e) {
     msg.textContent = 'Não foi possível enviar agora. Tente novamente em instantes.';
     msg.className = 'msg error show';
@@ -172,6 +199,7 @@ async function enviarAvaliacao(){
 
 montarEstrelas();
 carregarTitulo();
+carregarResultados();
 </script>
 <div id="cg-dev-credit" style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
 </body>

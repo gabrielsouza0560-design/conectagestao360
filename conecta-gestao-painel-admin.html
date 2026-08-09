@@ -254,7 +254,8 @@
         <div id="evento-fields" style="display:none;">
           <div class="form-grid">
             <div class="field"><label>Público estimado</label><input id="f-publico-estimado" type="number" placeholder="Ex.: 5000"></div>
-            <div class="field span-2"><label>Valor de retorno estimado (R$)</label><input id="f-valor-retorno" type="number" step="0.01" placeholder="Impacto econômico estimado"></div>
+            <div class="field"><label>Comerciantes/barracas participantes</label><input id="f-comerciantes" type="number" placeholder="Ex.: 25"></div>
+            <div class="field"><label>Valor de retorno estimado (R$)</label><input id="f-valor-retorno" type="number" step="0.01" placeholder="Impacto econômico estimado"></div>
           </div>
           <p class="panel-sub" style="margin:2px 0 10px;">Use o campo "Origem do recurso" acima para registrar se veio de emenda (parlamentar/federal/estadual) ou de recurso próprio.</p>
           <div class="form-grid">
@@ -282,6 +283,24 @@
         <table>
           <thead><tr><th>Título</th><th>Secretaria</th><th>Bairro</th><th>Status</th><th>Investimento</th><th>Evento</th></tr></thead>
           <tbody id="tbl-acoes"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-festas">
+      <div class="topbar">
+        <div><h1>Festas</h1><div class="path">Painel Administrativo / Festas</div></div>
+        <button class="btn-accent" onclick="novaFesta()">+ Nova festa</button>
+      </div>
+
+      <div class="kpi-grid" id="festas-kpi-grid"></div>
+
+      <div class="panel">
+        <h3>Festas e eventos cadastrados</h3>
+        <p class="panel-sub">Cada festa é uma ação com fotos/vídeos, investimento, retorno econômico e avaliação pública separada de moradores e comerciantes.</p>
+        <table>
+          <thead><tr><th>Festa</th><th>Secretaria</th><th>Data</th><th>Investimento</th><th>Público</th><th>Comerciantes</th><th>Retorno estimado</th><th>Avaliação</th><th></th></tr></thead>
+          <tbody id="tbl-festas"></tbody>
         </table>
       </div>
     </section>
@@ -379,7 +398,7 @@
       <div class="kpi-grid" id="promessas-kpi-grid"></div>
 
       <div class="panel" id="promessa-form-panel" style="display:none;">
-        <h3>Nova promessa de campanha</h3>
+        <h3 id="promessa-form-titulo">Nova promessa de campanha</h3>
         <div class="form-grid">
           <div class="field span-3"><label>Título</label><input id="pr-titulo" placeholder="Ex.: Reformar todas as UBS da rede municipal"></div>
           <div class="field span-3"><label>Descrição</label><textarea id="pr-descricao" rows="2"></textarea></div>
@@ -390,6 +409,7 @@
               <option>Cultura e Esporte</option><option>Gestão e Transparência</option><option>Outros</option>
             </select>
           </div>
+          <div class="field"><label>Secretaria responsável</label><select id="pr-secretaria"><option value="">Nenhuma / Gestão geral</option></select></div>
           <div class="field"><label>Ano previsto</label><input id="pr-ano" type="number" value="2027"></div>
           <div class="field"><label>Status inicial</label>
             <select id="pr-status">
@@ -399,6 +419,8 @@
               <option value="cumprida">Cumprida</option>
             </select>
           </div>
+          <div class="field"><label>Link de foto</label><input id="pr-foto" placeholder="https://..."></div>
+          <div class="field"><label>Link de vídeo</label><input id="pr-video" placeholder="https://..."></div>
         </div>
         <div class="form-actions">
           <button class="btn-ghost" onclick="togglePromessaForm()">Cancelar</button>
@@ -406,11 +428,24 @@
         </div>
       </div>
 
+      <div class="panel" id="metas-panel" style="display:none;">
+        <h3>Metas da promessa</h3>
+        <p class="panel-sub" id="metas-promessa-titulo"></p>
+        <div id="metas-lista" style="margin-bottom:14px;"></div>
+        <div class="form-grid">
+          <div class="field span-2"><label>Nova meta</label><input id="meta-titulo" placeholder="Ex.: Fase 1 — projeto executivo pronto"></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-ghost" onclick="fecharMetasPanel()">Fechar</button>
+          <button class="btn-accent" onclick="addMeta()">Adicionar meta</button>
+        </div>
+      </div>
+
       <div class="panel">
         <h3>Promessas cadastradas</h3>
         <p class="panel-sub">Clique no status para atualizar o cumprimento — reflete direto no Portal Público</p>
         <table>
-          <thead><tr><th>Promessa</th><th>Eixo</th><th>Ano previsto</th><th>Status</th></tr></thead>
+          <thead><tr><th>Promessa</th><th>Secretaria</th><th>Eixo</th><th>Ano previsto</th><th>Status</th><th>Metas</th><th></th></tr></thead>
           <tbody id="tbl-promessas"></tbody>
         </table>
       </div>
@@ -557,6 +592,7 @@ function doLogout(){
 const NAV_ITEMS = {
   dashboard: { label: 'Dashboard', view: 'view-dashboard' },
   acoes: { label: 'Cadastro de Ações', view: 'view-acoes' },
+  festas: { label: 'Festas', view: 'view-festas' },
   recursos: { label: 'Captação de Recursos', view: 'view-recursos' },
   importar: { label: 'Importar Dados (PR)', view: 'view-importar' },
   promessas: { label: 'Plano de Governo', view: 'view-promessas' },
@@ -573,13 +609,16 @@ function enterApp(){
 
   const isAdmin = perfil === 'admin_master';
   const canManagePromessas = ['admin_master','prefeito'].indexOf(perfil) !== -1;
+  const canSeeDashboardPrefeito = ['admin_master','prefeito','vice_prefeito','controladoria'].indexOf(perfil) !== -1;
   const nav = document.getElementById('nav-container');
   nav.innerHTML = '<div class="nav-group"><div class="nav-group-label">Menu</div>' +
     '<button class="nav-item active" data-key="dashboard" onclick="navigateTo(\'dashboard\')"><span>Dashboard</span></button>' +
     '<button class="nav-item" data-key="acoes" onclick="navigateTo(\'acoes\')"><span>Cadastro de Ações</span></button>' +
+    '<button class="nav-item" data-key="festas" onclick="navigateTo(\'festas\')"><span>Festas</span></button>' +
     '<button class="nav-item" data-key="recursos" onclick="navigateTo(\'recursos\')"><span>Captação de Recursos</span></button>' +
     '<button class="nav-item" data-key="importar" onclick="navigateTo(\'importar\')"><span>Importar Dados (PR)</span></button>' +
     (canManagePromessas ? '<button class="nav-item" data-key="promessas" onclick="navigateTo(\'promessas\')"><span>Plano de Governo</span></button>' : '') +
+    (canSeeDashboardPrefeito ? '<a class="nav-item" href="conecta-gestao-dashboard-prefeito.html" target="_blank"><span>Dashboard do Prefeito ↗</span></a>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="secretarias" onclick="navigateTo(\'secretarias\')"><span>Secretarias</span></button>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="usuarios" onclick="navigateTo(\'usuarios\')"><span>Usuários e Permissões</span></button>' : '') +
     '</div>';
@@ -594,6 +633,7 @@ function enterApp(){
 
   loadSecretarias();
   loadAcoes();
+  loadFestas();
   loadRecursos();
   loadNotificacoes();
   loadImportados();
@@ -749,10 +789,63 @@ function statusPill(s){
 }
 function money(v){ return v ? 'R$ ' + Number(v).toLocaleString('pt-BR') : '—'; }
 
+function novaFesta(){
+  navigateTo('acoes');
+  if(document.getElementById('form-panel').style.display === 'none'){
+    toggleForm();
+  }
+  document.getElementById('f-eh-evento').checked = true;
+  toggleEventoFields();
+}
+
+function mostrarLinkFesta(id){
+  const link = new URL('conecta-gestao-avaliar-evento.html?acao=' + id, location.href).href;
+  prompt('Link de avaliação pública dessa festa (Ctrl+C pra copiar):', link);
+}
+
+async function loadFestas(){
+  try {
+    const festas = await sbGet('acoes', 'select=id,titulo,data,valor_investido,publico_estimado,comerciantes_participantes,valor_retorno_estimado,secretarias(nome)&eh_evento=eq.true&order=criado_em.desc');
+    const eventoIds = festas.map(f => f.id);
+    let avaliacoes = [];
+    if(eventoIds.length){
+      try { avaliacoes = await sbGet('evento_avaliacoes', 'select=acao_id,tipo_avaliador,nota&acao_id=in.(' + eventoIds.join(',') + ')'); } catch(e){}
+    }
+    const investTotal = festas.reduce((s,f) => s + (Number(f.valor_investido)||0), 0);
+    const publicoTotal = festas.reduce((s,f) => s + (Number(f.publico_estimado)||0), 0);
+    document.getElementById('festas-kpi-grid').innerHTML =
+      '<div class="kpi"><div class="num">' + festas.length + '</div><div class="lbl">Festas cadastradas</div></div>' +
+      '<div class="kpi"><div class="num">' + money(investTotal) + '</div><div class="lbl">Investimento total</div></div>' +
+      '<div class="kpi"><div class="num">' + publicoTotal.toLocaleString('pt-BR') + '</div><div class="lbl">Público estimado (total)</div></div>';
+
+    document.getElementById('tbl-festas').innerHTML = festas.length
+      ? festas.map(f => {
+          const doAcao = avaliacoes.filter(v => v.acao_id === f.id);
+          const media = (tipo) => {
+            const notas = doAcao.filter(v => v.tipo_avaliador === tipo);
+            return notas.length ? (notas.reduce((s,v) => s + Number(v.nota), 0) / notas.length / 2).toFixed(1) : '—';
+          };
+          return '<tr><td>' + f.titulo + '</td><td>' + (f.secretarias ? f.secretarias.nome : '—') + '</td>' +
+            '<td>' + (f.data ? new Date(f.data).toLocaleDateString('pt-BR') : '—') + '</td>' +
+            '<td style="font-family:var(--mono);">' + money(f.valor_investido) + '</td>' +
+            '<td>' + (f.publico_estimado != null ? f.publico_estimado : '—') + '</td>' +
+            '<td>' + (f.comerciantes_participantes != null ? f.comerciantes_participantes : '—') + '</td>' +
+            '<td style="font-family:var(--mono);">' + money(f.valor_retorno_estimado) + '</td>' +
+            '<td style="font-size:12.5px;">👥 ' + media('morador') + ' · 🏪 ' + media('comerciante') + '</td>' +
+            '<td><button class="btn-ghost" onclick="mostrarLinkFesta(\'' + f.id + '\')">Link avaliação</button></td></tr>';
+        }).join('')
+      : '<tr><td colspan="9" class="empty">Nenhuma festa cadastrada ainda. Clique em "+ Nova festa" pra começar.</td></tr>';
+  } catch (e) {
+    document.getElementById('tbl-festas').innerHTML = '<tr><td colspan="9" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
 async function loadSecretarias(){
   try {
     const secs = await sbGet('secretarias', 'select=id,nome&order=nome.asc');
     document.getElementById('f-secretaria').innerHTML = secs.map(s => '<option value="' + s.id + '">' + s.nome + '</option>').join('') || '<option value="">Nenhuma secretaria visível</option>';
+    const prSel = document.getElementById('pr-secretaria');
+    if(prSel) prSel.innerHTML = '<option value="">Nenhuma / Gestão geral</option>' + secs.map(s => '<option value="' + s.id + '">' + s.nome + '</option>').join('');
   } catch (e) {
     document.getElementById('f-secretaria').innerHTML = '<option value="">Não foi possível carregar</option>';
   }
@@ -1004,14 +1097,54 @@ async function submitRecurso(){
 
 const PROMESSA_STATUS_LABEL = { nao_iniciada:'Não iniciada', em_andamento:'Em andamento', parcialmente_cumprida:'Parcialmente cumprida', cumprida:'Cumprida' };
 
+let promessaEditandoId = null;
+let metasPromessaId = null;
+let promessasCache = [];
+
 function togglePromessaForm(){
   const panel = document.getElementById('promessa-form-panel');
-  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  const opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if(opening && promessaEditandoId === null){
+    resetPromessaForm();
+  }
+}
+
+function resetPromessaForm(){
+  promessaEditandoId = null;
+  document.getElementById('promessa-form-titulo').textContent = 'Nova promessa de campanha';
+  document.getElementById('pr-titulo').value = '';
+  document.getElementById('pr-descricao').value = '';
+  document.getElementById('pr-secretaria').value = '';
+  document.getElementById('pr-ano').value = '2027';
+  document.getElementById('pr-status').value = 'nao_iniciada';
+  document.getElementById('pr-foto').value = '';
+  document.getElementById('pr-video').value = '';
+  document.getElementById('pr-submit-btn').textContent = 'Salvar promessa';
+}
+
+function editarPromessa(id){
+  const p = promessasCache.find(x => x.id === id);
+  if(!p) return;
+  promessaEditandoId = id;
+  document.getElementById('promessa-form-titulo').textContent = 'Editar promessa';
+  document.getElementById('pr-titulo').value = p.titulo || '';
+  document.getElementById('pr-descricao').value = p.descricao || '';
+  document.getElementById('pr-secretaria').value = p.secretaria_id || '';
+  document.getElementById('pr-eixo').value = p.eixo || '';
+  document.getElementById('pr-ano').value = p.ano_previsto || '';
+  document.getElementById('pr-status').value = p.status;
+  document.getElementById('pr-foto').value = p.foto_url || '';
+  document.getElementById('pr-video').value = p.video_url || '';
+  document.getElementById('pr-submit-btn').textContent = 'Salvar alterações';
+  document.getElementById('promessa-form-panel').style.display = 'block';
+  document.getElementById('promessa-form-panel').scrollIntoView({ behavior: 'smooth' });
 }
 
 async function loadPromessas(){
   try {
-    const promessas = await sbGet('promessas_campanha', 'select=id,titulo,eixo,ano_previsto,status&order=criado_em.desc');
+    const promessas = await sbGet('promessas_campanha', 'select=id,titulo,descricao,eixo,secretaria_id,ano_previsto,status,foto_url,video_url,secretarias(nome)&order=criado_em.desc');
+    promessasCache = promessas;
     const total = promessas.length;
     const cumpridas = promessas.filter(p => p.status === 'cumprida').length;
     const andamento = promessas.filter(p => p.status === 'em_andamento' || p.status === 'parcialmente_cumprida').length;
@@ -1023,14 +1156,31 @@ async function loadPromessas(){
       '<div class="kpi"><div class="num">' + andamento + '</div><div class="lbl">Em andamento</div></div>' +
       '<div class="kpi"><div class="num">' + naoIniciadas + '</div><div class="lbl">Não iniciadas</div></div>';
 
+    let metasContagem = {};
+    if(promessas.length){
+      try {
+        const metas = await sbGet('promessa_metas', 'select=promessa_id,concluida&promessa_id=in.(' + promessas.map(p=>p.id).join(',') + ')');
+        metas.forEach(m => {
+          if(!metasContagem[m.promessa_id]) metasContagem[m.promessa_id] = { total: 0, concluidas: 0 };
+          metasContagem[m.promessa_id].total++;
+          if(m.concluida) metasContagem[m.promessa_id].concluidas++;
+        });
+      } catch(e) {}
+    }
+
     document.getElementById('tbl-promessas').innerHTML = promessas.length
-      ? promessas.map(p => '<tr><td>' + p.titulo + '</td><td>' + p.eixo + '</td><td>' + (p.ano_previsto||'—') + '</td><td>' +
+      ? promessas.map(p => {
+          const mc = metasContagem[p.id];
+          const metasTxt = mc ? (mc.concluidas + '/' + mc.total) : '—';
+          return '<tr><td>' + p.titulo + '</td><td>' + (p.secretarias ? p.secretarias.nome : 'Gestão geral') + '</td><td>' + p.eixo + '</td><td>' + (p.ano_previsto||'—') + '</td><td>' +
           '<select class="status-select status-' + p.status + '" onchange="updatePromessaStatus(\'' + p.id + '\', this.value, this)">' +
             Object.keys(PROMESSA_STATUS_LABEL).map(k => '<option value="' + k + '"' + (k===p.status?' selected':'') + '>' + PROMESSA_STATUS_LABEL[k] + '</option>').join('') +
-          '</select></td></tr>').join('')
-      : '<tr><td colspan="4" class="empty">Nenhuma promessa cadastrada ainda.</td></tr>';
+          '</select></td><td><button class="btn-ghost" onclick="abrirMetasPanel(\'' + p.id + '\')">Metas (' + metasTxt + ')</button></td>' +
+          '<td><button class="btn-ghost" onclick="editarPromessa(\'' + p.id + '\')">Editar</button></td></tr>';
+        }).join('')
+      : '<tr><td colspan="7" class="empty">Nenhuma promessa cadastrada ainda.</td></tr>';
   } catch (e) {
-    document.getElementById('tbl-promessas').innerHTML = '<tr><td colspan="4" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+    document.getElementById('tbl-promessas').innerHTML = '<tr><td colspan="7" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
   }
 }
 
@@ -1039,23 +1189,39 @@ async function submitPromessa(){
   if(!titulo){ alert('Informe o título da promessa.'); return; }
   const btn = document.getElementById('pr-submit-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
+  const payload = {
+    titulo: titulo,
+    descricao: document.getElementById('pr-descricao').value.trim() || null,
+    secretaria_id: document.getElementById('pr-secretaria').value || null,
+    eixo: document.getElementById('pr-eixo').value,
+    ano_previsto: parseInt(document.getElementById('pr-ano').value) || null,
+    status: document.getElementById('pr-status').value,
+    foto_url: document.getElementById('pr-foto').value.trim() || null,
+    video_url: document.getElementById('pr-video').value.trim() || null,
+  };
   try {
-    await sbPost('promessas_campanha', {
-      tenant_id: session.claims.tenant_id,
-      titulo: titulo,
-      descricao: document.getElementById('pr-descricao').value.trim() || null,
-      eixo: document.getElementById('pr-eixo').value,
-      ano_previsto: parseInt(document.getElementById('pr-ano').value) || null,
-      status: document.getElementById('pr-status').value,
-    });
+    if(promessaEditandoId){
+      payload.atualizado_em = new Date().toISOString();
+      const res = await fetch(SUPABASE_URL + '/rest/v1/promessas_campanha?id=eq.' + promessaEditandoId, {
+        method: 'PATCH',
+        headers: {
+          apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token,
+          'Content-Profile': 'gestao360', 'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      if(!res.ok) throw new Error(await res.text());
+    } else {
+      payload.tenant_id = session.claims.tenant_id;
+      await sbPost('promessas_campanha', payload);
+    }
     togglePromessaForm();
-    document.getElementById('pr-titulo').value = '';
-    document.getElementById('pr-descricao').value = '';
+    resetPromessaForm();
     loadPromessas();
   } catch (e) {
     alert('Não foi possível salvar: ' + e.message.slice(0,200));
   } finally {
-    btn.disabled = false; btn.textContent = 'Salvar promessa';
+    btn.disabled = false; btn.textContent = promessaEditandoId ? 'Salvar alterações' : 'Salvar promessa';
   }
 }
 
@@ -1076,6 +1242,68 @@ async function updatePromessaStatus(id, novoStatus, selectEl){
     loadPromessas();
   } catch (e) {
     alert('Não foi possível atualizar: ' + e.message.slice(0,200));
+  }
+}
+
+async function abrirMetasPanel(promessaId){
+  metasPromessaId = promessaId;
+  const p = promessasCache.find(x => x.id === promessaId);
+  document.getElementById('metas-promessa-titulo').textContent = p ? p.titulo : '';
+  document.getElementById('metas-panel').style.display = 'block';
+  document.getElementById('metas-panel').scrollIntoView({ behavior: 'smooth' });
+  await carregarMetas();
+}
+
+function fecharMetasPanel(){
+  metasPromessaId = null;
+  document.getElementById('metas-panel').style.display = 'none';
+}
+
+async function carregarMetas(){
+  if(!metasPromessaId) return;
+  try {
+    const metas = await sbGet('promessa_metas', 'select=id,titulo,concluida&promessa_id=eq.' + metasPromessaId + '&order=criado_em.asc');
+    document.getElementById('metas-lista').innerHTML = metas.length
+      ? metas.map(m => '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">' +
+          '<input type="checkbox" ' + (m.concluida ? 'checked' : '') + ' onchange="toggleMeta(\'' + m.id + '\', this.checked)"> ' +
+          '<span style="' + (m.concluida ? 'text-decoration:line-through;color:var(--muted);' : '') + '">' + m.titulo + '</span></div>').join('')
+      : '<p style="color:var(--muted);font-size:12.5px;">Nenhuma meta cadastrada ainda.</p>';
+  } catch (e) {
+    document.getElementById('metas-lista').innerHTML = '<p style="color:var(--muted);font-size:12.5px;">Não foi possível carregar as metas.</p>';
+  }
+}
+
+async function addMeta(){
+  const input = document.getElementById('meta-titulo');
+  const titulo = input.value.trim();
+  if(!titulo || !metasPromessaId) return;
+  try {
+    await sbPost('promessa_metas', {
+      tenant_id: session.claims.tenant_id, promessa_id: metasPromessaId, titulo: titulo, concluida: false,
+    });
+    input.value = '';
+    carregarMetas();
+    loadPromessas();
+  } catch (e) {
+    alert('Não foi possível adicionar a meta: ' + e.message.slice(0,200));
+  }
+}
+
+async function toggleMeta(metaId, concluida){
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/promessa_metas?id=eq.' + metaId, {
+      method: 'PATCH',
+      headers: {
+        apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token,
+        'Content-Profile': 'gestao360', 'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ concluida: concluida }),
+    });
+    if(!res.ok) throw new Error(await res.text());
+    carregarMetas();
+    loadPromessas();
+  } catch (e) {
+    alert('Não foi possível atualizar a meta: ' + e.message.slice(0,200));
   }
 }
 
@@ -1254,6 +1482,7 @@ async function submitAcao(){
       publicada_no_portal: document.getElementById('f-publicar-portal').checked,
       eh_evento: ehEvento,
       publico_estimado: ehEvento ? (parseInt(document.getElementById('f-publico-estimado').value) || null) : null,
+      comerciantes_participantes: ehEvento ? (parseInt(document.getElementById('f-comerciantes').value) || null) : null,
       valor_retorno_estimado: ehEvento ? (parseFloat(document.getElementById('f-valor-retorno').value) || null) : null,
     });
     const novaAcao = rows && rows[0];
@@ -1271,6 +1500,7 @@ async function submitAcao(){
 
     fecharFormAcaoAposSalvar();
     loadAcoes();
+    loadFestas();
   } catch (e) {
     alert('Não foi possível salvar: ' + e.message.slice(0,200));
   } finally {
