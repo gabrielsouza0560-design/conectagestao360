@@ -2,6 +2,8 @@
 <html lang="pt-BR">
 <head>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Conecta Gestão — Painel Administrativo · Gabriel Oliveira</title>
@@ -212,7 +214,10 @@
     <section class="view" id="view-acoes">
       <div class="topbar">
         <div><h1>Cadastro de Ações</h1><div class="path" id="acoes-path">Painel Administrativo / Ações</div></div>
-        <button class="btn-accent" onclick="toggleForm()">+ Nova ação</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-ghost" onclick="baixarPdfAcoes()" id="pdf-acoes-btn">⬇ Baixar PDF</button>
+          <button class="btn-accent" onclick="toggleForm()">+ Nova ação</button>
+        </div>
       </div>
 
       <div class="panel" id="form-panel" style="display:none;">
@@ -392,7 +397,10 @@
     <section class="view" id="view-promessas">
       <div class="topbar">
         <div><h1>Plano de Governo</h1><div class="path">Painel Administrativo / Plano de Governo</div></div>
-        <button class="btn-accent" onclick="togglePromessaForm()">+ Nova promessa</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-ghost" onclick="baixarPdfPromessas()" id="pdf-promessas-btn">⬇ Baixar PDF</button>
+          <button class="btn-accent" onclick="togglePromessaForm()">+ Nova promessa</button>
+        </div>
       </div>
 
       <div class="kpi-grid" id="promessas-kpi-grid"></div>
@@ -788,6 +796,71 @@ function statusPill(s){
   return '<span class="status-pill status-' + s + '">' + (map[s] || s) + '</span>';
 }
 function money(v){ return v ? 'R$ ' + Number(v).toLocaleString('pt-BR') : '—'; }
+
+async function baixarPdfAcoes(){
+  const btn = document.getElementById('pdf-acoes-btn');
+  btn.disabled = true; btn.textContent = 'Gerando PDF...';
+  try {
+    const acoes = await sbGet('acoes', 'select=titulo,bairro,status,valor_investido,data,secretarias(nome)&order=criado_em.desc');
+    const STATUS_LABEL = { planejado:'Planejado', em_andamento:'Em andamento', concluido:'Concluído', cancelado:'Cancelado' };
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Conecta Gestão — Ações Cadastradas', 14, 18);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text('Gerado em ' + new Date().toLocaleString('pt-BR') + ' — ' + acoes.length + ' ação(ões) no seu escopo de acesso', 14, 25);
+    doc.autoTable({
+      startY: 32,
+      head: [['Título', 'Secretaria', 'Bairro', 'Status', 'Investimento', 'Data']],
+      body: acoes.map(a => [
+        a.titulo,
+        a.secretarias ? a.secretarias.nome : '—',
+        a.bairro || '—',
+        STATUS_LABEL[a.status] || a.status,
+        money(a.valor_investido),
+        a.data ? new Date(a.data).toLocaleDateString('pt-BR') : '—',
+      ]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [37,99,235] },
+    });
+    doc.save('conecta-gestao-acoes-' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch (e) {
+    alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Baixar PDF';
+  }
+}
+
+async function baixarPdfPromessas(){
+  const btn = document.getElementById('pdf-promessas-btn');
+  btn.disabled = true; btn.textContent = 'Gerando PDF...';
+  try {
+    const promessas = await sbGet('promessas_campanha', 'select=titulo,eixo,ano_previsto,status,secretarias(nome)&order=eixo.asc');
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Conecta Gestão — Plano de Governo', 14, 18);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text('Gerado em ' + new Date().toLocaleString('pt-BR') + ' — ' + promessas.length + ' promessa(s)', 14, 25);
+    doc.autoTable({
+      startY: 32,
+      head: [['Promessa', 'Secretaria', 'Eixo', 'Ano previsto', 'Status']],
+      body: promessas.map(p => [
+        p.titulo, p.secretarias ? p.secretarias.nome : 'Gestão geral', p.eixo, p.ano_previsto || '—',
+        PROMESSA_STATUS_LABEL[p.status] || p.status,
+      ]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [37,99,235] },
+    });
+    doc.save('conecta-gestao-plano-governo-' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch (e) {
+    alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Baixar PDF';
+  }
+}
 
 function novaFesta(){
   navigateTo('acoes');
