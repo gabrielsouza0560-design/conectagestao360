@@ -405,7 +405,11 @@
     <section class="view" id="view-recursos">
       <div class="topbar">
         <div><h1>Captação de Recursos</h1><div class="path">Painel Administrativo / Captação de Recursos</div></div>
-        <button class="btn-accent" onclick="toggleRecursoForm()">+ Nova oportunidade</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-ghost" onclick="baixarPdfRecursos()" id="pdf-recursos-btn">⬇ PDF</button>
+          <button class="btn-ghost" onclick="baixarExcelRecursos()" id="xlsx-recursos-btn">⬇ Excel</button>
+          <button class="btn-accent" onclick="toggleRecursoForm()">+ Nova oportunidade</button>
+        </div>
       </div>
 
       <div class="kpi-grid" id="recursos-kpi-grid"></div>
@@ -528,7 +532,11 @@
     <section class="view" id="view-secretarias">
       <div class="topbar">
         <div><h1>Secretarias</h1><div class="path">Painel Administrativo / Secretarias</div></div>
-        <button class="btn-accent" onclick="toggleSecForm()">+ Nova secretaria</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-ghost" onclick="baixarPdfSecretarias()" id="pdf-secretarias-btn">⬇ PDF</button>
+          <button class="btn-ghost" onclick="baixarExcelSecretarias()" id="xlsx-secretarias-btn">⬇ Excel</button>
+          <button class="btn-accent" onclick="toggleSecForm()">+ Nova secretaria</button>
+        </div>
       </div>
       <div class="panel" id="sec-form-panel" style="display:none;">
         <h3>Nova secretaria</h3>
@@ -554,7 +562,11 @@
     <section class="view" id="view-usuarios">
       <div class="topbar">
         <div><h1>Usuários e Permissões</h1><div class="path">Painel Administrativo / Usuários</div></div>
-        <button class="btn-accent" onclick="toggleVincularForm()">+ Cadastrar usuário</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-ghost" onclick="baixarPdfUsuarios()" id="pdf-usuarios-btn">⬇ PDF</button>
+          <button class="btn-ghost" onclick="baixarExcelUsuarios()" id="xlsx-usuarios-btn">⬇ Excel</button>
+          <button class="btn-accent" onclick="toggleVincularForm()">+ Cadastrar usuário</button>
+        </div>
       </div>
 
       <div class="diag" style="background:#EFF6FF;border-color:rgba(37,99,235,.25);color:var(--royal);">
@@ -1010,6 +1022,168 @@ async function baixarExcelPromessas(){
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = 'conecta-gestao-plano-governo-' + new Date().toISOString().slice(0,10) + '.xlsx';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Não foi possível gerar o Excel: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Excel';
+  }
+}
+
+async function baixarPdfRecursos(){
+  const btn = document.getElementById('pdf-recursos-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const recursos = await sbGet('oportunidades_recursos', 'select=programa,esfera,valor_estimado,prazo_submissao,status,numero_convenio,vigencia_fim,secretarias(nome)&order=prazo_submissao.asc.nullslast');
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16); doc.text('Conecta Gestão — Captação de Recursos', 14, 18);
+    doc.setFontSize(10); doc.setTextColor(100);
+    doc.text('Gerado em ' + new Date().toLocaleString('pt-BR') + ' — ' + recursos.length + ' oportunidade(s)', 14, 25);
+    doc.autoTable({
+      startY: 32,
+      head: [['Programa', 'Esfera', 'Secretaria', 'Valor', 'Prazo', 'Nº convênio', 'Vigência até', 'Status']],
+      body: recursos.map(r => [
+        r.programa, r.esfera, r.secretarias ? r.secretarias.nome : 'Toda a prefeitura', moneyR(r.valor_estimado),
+        r.prazo_submissao ? new Date(r.prazo_submissao).toLocaleDateString('pt-BR') : '—',
+        r.numero_convenio || '—', r.vigencia_fim ? new Date(r.vigencia_fim).toLocaleDateString('pt-BR') : '—',
+        RECURSO_STATUS_LABEL[r.status] || r.status,
+      ]),
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    await salvarRelatorioNaPlataforma(doc.output('blob'), 'Captação de Recursos — ' + new Date().toLocaleDateString('pt-BR'), 'recursos', 'pdf');
+    doc.save('conecta-gestao-recursos-' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch (e) {
+    alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ PDF';
+  }
+}
+
+async function baixarExcelRecursos(){
+  const btn = document.getElementById('xlsx-recursos-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const recursos = await sbGet('oportunidades_recursos', 'select=programa,esfera,valor_estimado,prazo_submissao,status,numero_convenio,vigencia_fim,secretarias(nome)&order=prazo_submissao.asc.nullslast');
+    const rows = recursos.map(r => ({
+      'Programa': r.programa, 'Esfera': r.esfera, 'Secretaria': r.secretarias ? r.secretarias.nome : 'Toda a prefeitura',
+      'Valor estimado (R$)': Number(r.valor_estimado) || 0,
+      'Prazo de submissão': r.prazo_submissao ? new Date(r.prazo_submissao).toLocaleDateString('pt-BR') : '—',
+      'Nº convênio': r.numero_convenio || '—',
+      'Vigência até': r.vigencia_fim ? new Date(r.vigencia_fim).toLocaleDateString('pt-BR') : '—',
+      'Status': RECURSO_STATUS_LABEL[r.status] || r.status,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Recursos');
+    const blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    await salvarRelatorioNaPlataforma(blob, 'Captação de Recursos — ' + new Date().toLocaleDateString('pt-BR'), 'recursos', 'xlsx');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'conecta-gestao-recursos-' + new Date().toISOString().slice(0,10) + '.xlsx';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Não foi possível gerar o Excel: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Excel';
+  }
+}
+
+async function baixarPdfSecretarias(){
+  const btn = document.getElementById('pdf-secretarias-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const secs = await sbGet('secretarias', 'select=nome,sigla,ativa&order=nome.asc');
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16); doc.text('Conecta Gestão — Secretarias', 14, 18);
+    doc.setFontSize(10); doc.setTextColor(100);
+    doc.text('Gerado em ' + new Date().toLocaleString('pt-BR') + ' — ' + secs.length + ' secretaria(s)', 14, 25);
+    doc.autoTable({
+      startY: 32,
+      head: [['Nome', 'Sigla', 'Status']],
+      body: secs.map(s => [s.nome, s.sigla || '—', s.ativa ? 'Ativa' : 'Inativa']),
+      styles: { fontSize: 9 }, headStyles: { fillColor: [37,99,235] },
+    });
+    await salvarRelatorioNaPlataforma(doc.output('blob'), 'Secretarias — ' + new Date().toLocaleDateString('pt-BR'), 'secretarias', 'pdf');
+    doc.save('conecta-gestao-secretarias-' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch (e) {
+    alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ PDF';
+  }
+}
+
+async function baixarExcelSecretarias(){
+  const btn = document.getElementById('xlsx-secretarias-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const secs = await sbGet('secretarias', 'select=nome,sigla,ativa&order=nome.asc');
+    const rows = secs.map(s => ({ 'Nome': s.nome, 'Sigla': s.sigla || '—', 'Status': s.ativa ? 'Ativa' : 'Inativa' }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Secretarias');
+    const blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    await salvarRelatorioNaPlataforma(blob, 'Secretarias — ' + new Date().toLocaleDateString('pt-BR'), 'secretarias', 'xlsx');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'conecta-gestao-secretarias-' + new Date().toISOString().slice(0,10) + '.xlsx';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Não foi possível gerar o Excel: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Excel';
+  }
+}
+
+async function baixarPdfUsuarios(){
+  const btn = document.getElementById('pdf-usuarios-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const usuarios = await sbGet('usuarios', 'select=nome,email,status,perfis(nome),secretarias(nome)&order=nome.asc');
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16); doc.text('Conecta Gestão — Usuários e Permissões', 14, 18);
+    doc.setFontSize(10); doc.setTextColor(100);
+    doc.text('Gerado em ' + new Date().toLocaleString('pt-BR') + ' — ' + usuarios.length + ' usuário(s)', 14, 25);
+    doc.autoTable({
+      startY: 32,
+      head: [['Nome', 'E-mail', 'Perfil', 'Secretaria', 'Status']],
+      body: usuarios.map(u => [
+        u.nome, u.email || '—', u.perfis ? u.perfis.nome.replace('_',' ') : '—',
+        u.secretarias ? u.secretarias.nome : '—', u.status === 'ativo' ? 'Ativo' : u.status,
+      ]),
+      styles: { fontSize: 9 }, headStyles: { fillColor: [37,99,235] },
+    });
+    await salvarRelatorioNaPlataforma(doc.output('blob'), 'Usuários — ' + new Date().toLocaleDateString('pt-BR'), 'usuarios', 'pdf');
+    doc.save('conecta-gestao-usuarios-' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch (e) {
+    alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ PDF';
+  }
+}
+
+async function baixarExcelUsuarios(){
+  const btn = document.getElementById('xlsx-usuarios-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const usuarios = await sbGet('usuarios', 'select=nome,email,status,perfis(nome),secretarias(nome)&order=nome.asc');
+    const rows = usuarios.map(u => ({
+      'Nome': u.nome, 'E-mail': u.email || '—', 'Perfil': u.perfis ? u.perfis.nome.replace('_',' ') : '—',
+      'Secretaria': u.secretarias ? u.secretarias.nome : '—', 'Status': u.status === 'ativo' ? 'Ativo' : u.status,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Usuários');
+    const blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    await salvarRelatorioNaPlataforma(blob, 'Usuários — ' + new Date().toLocaleDateString('pt-BR'), 'usuarios', 'xlsx');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'conecta-gestao-usuarios-' + new Date().toISOString().slice(0,10) + '.xlsx';
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
   } catch (e) {
