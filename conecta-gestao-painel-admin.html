@@ -143,6 +143,28 @@
   .empty{padding:50px 20px;text-align:center;color:var(--muted);font-size:12.5px;}
   .view{display:none;}
   .view.active{display:block;}
+
+  @media(max-width:860px){
+    #app.active{display:flex;flex-direction:column;}
+    .sidebar{position:relative;top:auto;height:auto;width:100%;min-width:0;max-width:none;padding:14px 0;}
+    .sb-brand{padding:0 16px 14px;}
+    .sb-role{margin:0 16px 12px;}
+    .notif-bell{margin:0 16px 10px;}
+    .notif-panel{margin:0 16px 10px;}
+    #nav-container .nav-group{display:flex;gap:6px;overflow-x:auto;padding:0 16px 4px;-webkit-overflow-scrolling:touch;}
+    #nav-container .nav-group-label{display:none;}
+    #nav-container .nav-item{width:auto;white-space:nowrap;flex-shrink:0;}
+    .sb-foot{margin-top:10px;padding:12px 16px 0;}
+    .main{height:auto;padding:18px 16px 50px;overflow-y:visible;}
+    .topbar{flex-direction:column;align-items:stretch;gap:12px;}
+    .topbar > div:last-child{display:flex;}
+    .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .form-grid{grid-template-columns:1fr;gap:12px;}
+    .form-grid .span-2, .form-grid .span-3{grid-column:span 1;}
+    .panel{padding:16px;}
+    table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;}
+    #login-screen{grid-template-columns:1fr;}
+  }
 </style>
 </head>
 <body>
@@ -250,6 +272,22 @@
           </div>
         </div>
 
+        <div class="fieldset-label">Obra pública</div>
+        <div class="form-grid">
+          <div class="field span-3">
+            <label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="checkbox" id="f-eh-obra" onchange="toggleObraFields()" style="width:auto;margin-right:8px;vertical-align:middle;"> Este cadastro é uma obra (contratada, percentual de execução, prazo)</label>
+          </div>
+        </div>
+        <div id="obra-fields" style="display:none;">
+          <div class="form-grid">
+            <div class="field span-2"><label>Empresa contratada</label><input id="f-contratada" placeholder="Ex.: Construtora ABC Ltda."></div>
+            <div class="field"><label>Nº do contrato</label><input id="f-numero-contrato"></div>
+            <div class="field"><label>Valor executado até agora (R$)</label><input id="f-valor-executado" type="number" step="0.01"></div>
+            <div class="field"><label>Percentual de execução (%)</label><input id="f-percentual-execucao" type="number" min="0" max="100"></div>
+            <div class="field"><label>Prazo de conclusão</label><input id="f-prazo-conclusao" type="date"></div>
+          </div>
+        </div>
+
         <div class="fieldset-label">Evento (festa, feira, show...)</div>
         <div class="form-grid">
           <div class="field span-3">
@@ -288,6 +326,24 @@
         <table>
           <thead><tr><th>Título</th><th>Secretaria</th><th>Bairro</th><th>Status</th><th>Investimento</th><th>Evento</th></tr></thead>
           <tbody id="tbl-acoes"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-obras">
+      <div class="topbar">
+        <div><h1>Obras</h1><div class="path">Painel Administrativo / Obras</div></div>
+        <button class="btn-accent" onclick="novaObra()">+ Nova obra</button>
+      </div>
+
+      <div class="kpi-grid" id="obras-kpi-grid"></div>
+
+      <div class="panel">
+        <h3>Obras cadastradas</h3>
+        <p class="panel-sub">Cada obra é uma ação com contratada, percentual de execução e prazo de conclusão.</p>
+        <table>
+          <thead><tr><th>Obra</th><th>Secretaria</th><th>Contratada</th><th>Investimento</th><th>Executado</th><th>Execução</th><th>Prazo</th><th>Status</th></tr></thead>
+          <tbody id="tbl-obras"></tbody>
         </table>
       </div>
     </section>
@@ -378,6 +434,13 @@
           <div class="field span-3"><label>O que precisa ser apresentado (requisitos)</label><textarea id="rc-requisitos" rows="3" placeholder="Ex.: Plano de trabalho, projeto de engenharia aprovado, contrapartida municipal de 10%"></textarea></div>
           <div class="field span-3"><label>Link do edital (opcional)</label><input id="rc-link" placeholder="https://..."></div>
         </div>
+        <div class="fieldset-label">Convênio (depois de aprovado)</div>
+        <div class="form-grid">
+          <div class="field"><label>Nº do convênio</label><input id="rc-numero-convenio" placeholder="Ex.: 123/2026"></div>
+          <div class="field"><label>Início da vigência</label><input id="rc-vigencia-inicio" type="date"></div>
+          <div class="field"><label>Fim da vigência</label><input id="rc-vigencia-fim" type="date"></div>
+          <div class="field"><label>Contrapartida municipal (R$)</label><input id="rc-contrapartida" type="number" step="0.01"></div>
+        </div>
         <div class="form-actions">
           <button class="btn-ghost" onclick="toggleRecursoForm()">Cancelar</button>
           <button class="btn-accent" onclick="submitRecurso()" id="rc-submit-btn">Salvar oportunidade</button>
@@ -388,7 +451,7 @@
         <h3>Oportunidades em acompanhamento</h3>
         <p class="panel-sub" id="recursos-scope-note">Carregando...</p>
         <table>
-          <thead><tr><th>Programa</th><th>Esfera</th><th>Secretaria</th><th>Valor</th><th>Prazo</th><th>Status</th></tr></thead>
+          <thead><tr><th>Programa</th><th>Esfera</th><th>Secretaria</th><th>Valor</th><th>Prazo</th><th>Nº convênio</th><th>Vigência até</th><th>Status</th></tr></thead>
           <tbody id="tbl-recursos"></tbody>
         </table>
       </div>
@@ -600,6 +663,7 @@ function doLogout(){
 const NAV_ITEMS = {
   dashboard: { label: 'Dashboard', view: 'view-dashboard' },
   acoes: { label: 'Cadastro de Ações', view: 'view-acoes' },
+  obras: { label: 'Obras', view: 'view-obras' },
   festas: { label: 'Festas', view: 'view-festas' },
   recursos: { label: 'Captação de Recursos', view: 'view-recursos' },
   importar: { label: 'Importar Dados (PR)', view: 'view-importar' },
@@ -622,6 +686,7 @@ function enterApp(){
   nav.innerHTML = '<div class="nav-group"><div class="nav-group-label">Menu</div>' +
     '<button class="nav-item active" data-key="dashboard" onclick="navigateTo(\'dashboard\')"><span>Dashboard</span></button>' +
     '<button class="nav-item" data-key="acoes" onclick="navigateTo(\'acoes\')"><span>Cadastro de Ações</span></button>' +
+    '<button class="nav-item" data-key="obras" onclick="navigateTo(\'obras\')"><span>Obras</span></button>' +
     '<button class="nav-item" data-key="festas" onclick="navigateTo(\'festas\')"><span>Festas</span></button>' +
     '<button class="nav-item" data-key="recursos" onclick="navigateTo(\'recursos\')"><span>Captação de Recursos</span></button>' +
     '<button class="nav-item" data-key="importar" onclick="navigateTo(\'importar\')"><span>Importar Dados (PR)</span></button>' +
@@ -642,6 +707,7 @@ function enterApp(){
   loadSecretarias();
   loadAcoes();
   loadFestas();
+  loadObras();
   loadRecursos();
   loadNotificacoes();
   loadImportados();
@@ -712,6 +778,8 @@ function toggleForm(){
     document.getElementById('evento-link-panel').style.display = 'none';
     document.getElementById('f-eh-evento').checked = false;
     toggleEventoFields();
+    document.getElementById('f-eh-obra').checked = false;
+    toggleObraFields();
   }
 }
 
@@ -721,6 +789,10 @@ function fecharFormAcaoAposSalvar(){
 
 function toggleEventoFields(){
   document.getElementById('evento-fields').style.display = document.getElementById('f-eh-evento').checked ? 'block' : 'none';
+}
+
+function toggleObraFields(){
+  document.getElementById('obra-fields').style.display = document.getElementById('f-eh-obra').checked ? 'block' : 'none';
 }
 
 async function uploadMidiaEvento(file, tipo, acaoId){
@@ -890,6 +962,47 @@ function novaFesta(){
   }
   document.getElementById('f-eh-evento').checked = true;
   toggleEventoFields();
+}
+
+function novaObra(){
+  navigateTo('acoes');
+  if(document.getElementById('form-panel').style.display === 'none'){
+    toggleForm();
+  }
+  document.getElementById('f-eh-obra').checked = true;
+  toggleObraFields();
+}
+
+async function loadObras(){
+  try {
+    const obras = await sbGet('acoes', 'select=id,titulo,status,valor_investido,valor_executado,contratada,percentual_execucao,prazo_conclusao,secretarias(nome)&eh_obra=eq.true&order=criado_em.desc');
+    const investTotal = obras.reduce((s,o) => s + (Number(o.valor_investido)||0), 0);
+    const executadoTotal = obras.reduce((s,o) => s + (Number(o.valor_executado)||0), 0);
+    const concluidas = obras.filter(o => o.status === 'concluido').length;
+    document.getElementById('obras-kpi-grid').innerHTML =
+      '<div class="kpi"><div class="num">' + obras.length + '</div><div class="lbl">Obras cadastradas</div></div>' +
+      '<div class="kpi"><div class="num">' + money(investTotal) + '</div><div class="lbl">Investimento total</div></div>' +
+      '<div class="kpi"><div class="num">' + money(executadoTotal) + '</div><div class="lbl">Já executado</div></div>' +
+      '<div class="kpi"><div class="num">' + concluidas + '</div><div class="lbl">Concluídas</div></div>';
+
+    document.getElementById('tbl-obras').innerHTML = obras.length
+      ? obras.map(o => {
+          const pct = o.percentual_execucao != null ? Math.max(0, Math.min(100, o.percentual_execucao)) : null;
+          const barra = pct != null
+            ? '<div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;background:#EFF6FF;border-radius:5px;height:8px;overflow:hidden;"><div style="height:100%;background:var(--royal);width:' + pct + '%;"></div></div><span style="font-size:11px;color:var(--ink-soft);">' + pct + '%</span></div>'
+            : '—';
+          return '<tr><td>' + o.titulo + '</td><td>' + (o.secretarias ? o.secretarias.nome : '—') + '</td>' +
+            '<td>' + (o.contratada || '—') + '</td>' +
+            '<td style="font-family:var(--mono);">' + money(o.valor_investido) + '</td>' +
+            '<td style="font-family:var(--mono);">' + money(o.valor_executado) + '</td>' +
+            '<td style="min-width:110px;">' + barra + '</td>' +
+            '<td>' + (o.prazo_conclusao ? new Date(o.prazo_conclusao).toLocaleDateString('pt-BR') : '—') + '</td>' +
+            '<td>' + statusPill(o.status) + '</td></tr>';
+        }).join('')
+      : '<tr><td colspan="8" class="empty">Nenhuma obra cadastrada ainda. Clique em "+ Nova obra" pra começar.</td></tr>';
+  } catch (e) {
+    document.getElementById('tbl-obras').innerHTML = '<tr><td colspan="8" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
 }
 
 function mostrarLinkFesta(id){
@@ -1124,7 +1237,7 @@ async function loadRecursos(){
     const secs = await sbGet('secretarias', 'select=id,nome&order=nome.asc');
     document.getElementById('rc-secretaria').innerHTML = '<option value="">Toda a prefeitura</option>' + secs.map(s => '<option value="' + s.id + '">' + s.nome + '</option>').join('');
 
-    const recursos = await sbGet('oportunidades_recursos', 'select=id,programa,esfera,valor_estimado,prazo_submissao,status,secretarias(nome)&order=prazo_submissao.asc.nullslast');
+    const recursos = await sbGet('oportunidades_recursos', 'select=id,programa,esfera,valor_estimado,prazo_submissao,status,numero_convenio,vigencia_fim,secretarias(nome)&order=prazo_submissao.asc.nullslast');
 
     const totalCaptado = recursos.filter(r => r.status === 'aprovado' || r.status === 'em_execucao' || r.status === 'concluido').reduce((s,r) => s + (Number(r.valor_estimado)||0), 0);
     const emAndamento = recursos.filter(r => ['prospectando','em_elaboracao','submetido'].indexOf(r.status) !== -1).length;
@@ -1134,12 +1247,18 @@ async function loadRecursos(){
       const dias = (new Date(r.prazo_submissao) - hoje) / 86400000;
       return dias >= 0 && dias <= 30;
     }).length;
+    const convenioVencendo30 = recursos.filter(r => {
+      if(!r.vigencia_fim) return false;
+      const dias = (new Date(r.vigencia_fim) - hoje) / 86400000;
+      return dias >= 0 && dias <= 30;
+    }).length;
 
     document.getElementById('recursos-kpi-grid').innerHTML =
       '<div class="kpi"><div class="num">' + recursos.length + '</div><div class="lbl">Oportunidades no funil</div></div>' +
       '<div class="kpi"><div class="num">' + moneyR(totalCaptado) + '</div><div class="lbl">Total captado/aprovado</div></div>' +
       '<div class="kpi"><div class="num">' + emAndamento + '</div><div class="lbl">Em elaboração/análise</div></div>' +
-      '<div class="kpi"><div class="num">' + proximos30 + '</div><div class="lbl">Prazos nos próximos 30 dias</div></div>';
+      '<div class="kpi"><div class="num">' + proximos30 + '</div><div class="lbl">Prazos nos próximos 30 dias</div></div>' +
+      '<div class="kpi"><div class="num">' + convenioVencendo30 + '</div><div class="lbl">Convênios vencendo em 30 dias</div></div>';
 
     document.getElementById('tbl-recursos').innerHTML = recursos.length
       ? recursos.map(r => {
@@ -1150,11 +1269,18 @@ async function loadRecursos(){
             prazoTxt = new Date(r.prazo_submissao).toLocaleDateString('pt-BR');
             if(dias >= 0 && dias <= 15 && ['aprovado','reprovado','concluido'].indexOf(r.status) === -1) prazoClass = 'prazo-urgente';
           }
-          return '<tr><td>' + r.programa + '</td><td>' + r.esfera + '</td><td>' + (r.secretarias ? r.secretarias.nome : 'Toda a prefeitura') + '</td><td style="font-family:var(--mono);">' + moneyR(r.valor_estimado) + '</td><td class="' + prazoClass + '">' + prazoTxt + '</td><td><span class="status-pill status-' + r.status + '">' + RECURSO_STATUS_LABEL[r.status] + '</span></td></tr>';
+          let vigenciaTxt = '—';
+          let vigenciaClass = '';
+          if(r.vigencia_fim){
+            const diasV = Math.round((new Date(r.vigencia_fim) - hoje) / 86400000);
+            vigenciaTxt = new Date(r.vigencia_fim).toLocaleDateString('pt-BR');
+            if(diasV >= 0 && diasV <= 15) vigenciaClass = 'prazo-urgente';
+          }
+          return '<tr><td>' + r.programa + '</td><td>' + r.esfera + '</td><td>' + (r.secretarias ? r.secretarias.nome : 'Toda a prefeitura') + '</td><td style="font-family:var(--mono);">' + moneyR(r.valor_estimado) + '</td><td class="' + prazoClass + '">' + prazoTxt + '</td><td>' + (r.numero_convenio || '—') + '</td><td class="' + vigenciaClass + '">' + vigenciaTxt + '</td><td><span class="status-pill status-' + r.status + '">' + RECURSO_STATUS_LABEL[r.status] + '</span></td></tr>';
         }).join('')
-      : '<tr><td colspan="6" class="empty">Nenhuma oportunidade cadastrada ainda.</td></tr>';
+      : '<tr><td colspan="8" class="empty">Nenhuma oportunidade cadastrada ainda.</td></tr>';
   } catch (e) {
-    document.getElementById('tbl-recursos').innerHTML = '<tr><td colspan="6" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+    document.getElementById('tbl-recursos').innerHTML = '<tr><td colspan="8" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
   }
 }
 
@@ -1175,12 +1301,20 @@ async function submitRecurso(){
       status: document.getElementById('rc-status').value,
       requisitos: document.getElementById('rc-requisitos').value.trim() || null,
       link_edital: document.getElementById('rc-link').value.trim() || null,
+      numero_convenio: document.getElementById('rc-numero-convenio').value.trim() || null,
+      vigencia_inicio: document.getElementById('rc-vigencia-inicio').value || null,
+      vigencia_fim: document.getElementById('rc-vigencia-fim').value || null,
+      contrapartida: parseFloat(document.getElementById('rc-contrapartida').value) || null,
     });
     toggleRecursoForm();
     document.getElementById('rc-programa').value = '';
     document.getElementById('rc-orgao').value = '';
     document.getElementById('rc-requisitos').value = '';
     document.getElementById('rc-link').value = '';
+    document.getElementById('rc-numero-convenio').value = '';
+    document.getElementById('rc-vigencia-inicio').value = '';
+    document.getElementById('rc-vigencia-fim').value = '';
+    document.getElementById('rc-contrapartida').value = '';
     loadRecursos();
   } catch (e) {
     alert('Não foi possível salvar: ' + e.message.slice(0,200));
@@ -1558,6 +1692,7 @@ async function submitAcao(){
   if(!titulo || !secretariaId || !ano){ alert('Preencha ao menos título, secretaria e ano.'); return; }
 
   const ehEvento = document.getElementById('f-eh-evento').checked;
+  const ehObra = document.getElementById('f-eh-obra').checked;
   const btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
@@ -1578,6 +1713,12 @@ async function submitAcao(){
       publico_estimado: ehEvento ? (parseInt(document.getElementById('f-publico-estimado').value) || null) : null,
       comerciantes_participantes: ehEvento ? (parseInt(document.getElementById('f-comerciantes').value) || null) : null,
       valor_retorno_estimado: ehEvento ? (parseFloat(document.getElementById('f-valor-retorno').value) || null) : null,
+      eh_obra: ehObra,
+      contratada: ehObra ? (document.getElementById('f-contratada').value.trim() || null) : null,
+      numero_contrato: ehObra ? (document.getElementById('f-numero-contrato').value.trim() || null) : null,
+      valor_executado: ehObra ? (parseFloat(document.getElementById('f-valor-executado').value) || null) : null,
+      percentual_execucao: ehObra ? (parseInt(document.getElementById('f-percentual-execucao').value) || null) : null,
+      prazo_conclusao: ehObra ? (document.getElementById('f-prazo-conclusao').value || null) : null,
     });
     const novaAcao = rows && rows[0];
 
@@ -1595,6 +1736,7 @@ async function submitAcao(){
     fecharFormAcaoAposSalvar();
     loadAcoes();
     loadFestas();
+    loadObras();
   } catch (e) {
     alert('Não foi possível salvar: ' + e.message.slice(0,200));
   } finally {
