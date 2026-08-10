@@ -245,7 +245,7 @@
       </div>
 
       <div class="panel" id="form-panel" style="display:none;">
-        <h3>Nova ação</h3>
+        <h3 id="acao-form-titulo">Nova ação</h3>
         <p class="panel-sub">Grava direto na tabela gestao360.acoes</p>
         <div class="fieldset-label">Identificação</div>
         <div class="form-grid">
@@ -326,7 +326,7 @@
         <h3>Ações cadastradas</h3>
         <p class="panel-sub" id="acoes-scope-note">Carregando...</p>
         <table>
-          <thead><tr><th>Título</th><th>Secretaria</th><th>Bairro</th><th>Status</th><th>Investimento</th><th>Evento</th></tr></thead>
+          <thead><tr><th>Título</th><th>Secretaria</th><th>Bairro</th><th>Status</th><th>Investimento</th><th>Evento</th><th></th></tr></thead>
           <tbody id="tbl-acoes"></tbody>
         </table>
       </div>
@@ -415,7 +415,7 @@
       <div class="kpi-grid" id="recursos-kpi-grid"></div>
 
       <div class="panel" id="recurso-form-panel" style="display:none;">
-        <h3>Nova oportunidade de recurso</h3>
+        <h3 id="recurso-form-titulo">Nova oportunidade de recurso</h3>
         <p class="panel-sub">Convênios, editais e emendas de governo federal, estadual ou parcerias</p>
         <div class="form-grid">
           <div class="field span-3"><label>Programa / Edital</label><input id="rc-programa" placeholder="Ex.: Novo PAC Saúde — Reforma de UBS"></div>
@@ -457,7 +457,7 @@
         <h3>Oportunidades em acompanhamento</h3>
         <p class="panel-sub" id="recursos-scope-note">Carregando...</p>
         <table>
-          <thead><tr><th>Programa</th><th>Esfera</th><th>Secretaria</th><th>Valor</th><th>Prazo</th><th>Nº convênio</th><th>Vigência até</th><th>Status</th></tr></thead>
+          <thead><tr><th>Programa</th><th>Esfera</th><th>Secretaria</th><th>Valor</th><th>Prazo</th><th>Nº convênio</th><th>Vigência até</th><th>Status</th><th></th></tr></thead>
           <tbody id="tbl-recursos"></tbody>
         </table>
       </div>
@@ -539,10 +539,15 @@
         </div>
       </div>
       <div class="panel" id="sec-form-panel" style="display:none;">
-        <h3>Nova secretaria</h3>
+        <h3 id="sec-form-titulo">Nova secretaria</h3>
         <div class="form-grid">
           <div class="field span-2"><label>Nome</label><input id="sec-nome" placeholder="Ex.: Secretaria de Cultura"></div>
           <div class="field"><label>Sigla</label><input id="sec-sigla" placeholder="Ex.: CUL"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field span-3">
+            <label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="checkbox" id="sec-ativa" checked style="width:auto;margin-right:8px;vertical-align:middle;"> Secretaria ativa</label>
+          </div>
         </div>
         <div class="form-actions">
           <button class="btn-ghost" onclick="toggleSecForm()">Cancelar</button>
@@ -553,7 +558,7 @@
         <h3>Secretarias cadastradas</h3>
         <p class="panel-sub">Dados reais de <code style="font-family:var(--mono);">gestao360.secretarias</code></p>
         <table>
-          <thead><tr><th>Nome</th><th>Sigla</th><th>Status</th></tr></thead>
+          <thead><tr><th>Nome</th><th>Sigla</th><th>Status</th><th></th></tr></thead>
           <tbody id="tbl-secretarias-admin"></tbody>
         </table>
       </div>
@@ -598,6 +603,34 @@
         <div class="form-actions">
           <button class="btn-ghost" onclick="toggleVincularForm()">Cancelar</button>
           <button class="btn-accent" onclick="submitVincular()" id="vc-submit-btn">Cadastrar usuário</button>
+        </div>
+      </div>
+
+      <div class="panel" id="usuario-edit-panel" style="display:none;">
+        <h3>Editar usuário</h3>
+        <p class="panel-sub" id="usuario-edit-nome"></p>
+        <div class="form-grid">
+          <div class="field"><label>Perfil</label>
+            <select id="ue-perfil">
+              <option value="secretario">Secretário</option>
+              <option value="diretor">Diretor</option>
+              <option value="coordenador">Coordenador</option>
+              <option value="servidor">Servidor</option>
+              <option value="comunicacao">Comunicação</option>
+              <option value="controladoria">Controladoria</option>
+              <option value="vice_prefeito">Vice-Prefeito</option>
+              <option value="prefeito">Prefeito</option>
+              <option value="admin_master">Administrador Master</option>
+            </select>
+          </div>
+          <div class="field"><label>Secretaria (se aplicável)</label><select id="ue-secretaria"><option value="">Nenhuma / todas</option></select></div>
+          <div class="field"><label>Status</label>
+            <select id="ue-status"><option value="ativo">Ativo</option><option value="pendente">Pendente</option><option value="inativo">Inativo</option></select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-ghost" onclick="fecharEdicaoUsuario()">Cancelar</button>
+          <button class="btn-accent" onclick="submitEdicaoUsuario()" id="ue-submit-btn">Salvar alterações</button>
         </div>
       </div>
 
@@ -789,12 +822,54 @@ function toggleForm(){
   const panel = document.getElementById('form-panel');
   const opening = panel.style.display === 'none';
   panel.style.display = opening ? 'block' : 'none';
-  if(opening){
+  if(opening && acaoEditandoId === null){
     document.getElementById('evento-link-panel').style.display = 'none';
     document.getElementById('f-eh-evento').checked = false;
     toggleEventoFields();
     document.getElementById('f-eh-obra').checked = false;
     toggleObraFields();
+    document.getElementById('acao-form-titulo').textContent = 'Nova ação';
+    document.getElementById('submit-btn').textContent = 'Salvar ação';
+  }
+}
+
+async function editarAcao(id){
+  try {
+    const rows = await sbGet('acoes', 'select=*&id=eq.' + id);
+    const a = rows && rows[0];
+    if(!a){ alert('Não foi possível carregar essa ação.'); return; }
+    acaoEditandoId = id;
+    document.getElementById('acao-form-titulo').textContent = 'Editar ação';
+    document.getElementById('submit-btn').textContent = 'Salvar alterações';
+    document.getElementById('f-titulo').value = a.titulo || '';
+    document.getElementById('f-descricao').value = a.descricao || '';
+    document.getElementById('f-ano').value = a.ano || '';
+    document.getElementById('f-data').value = a.data || '';
+    document.getElementById('f-secretaria').value = a.secretaria_id || '';
+    document.getElementById('f-bairro').value = a.bairro || '';
+    document.getElementById('f-valor').value = a.valor_investido || '';
+    document.getElementById('f-origem').value = a.origem_recurso || '';
+    document.getElementById('f-status').value = a.status;
+    document.getElementById('f-beneficiados').value = a.quantidade_beneficiados || '';
+    document.getElementById('f-publicar-portal').checked = !!a.publicada_no_portal;
+    document.getElementById('f-eh-evento').checked = !!a.eh_evento;
+    toggleEventoFields();
+    document.getElementById('f-publico-estimado').value = a.publico_estimado || '';
+    document.getElementById('f-comerciantes').value = a.comerciantes_participantes || '';
+    document.getElementById('f-valor-retorno').value = a.valor_retorno_estimado || '';
+    document.getElementById('f-eh-obra').checked = !!a.eh_obra;
+    toggleObraFields();
+    document.getElementById('f-contratada').value = a.contratada || '';
+    document.getElementById('f-numero-contrato').value = a.numero_contrato || '';
+    document.getElementById('f-valor-executado').value = a.valor_executado || '';
+    document.getElementById('f-percentual-execucao').value = a.percentual_execucao || '';
+    document.getElementById('f-prazo-conclusao').value = a.prazo_conclusao || '';
+
+    navigateTo('acoes');
+    document.getElementById('form-panel').style.display = 'block';
+    document.getElementById('form-panel').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    alert('Não foi possível carregar essa ação: ' + e.message.slice(0,200));
   }
 }
 
@@ -1302,6 +1377,7 @@ async function loadAcoes(){
   document.getElementById('acoes-scope-note').textContent = scopeNote;
   try {
     const acoes = await sbGet('acoes', 'select=id,titulo,bairro,status,valor_investido,eh_evento,secretarias(nome)&order=criado_em.desc&limit=20');
+    acoesCache = acoes;
     const eventoIds = acoes.filter(a => a.eh_evento).map(a => a.id);
     let avaliacoesEvento = [];
     if(eventoIds.length){
@@ -1312,7 +1388,7 @@ async function loadAcoes(){
     renderAcoes(acoes, avaliacoesEvento);
     renderDashboard(acoes);
   } catch (e) {
-    document.getElementById('tbl-acoes').innerHTML = '<tr><td colspan="6" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+    document.getElementById('tbl-acoes').innerHTML = '<tr><td colspan="7" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
     document.getElementById('tbl-recentes').innerHTML = '';
     document.getElementById('kpi-grid').innerHTML = '';
   }
@@ -1338,9 +1414,9 @@ function renderAcoes(acoes, avaliacoesEvento){
           };
           eventoCell = '<span title="Avaliação da população (0–5)">👥 ' + media('morador') + '</span> · <span title="Avaliação dos comerciantes/barracas (0–5)">🏪 ' + media('comerciante') + '</span>';
         }
-        return '<tr><td>' + a.titulo + '</td><td>' + (a.secretarias ? a.secretarias.nome : '—') + '</td><td>' + (a.bairro||'—') + '</td><td>' + statusPill(a.status) + '</td><td style="font-family:var(--mono);">' + money(a.valor_investido) + '</td><td style="font-size:12.5px;">' + eventoCell + '</td></tr>';
+        return '<tr><td>' + a.titulo + '</td><td>' + (a.secretarias ? a.secretarias.nome : '—') + '</td><td>' + (a.bairro||'—') + '</td><td>' + statusPill(a.status) + '</td><td style="font-family:var(--mono);">' + money(a.valor_investido) + '</td><td style="font-size:12.5px;">' + eventoCell + '</td><td><button class="btn-ghost" onclick="editarAcao(\'' + a.id + '\')">Editar</button></td></tr>';
       }).join('')
-    : '<tr><td colspan="6" class="empty">Nenhuma ação encontrada para o seu escopo de acesso.</td></tr>';
+    : '<tr><td colspan="7" class="empty">Nenhuma ação encontrada para o seu escopo de acesso.</td></tr>';
 }
 
 function renderDashboard(acoes){
@@ -1462,9 +1538,44 @@ async function loadImportados(){
 
 const RECURSO_STATUS_LABEL = { prospectando:'Prospectando', em_elaboracao:'Em elaboração', submetido:'Submetido', aprovado:'Aprovado', reprovado:'Reprovado', em_execucao:'Em execução', concluido:'Concluído' };
 
+let recursoEditandoId = null;
+
 function toggleRecursoForm(){
   const panel = document.getElementById('recurso-form-panel');
-  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  const opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if(opening && recursoEditandoId === null){
+    document.getElementById('recurso-form-titulo').textContent = 'Nova oportunidade de recurso';
+    document.getElementById('rc-submit-btn').textContent = 'Salvar oportunidade';
+  }
+}
+
+async function editarRecurso(id){
+  try {
+    const rows = await sbGet('oportunidades_recursos', 'select=*&id=eq.' + id);
+    const r = rows && rows[0];
+    if(!r){ alert('Não foi possível carregar essa oportunidade.'); return; }
+    recursoEditandoId = id;
+    document.getElementById('recurso-form-titulo').textContent = 'Editar oportunidade';
+    document.getElementById('rc-submit-btn').textContent = 'Salvar alterações';
+    document.getElementById('rc-programa').value = r.programa || '';
+    document.getElementById('rc-orgao').value = r.orgao_concedente || '';
+    document.getElementById('rc-esfera').value = r.esfera || 'Federal';
+    document.getElementById('rc-secretaria').value = r.secretaria_id || '';
+    document.getElementById('rc-valor').value = r.valor_estimado || '';
+    document.getElementById('rc-prazo').value = r.prazo_submissao || '';
+    document.getElementById('rc-status').value = r.status;
+    document.getElementById('rc-requisitos').value = r.requisitos || '';
+    document.getElementById('rc-link').value = r.link_edital || '';
+    document.getElementById('rc-numero-convenio').value = r.numero_convenio || '';
+    document.getElementById('rc-vigencia-inicio').value = r.vigencia_inicio || '';
+    document.getElementById('rc-vigencia-fim').value = r.vigencia_fim || '';
+    document.getElementById('rc-contrapartida').value = r.contrapartida || '';
+    document.getElementById('recurso-form-panel').style.display = 'block';
+    document.getElementById('recurso-form-panel').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    alert('Não foi possível carregar: ' + e.message.slice(0,200));
+  }
 }
 
 function moneyR(v){ return v ? 'R$ ' + Number(v).toLocaleString('pt-BR') : '—'; }
@@ -1514,11 +1625,11 @@ async function loadRecursos(){
             vigenciaTxt = new Date(r.vigencia_fim).toLocaleDateString('pt-BR');
             if(diasV >= 0 && diasV <= 15) vigenciaClass = 'prazo-urgente';
           }
-          return '<tr><td>' + r.programa + '</td><td>' + r.esfera + '</td><td>' + (r.secretarias ? r.secretarias.nome : 'Toda a prefeitura') + '</td><td style="font-family:var(--mono);">' + moneyR(r.valor_estimado) + '</td><td class="' + prazoClass + '">' + prazoTxt + '</td><td>' + (r.numero_convenio || '—') + '</td><td class="' + vigenciaClass + '">' + vigenciaTxt + '</td><td><span class="status-pill status-' + r.status + '">' + RECURSO_STATUS_LABEL[r.status] + '</span></td></tr>';
+          return '<tr><td>' + r.programa + '</td><td>' + r.esfera + '</td><td>' + (r.secretarias ? r.secretarias.nome : 'Toda a prefeitura') + '</td><td style="font-family:var(--mono);">' + moneyR(r.valor_estimado) + '</td><td class="' + prazoClass + '">' + prazoTxt + '</td><td>' + (r.numero_convenio || '—') + '</td><td class="' + vigenciaClass + '">' + vigenciaTxt + '</td><td><span class="status-pill status-' + r.status + '">' + RECURSO_STATUS_LABEL[r.status] + '</span></td><td><button class="btn-ghost" onclick="editarRecurso(\'' + r.id + '\')">Editar</button></td></tr>';
         }).join('')
-      : '<tr><td colspan="8" class="empty">Nenhuma oportunidade cadastrada ainda.</td></tr>';
+      : '<tr><td colspan="9" class="empty">Nenhuma oportunidade cadastrada ainda.</td></tr>';
   } catch (e) {
-    document.getElementById('tbl-recursos').innerHTML = '<tr><td colspan="8" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+    document.getElementById('tbl-recursos').innerHTML = '<tr><td colspan="9" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
   }
 }
 
@@ -1528,8 +1639,7 @@ async function submitRecurso(){
   const btn = document.getElementById('rc-submit-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
-    await sbPost('oportunidades_recursos', {
-      tenant_id: session.claims.tenant_id,
+    const payload = {
       secretaria_id: document.getElementById('rc-secretaria').value || null,
       programa: programa,
       orgao_concedente: document.getElementById('rc-orgao').value.trim() || null,
@@ -1543,7 +1653,22 @@ async function submitRecurso(){
       vigencia_inicio: document.getElementById('rc-vigencia-inicio').value || null,
       vigencia_fim: document.getElementById('rc-vigencia-fim').value || null,
       contrapartida: parseFloat(document.getElementById('rc-contrapartida').value) || null,
-    });
+    };
+    if(recursoEditandoId){
+      const res = await fetch(SUPABASE_URL + '/rest/v1/oportunidades_recursos?id=eq.' + recursoEditandoId, {
+        method: 'PATCH',
+        headers: {
+          apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token,
+          'Content-Profile': 'gestao360', 'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      if(!res.ok) throw new Error(await res.text());
+    } else {
+      payload.tenant_id = session.claims.tenant_id;
+      await sbPost('oportunidades_recursos', payload);
+    }
+    recursoEditandoId = null;
     toggleRecursoForm();
     document.getElementById('rc-programa').value = '';
     document.getElementById('rc-orgao').value = '';
@@ -1564,6 +1689,8 @@ async function submitRecurso(){
 const PROMESSA_STATUS_LABEL = { nao_iniciada:'Não iniciada', em_andamento:'Em andamento', parcialmente_cumprida:'Parcialmente cumprida', cumprida:'Cumprida' };
 
 let promessaEditandoId = null;
+let acaoEditandoId = null;
+let acoesCache = [];
 let metasPromessaId = null;
 let promessasCache = [];
 
@@ -1838,20 +1965,45 @@ async function submitVincular(){
   }
 }
 
+let secretariasCache = [];
+let secretariaEditandoId = null;
+
 async function loadSecretariasAdmin(){
   try {
     const secs = await sbGet('secretarias', 'select=id,nome,sigla,ativa&order=nome.asc');
+    secretariasCache = secs;
     document.getElementById('tbl-secretarias-admin').innerHTML = secs.length
-      ? secs.map(s => '<tr><td>' + s.nome + '</td><td>' + (s.sigla||'—') + '</td><td>' + (s.ativa ? '<span class="status-pill status-concluido">Ativa</span>' : '<span class="status-pill status-cancelado">Inativa</span>') + '</td></tr>').join('')
-      : '<tr><td colspan="3" class="empty">Nenhuma secretaria cadastrada.</td></tr>';
+      ? secs.map(s => '<tr><td>' + s.nome + '</td><td>' + (s.sigla||'—') + '</td><td>' + (s.ativa ? '<span class="status-pill status-concluido">Ativa</span>' : '<span class="status-pill status-cancelado">Inativa</span>') + '</td><td><button class="btn-ghost" onclick="editarSecretaria(\'' + s.id + '\')">Editar</button></td></tr>').join('')
+      : '<tr><td colspan="4" class="empty">Nenhuma secretaria cadastrada.</td></tr>';
   } catch (e) {
-    document.getElementById('tbl-secretarias-admin').innerHTML = '<tr><td colspan="3" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+    document.getElementById('tbl-secretarias-admin').innerHTML = '<tr><td colspan="4" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
   }
 }
 
 function toggleSecForm(){
   const panel = document.getElementById('sec-form-panel');
-  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  const opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if(opening && secretariaEditandoId === null){
+    document.getElementById('sec-form-titulo').textContent = 'Nova secretaria';
+    document.getElementById('sec-submit-btn').textContent = 'Salvar secretaria';
+    document.getElementById('sec-nome').value = '';
+    document.getElementById('sec-sigla').value = '';
+    document.getElementById('sec-ativa').checked = true;
+  }
+}
+
+function editarSecretaria(id){
+  const s = secretariasCache.find(x => x.id === id);
+  if(!s) return;
+  secretariaEditandoId = id;
+  document.getElementById('sec-form-titulo').textContent = 'Editar secretaria';
+  document.getElementById('sec-submit-btn').textContent = 'Salvar alterações';
+  document.getElementById('sec-nome').value = s.nome || '';
+  document.getElementById('sec-sigla').value = s.sigla || '';
+  document.getElementById('sec-ativa').checked = !!s.ativa;
+  document.getElementById('sec-form-panel').style.display = 'block';
+  document.getElementById('sec-form-panel').scrollIntoView({ behavior: 'smooth' });
 }
 
 async function submitSecretaria(){
@@ -1861,10 +2013,23 @@ async function submitSecretaria(){
   const btn = document.getElementById('sec-submit-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
-    await sbPost('secretarias', { tenant_id: session.claims.tenant_id, nome: nome, sigla: sigla || null });
+    const payload = { nome: nome, sigla: sigla || null, ativa: document.getElementById('sec-ativa').checked };
+    if(secretariaEditandoId){
+      const res = await fetch(SUPABASE_URL + '/rest/v1/secretarias?id=eq.' + secretariaEditandoId, {
+        method: 'PATCH',
+        headers: {
+          apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token,
+          'Content-Profile': 'gestao360', 'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      if(!res.ok) throw new Error(await res.text());
+    } else {
+      payload.tenant_id = session.claims.tenant_id;
+      await sbPost('secretarias', payload);
+    }
+    secretariaEditandoId = null;
     toggleSecForm();
-    document.getElementById('sec-nome').value = '';
-    document.getElementById('sec-sigla').value = '';
     loadSecretariasAdmin();
     loadSecretarias();
   } catch (e) {
@@ -1884,19 +2049,72 @@ async function aprovarUsuario(id){
   }
 }
 
+let usuariosCache = [];
+let usuarioEditandoId = null;
+
 async function loadUsuarios(){
   document.getElementById('usuarios-scope-note').textContent = 'Usuários cadastrados no tenant atual';
   try {
-    const usuarios = await sbGet('usuarios', 'select=id,nome,email,status,perfis(nome)&order=nome.asc');
+    const usuarios = await sbGet('usuarios', 'select=id,nome,email,status,perfil_id,secretaria_id,perfis(nome)&order=nome.asc');
+    usuariosCache = usuarios;
     document.getElementById('tbl-usuarios').innerHTML = usuarios.length
-      ? usuarios.map(u => '<tr><td>' + u.nome + '</td><td>' + u.email + '</td><td>' + (u.perfis ? u.perfis.nome.replace('_',' ') : '—') + '</td><td>' + (u.status === 'ativo' ? '<span class="status-pill status-concluido">Ativo</span>' : '<span class="status-pill status-pendente">' + u.status + '</span>') + '</td><td>' + (u.status === 'pendente' ? '<button class="btn-ghost" onclick="aprovarUsuario(\'' + u.id + '\')">Aprovar</button>' : '—') + '</td></tr>').join('')
+      ? usuarios.map(u => '<tr><td>' + u.nome + '</td><td>' + u.email + '</td><td>' + (u.perfis ? u.perfis.nome.replace('_',' ') : '—') + '</td><td>' + (u.status === 'ativo' ? '<span class="status-pill status-concluido">Ativo</span>' : '<span class="status-pill status-pendente">' + u.status + '</span>') + '</td><td style="display:flex;gap:6px;">' + (u.status === 'pendente' ? '<button class="btn-ghost" onclick="aprovarUsuario(\'' + u.id + '\')">Aprovar</button>' : '') + '<button class="btn-ghost" onclick="editarUsuario(\'' + u.id + '\')">Editar</button></td></tr>').join('')
       : '<tr><td colspan="5" class="empty">Nenhum usuário cadastrado.</td></tr>';
 
     const secs = await sbGet('secretarias', 'select=id,nome&order=nome.asc');
     const vcSel = document.getElementById('vc-secretaria');
     if(vcSel) vcSel.innerHTML = '<option value="">Nenhuma / todas</option>' + secs.map(s => '<option value="' + s.id + '">' + s.nome + '</option>').join('');
+    const ueSel = document.getElementById('ue-secretaria');
+    if(ueSel) ueSel.innerHTML = '<option value="">Nenhuma / todas</option>' + secs.map(s => '<option value="' + s.id + '">' + s.nome + '</option>').join('');
   } catch (e) {
-    document.getElementById('tbl-usuarios').innerHTML = '<tr><td colspan="4" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+    document.getElementById('tbl-usuarios').innerHTML = '<tr><td colspan="5" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
+function editarUsuario(id){
+  const u = usuariosCache.find(x => x.id === id);
+  if(!u) return;
+  usuarioEditandoId = id;
+  document.getElementById('usuario-edit-nome').textContent = u.nome + ' — ' + u.email;
+  document.getElementById('ue-perfil').value = u.perfis ? u.perfis.nome : 'servidor';
+  document.getElementById('ue-secretaria').value = u.secretaria_id || '';
+  document.getElementById('ue-status').value = u.status;
+  document.getElementById('usuario-edit-panel').style.display = 'block';
+  document.getElementById('usuario-edit-panel').scrollIntoView({ behavior: 'smooth' });
+}
+
+function fecharEdicaoUsuario(){
+  usuarioEditandoId = null;
+  document.getElementById('usuario-edit-panel').style.display = 'none';
+}
+
+async function submitEdicaoUsuario(){
+  if(!usuarioEditandoId) return;
+  const btn = document.getElementById('ue-submit-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const perfilNome = document.getElementById('ue-perfil').value;
+    const perfis = await sbGet('perfis', 'select=id,nome&nome=eq.' + perfilNome);
+    if(!perfis.length) throw new Error('Perfil não encontrado');
+    const res = await fetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + usuarioEditandoId, {
+      method: 'PATCH',
+      headers: {
+        apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token,
+        'Content-Profile': 'gestao360', 'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        perfil_id: perfis[0].id,
+        secretaria_id: document.getElementById('ue-secretaria').value || null,
+        status: document.getElementById('ue-status').value,
+      }),
+    });
+    if(!res.ok) throw new Error(await res.text());
+    fecharEdicaoUsuario();
+    loadUsuarios();
+  } catch (e) {
+    alert('Não foi possível salvar: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar alterações';
   }
 }
 
@@ -1934,8 +2152,7 @@ async function submitAcao(){
   const btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
-    const rows = await sbPost('acoes', {
-      tenant_id: session.claims.tenant_id,
+    const payload = {
       secretaria_id: secretariaId,
       titulo: titulo,
       descricao: document.getElementById('f-descricao').value.trim() || null,
@@ -1957,8 +2174,26 @@ async function submitAcao(){
       valor_executado: ehObra ? (parseFloat(document.getElementById('f-valor-executado').value) || null) : null,
       percentual_execucao: ehObra ? (parseInt(document.getElementById('f-percentual-execucao').value) || null) : null,
       prazo_conclusao: ehObra ? (document.getElementById('f-prazo-conclusao').value || null) : null,
-    });
-    const novaAcao = rows && rows[0];
+    };
+
+    let novaAcao;
+    if(acaoEditandoId){
+      const res = await fetch(SUPABASE_URL + '/rest/v1/acoes?id=eq.' + acaoEditandoId, {
+        method: 'PATCH',
+        headers: {
+          apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token,
+          'Content-Profile': 'gestao360', 'Content-Type': 'application/json', Prefer: 'return=representation',
+        },
+        body: JSON.stringify(payload),
+      });
+      if(!res.ok) throw new Error(await res.text());
+      const rows = await res.json();
+      novaAcao = rows && rows[0];
+    } else {
+      payload.tenant_id = session.claims.tenant_id;
+      const rows = await sbPost('acoes', payload);
+      novaAcao = rows && rows[0];
+    }
 
     if(ehEvento && novaAcao){
       btn.textContent = 'Enviando fotos/vídeos...';
@@ -1971,6 +2206,7 @@ async function submitAcao(){
       mostrarLinkAvaliacao(novaAcao.id);
     }
 
+    acaoEditandoId = null;
     fecharFormAcaoAposSalvar();
     loadAcoes();
     loadFestas();
