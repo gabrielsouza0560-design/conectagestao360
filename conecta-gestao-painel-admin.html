@@ -4,6 +4,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Conecta Gestão — Painel Administrativo · Gabriel Oliveira</title>
@@ -237,7 +238,8 @@
       <div class="topbar">
         <div><h1>Cadastro de Ações</h1><div class="path" id="acoes-path">Painel Administrativo / Ações</div></div>
         <div style="display:flex;gap:10px;">
-          <button class="btn-ghost" onclick="baixarPdfAcoes()" id="pdf-acoes-btn">⬇ Baixar PDF</button>
+          <button class="btn-ghost" onclick="baixarPdfAcoes()" id="pdf-acoes-btn">⬇ PDF</button>
+          <button class="btn-ghost" onclick="baixarExcelAcoes()" id="xlsx-acoes-btn">⬇ Excel</button>
           <button class="btn-accent" onclick="toggleForm()">+ Nova ação</button>
         </div>
       </div>
@@ -461,7 +463,8 @@
       <div class="topbar">
         <div><h1>Plano de Governo</h1><div class="path">Painel Administrativo / Plano de Governo</div></div>
         <div style="display:flex;gap:10px;">
-          <button class="btn-ghost" onclick="baixarPdfPromessas()" id="pdf-promessas-btn">⬇ Baixar PDF</button>
+          <button class="btn-ghost" onclick="baixarPdfPromessas()" id="pdf-promessas-btn">⬇ PDF</button>
+          <button class="btn-ghost" onclick="baixarExcelPromessas()" id="xlsx-promessas-btn">⬇ Excel</button>
           <button class="btn-accent" onclick="togglePromessaForm()">+ Nova promessa</button>
         </div>
       </div>
@@ -869,18 +872,19 @@ function statusPill(s){
 }
 function money(v){ return v ? 'R$ ' + Number(v).toLocaleString('pt-BR') : '—'; }
 
-async function salvarRelatorioNaPlataforma(doc, titulo, tipo){
+async function salvarRelatorioNaPlataforma(blob, titulo, tipo, formato){
   try {
-    const blob = doc.output('blob');
-    const path = session.claims.tenant_id + '/' + tipo + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.pdf';
+    const ext = formato === 'xlsx' ? 'xlsx' : 'pdf';
+    const mime = formato === 'xlsx' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/pdf';
+    const path = session.claims.tenant_id + '/' + tipo + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
     const upRes = await fetch(SUPABASE_URL + '/storage/v1/object/relatorios/' + path, {
       method: 'POST',
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/pdf' },
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': mime },
       body: blob,
     });
     if(!upRes.ok) throw new Error(await upRes.text());
     await sbPost('relatorios_gerados', {
-      tenant_id: session.claims.tenant_id, titulo: titulo, tipo: tipo, formato: 'pdf',
+      tenant_id: session.claims.tenant_id, titulo: titulo, tipo: tipo, formato: formato,
       storage_path: path, gerado_por: session.claims.perfil,
     });
   } catch (e) {
@@ -915,7 +919,7 @@ async function baixarPdfAcoes(){
       styles: { fontSize: 9 },
       headStyles: { fillColor: [37,99,235] },
     });
-    await salvarRelatorioNaPlataforma(doc, 'Ações Cadastradas — ' + new Date().toLocaleDateString('pt-BR'), 'acoes');
+    await salvarRelatorioNaPlataforma(doc.output('blob'), 'Ações Cadastradas — ' + new Date().toLocaleDateString('pt-BR'), 'acoes', 'pdf');
     doc.save('conecta-gestao-acoes-' + new Date().toISOString().slice(0,10) + '.pdf');
   } catch (e) {
     alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
@@ -946,12 +950,72 @@ async function baixarPdfPromessas(){
       styles: { fontSize: 9 },
       headStyles: { fillColor: [37,99,235] },
     });
-    await salvarRelatorioNaPlataforma(doc, 'Plano de Governo — ' + new Date().toLocaleDateString('pt-BR'), 'promessas');
+    await salvarRelatorioNaPlataforma(doc.output('blob'), 'Plano de Governo — ' + new Date().toLocaleDateString('pt-BR'), 'promessas', 'pdf');
     doc.save('conecta-gestao-plano-governo-' + new Date().toISOString().slice(0,10) + '.pdf');
   } catch (e) {
     alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
   } finally {
     btn.disabled = false; btn.textContent = '⬇ Baixar PDF';
+  }
+}
+
+async function baixarExcelAcoes(){
+  const btn = document.getElementById('xlsx-acoes-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const acoes = await sbGet('acoes', 'select=titulo,bairro,status,valor_investido,data,secretarias(nome)&order=criado_em.desc');
+    const STATUS_LABEL = { planejado:'Planejado', em_andamento:'Em andamento', concluido:'Concluído', cancelado:'Cancelado' };
+    const rows = acoes.map(a => ({
+      'Título': a.titulo,
+      'Secretaria': a.secretarias ? a.secretarias.nome : '—',
+      'Bairro': a.bairro || '—',
+      'Status': STATUS_LABEL[a.status] || a.status,
+      'Investimento (R$)': Number(a.valor_investido) || 0,
+      'Data': a.data ? new Date(a.data).toLocaleDateString('pt-BR') : '—',
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Ações');
+    const blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    await salvarRelatorioNaPlataforma(blob, 'Ações Cadastradas — ' + new Date().toLocaleDateString('pt-BR'), 'acoes', 'xlsx');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'conecta-gestao-acoes-' + new Date().toISOString().slice(0,10) + '.xlsx';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Não foi possível gerar o Excel: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Excel';
+  }
+}
+
+async function baixarExcelPromessas(){
+  const btn = document.getElementById('xlsx-promessas-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const promessas = await sbGet('promessas_campanha', 'select=titulo,eixo,ano_previsto,status,secretarias(nome)&order=eixo.asc');
+    const rows = promessas.map(p => ({
+      'Promessa': p.titulo,
+      'Secretaria': p.secretarias ? p.secretarias.nome : 'Gestão geral',
+      'Eixo': p.eixo,
+      'Ano previsto': p.ano_previsto || '—',
+      'Status': PROMESSA_STATUS_LABEL[p.status] || p.status,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Plano de Governo');
+    const blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    await salvarRelatorioNaPlataforma(blob, 'Plano de Governo — ' + new Date().toLocaleDateString('pt-BR'), 'promessas', 'xlsx');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'conecta-gestao-plano-governo-' + new Date().toISOString().slice(0,10) + '.xlsx';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Não foi possível gerar o Excel: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Excel';
   }
 }
 
