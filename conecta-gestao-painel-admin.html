@@ -1132,6 +1132,7 @@ async function doLogin(){
     }
     const claims = decodeJwt(data.access_token);
     session = { access_token: data.access_token, claims };
+    try{localStorage.setItem('cg_session',JSON.stringify(session));}catch(e){}
     enterApp();
   } catch (e) {
     errBox.textContent = 'Não foi possível conectar ao servidor de autenticação.';
@@ -1143,6 +1144,7 @@ async function doLogin(){
 
 function doLogout(){
   session = null;
+  try{localStorage.removeItem('cg_session');}catch(e){}
   document.getElementById('app').classList.remove('active');
   document.getElementById('login-screen').style.display = 'grid';
   document.getElementById('login-email').value = '';

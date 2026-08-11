@@ -134,13 +134,31 @@ async function doLogin(){
     const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
     const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
     session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    try{localStorage.setItem('cg_session',JSON.stringify(session));}catch(e){}
     document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';
     document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');
     buildNav();buildViews();navigateTo('dashboard_saude');
   }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
   finally{btn.disabled=false;btn.textContent='Entrar';}
 }
-function doLogout(){session=null;document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+function doLogout(){session=null;try{localStorage.removeItem('cg_session');}catch(e){}document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+
+function tryAutoLogin(){
+  try{
+    const saved=localStorage.getItem('cg_session');
+    if(!saved)return false;
+    const s=JSON.parse(saved);
+    if(!s.access_token)return false;
+    const claims=decodeJwt(s.access_token);
+    if(!claims.exp||claims.exp*1000<Date.now())return false;
+    session={access_token:s.access_token,claims};
+    document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';
+    document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');
+    buildNav();buildViews();navigateTo('dashboard_saude');
+    return true;
+  }catch(e){return false;}
+}
+window.addEventListener('DOMContentLoaded',()=>{tryAutoLogin();});
 
 async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
 async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
