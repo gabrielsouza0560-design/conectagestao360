@@ -529,9 +529,21 @@ async function loadDashboardComercio(){
   }
 }
 
+async function loadDashboardFestas(){
+  try{
+    const secs=await sbGet('secretarias','select=id,nome');
+    const sec=secs.find(s=>/ind[uú]stria/i.test(s.nome));
+    if(!sec)return{total:0,proximas:0};
+    const festas=await sbGet('acoes','select=id,data,titulo&eh_evento=eq.true&secretaria_id=eq.'+sec.id);
+    const hoje=new Date().toISOString().slice(0,10);
+    const proximas=festas.filter(f=>f.data&&f.data>=hoje).length;
+    return {total:festas.length,proximas};
+  }catch(e){return {total:0,proximas:0};}
+}
+
 async function loadDashboard(){try{
   loadDashboardComercio();
-  const [emp,meis,vag,atend,fom,micro,cap,ev,fe,inv,inc,met,al,trab]=await Promise.all([
+  const [emp,meis,vag,atend,fom,micro,cap,ev,fe,inv,inc,met,al,trab,cur,festasInfo]=await Promise.all([
     sbGet('ic_empresas','select=id,situacao,porte,bairro,numero_funcionarios').catch(()=>[]),
     sbGet('ic_meis','select=id,situacao').catch(()=>[]),
     sbGet('ic_vagas','select=id,situacao,quantidade,contratados').catch(()=>[]),
@@ -546,6 +558,8 @@ async function loadDashboard(){try{
     sbGet('ic_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
     sbGet('ic_alertas','select=*&lido=eq.false&order=criado_em.desc&limit=10').catch(()=>[]),
     sbGet('ic_trabalhadores','select=id,situacao_emprego').catch(()=>[]),
+    sbGet('ic_cursos','select=id,vagas').catch(()=>[]),
+    loadDashboardFestas(),
   ]);
   const empAt=emp.filter(e=>e.situacao==='ativa').length;const meisAt=meis.filter(m=>m.situacao==='ativo').length;
   const vagAb=vag.filter(v=>v.situacao==='aberta').length;const vagTot=vag.reduce((s,v)=>s+(Number(v.quantidade)||0),0);
@@ -565,6 +579,8 @@ async function loadDashboard(){try{
     ['Eventos',ev.length,evPart+' participantes'],['Feiras',fe.length,fe.reduce((s,f)=>s+(Number(f.expositores)||0),0)+' expositores'],
     ['Investimentos',inv.length,moneyShort(invVal)+' estimado'],['Empregos previstos',invEmp+incEmp,'invest.+incentivos'],
     ['Metas',met.filter(m=>m.situacao==='atingida').length+'/'+met.length,'atingidas'],['Alertas',al.length,'não lidos'],
+    ['Cursos',cur.length,cur.reduce((s,c)=>s+(Number(c.vagas)||0),0)+' vagas ofertadas'],
+    ['Festas',festasInfo.total,festasInfo.proximas+' futura(s)'],
   ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
   // Empresas bars
   const eSit={};emp.forEach(e=>{eSit[e.situacao]=(eSit[e.situacao]||0)+1;});const maxE=Math.max(1,...Object.values(eSit));
