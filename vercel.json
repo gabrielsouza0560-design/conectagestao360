@@ -2,6 +2,7 @@
   "rewrites": [
     { "source": "/painel", "destination": "/conecta-gestao-painel-admin.html" },
     { "source": "/cadastro", "destination": "/conecta-gestao-cadastro.html" },
-    { "source": "/dashboard", "destination": "/conecta-gestao-dashboard-prefeito.html" }
+    { "source": "/dashboard", "destination": "/conecta-gestao-dashboard-prefeito.html" },
+    { "source": "/saude", "destination": "/conecta-gestao-saude.html" }
   ]
 }

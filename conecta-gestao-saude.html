@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Saúde · Gabriel Oliveira</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2563EB">
+<style>
+:root{--royal:#2563EB;--neon:#3B82F6;--light:#60A5FA;--darkblue:#0F172A;--bg:#F8FAFC;--surface:#FFFFFF;--ink:#0F172A;--ink-soft:#475569;--line:rgba(15,23,42,.08);--ok:#059669;--danger:#DC2626;--warn:#D97706;--muted:#94A3B8;--radius:18px;--sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;--shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);}
+*{box-sizing:border-box;}body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}button{font-family:inherit;cursor:pointer;}select,input,textarea{font-family:inherit;}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
+#login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+@media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+.login-brand{background:linear-gradient(150deg,var(--darkblue) 0%,#16265A 45%,var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+.login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle,rgba(96,165,250,.25),transparent 70%);}
+.brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+.brand-name{font-size:19px;font-weight:800;}.brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+.brand-quote{position:relative;z-index:1;max-width:420px;}.brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;}.brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+.brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+.login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-form{width:100%;max-width:380px;}.login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+.field{margin-bottom:18px;}.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(37,99,235,.35);}
+.btn-primary:hover{transform:translateY(-1px);}.btn-primary:disabled{opacity:.6;pointer-events:none;}
+.login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
+header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.hd-left{display:flex;align-items:center;gap:12px;}.hd-left .name{font-size:16px;font-weight:800;}.hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+.hd-right{display:flex;align-items:center;gap:12px;font-size:12px;color:#B6C4DD;}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;}
+.btn-ghost:hover{border-color:var(--royal);color:var(--royal);}
+.btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 12px rgba(37,99,235,.35);}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;}.logout-btn:hover{border-color:var(--light);color:var(--light);}
+.back-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;text-decoration:none;}.back-btn:hover{border-color:var(--light);color:var(--light);}
+.app-body{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:220px;background:var(--darkblue);padding:12px 8px;overflow-y:auto;flex-shrink:0;}
+.sidebar::-webkit-scrollbar{width:4px;}.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+.nav-group-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:14px 10px 4px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:#B6C4DD;font-size:12px;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:background .15s;}
+.nav-item:hover{background:rgba(59,130,246,.12);}.nav-item.active{background:linear-gradient(90deg,rgba(37,99,235,.4),rgba(59,130,246,.15));color:#fff;font-weight:700;}
+main{flex:1;padding:28px 36px 60px;max-width:1300px;overflow-x:hidden;}
+@media(max-width:860px){.sidebar{display:none;}main{padding:20px;}}
+.view{display:none;}.view.active{display:block;}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.topbar h1{font-size:24px;margin:0 0 2px;font-weight:800;}.topbar .sub{font-size:12px;color:var(--muted);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:1000px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);transition:transform .2s;}
+.kpi:hover{transform:translateY(-2px);}
+.kpi .ico{font-size:10px;color:var(--royal);text-transform:uppercase;letter-spacing:.8px;font-weight:800;margin-bottom:6px;}
+.kpi .num{font-size:22px;color:var(--ink);font-weight:800;}.kpi .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.panel h3{font-size:15px;margin:0 0 4px;font-weight:800;}.panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 14px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+.field.span-2{grid-column:span 2;}.field.span-3{grid-column:span 3;}
+.form-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+.fieldset-label{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--royal);font-weight:800;margin:16px 0 8px;padding-top:10px;border-top:1px solid var(--line);}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);font-weight:700;}
+td{padding:9px 8px;border-bottom:1px solid var(--line);}tr:last-child td{border-bottom:none;}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.status-agendada,.status-solicitado,.status-solicitada,.status-pendente,.status-aguardando,.status-prospectando,.status-planejado{background:#EFF6FF;color:var(--royal);}
+.status-confirmada,.status-em_andamento,.status-em_cotacao,.status-em_elaboracao,.status-em_manutencao,.status-agendado{background:#FEF3C7;color:var(--warn);}
+.status-realizada,.status-realizado,.status-ativo,.status-atingida,.status-vigente,.status-entregue,.status-empenhada,.status-concluido,.status-atendido{background:#D1FAE5;color:var(--ok);}
+.status-cancelada,.status-cancelado,.status-faltou,.status-inativo,.status-abaixo,.status-rescindido,.status-critico{background:#FEF2F2;color:var(--danger);}
+.status-reagendada,.status-atencao,.status-aditado,.status-afastado,.status-ferias,.status-encerrado{background:#FEF3C7;color:var(--warn);}
+.status-info{background:#EFF6FF;color:var(--royal);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:1000px){.grid-2{grid-template-columns:1fr;}}
+.diag{padding:14px;border-radius:12px;font-size:12.5px;line-height:1.6;margin-bottom:16px;}
+.diag-ok{background:#D1FAE5;border:1px solid rgba(5,150,105,.25);color:#065F46;}
+.diag-warn{background:#FEF3C7;border:1px solid rgba(217,119,6,.25);color:#92400E;}
+.diag-danger{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
+.bars{display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:grid;grid-template-columns:160px 1fr 44px;align-items:center;gap:10px;font-size:12px;}
+.bar-track{background:#EFF6FF;border-radius:5px;height:8px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:5px;}
+.bar-fill-ok{background:linear-gradient(90deg,var(--ok),#34D399);}
+.bar-fill-warn{background:linear-gradient(90deg,var(--warn),#FBBF24);}
+.bar-fill-danger{background:linear-gradient(90deg,var(--danger),#F87171);}
+.bar-fill-royal{background:linear-gradient(90deg,var(--royal),var(--light));}
+.bar-row .val{text-align:right;color:var(--ink-soft);font-family:var(--mono);}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.filter-bar .fb{display:flex;flex-direction:column;gap:4px;}.filter-bar .fb-label{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;}
+.filter-bar select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-size:12px;background:#fff;}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name">Conecta Gestão<small>Secretaria de Saúde</small></div></div>
+    <div class="brand-quote"><h1>Gestão estratégica da Saúde Municipal.</h1><p>Indicadores em tempo real, controle de estoque, consultas, vacinação, transporte e muito mais — tudo integrado.</p></div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap"><div class="login-form">
+    <h2>Acessar Saúde</h2><p class="sub">Entre com sua conta institucional.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div></div>
+</div>
+
+<div id="app" style="display:none;">
+<header>
+  <div class="hd-left"><div class="logo">CG</div><div class="name">Conecta Gestão<small>Secretaria de Saúde</small></div></div>
+  <div class="hd-right"><span id="hd-role"></span><a class="back-btn" href="conecta-gestao-painel-admin.html">← Painel</a><button class="logout-btn" onclick="doLogout()">Sair</button></div>
+</header>
+<div class="app-body">
+<aside class="sidebar" id="sidebar-nav"></aside>
+<main id="main-content"></main>
+</div>
+</div>
+
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co";
+const SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+let session=null;
+
+function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),senha=document.getElementById('login-senha').value,err=document.getElementById('login-error'),btn=document.getElementById('login-btn');
+  err.classList.remove('show');if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{
+    const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
+    session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';
+    document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');
+    buildNav();buildViews();navigateTo('dashboard_saude');
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+function doLogout(){session=null;document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPatch(t,q,d){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbDel(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'DELETE',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());}
+
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';}
+function moneyShort(v){if(!v)return'R$ 0';const n=Number(v);if(n>=1e6)return'R$ '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'R$ '+(n/1e3).toFixed(0)+'k';return'R$ '+n.toFixed(0);}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function pill(s,label){return'<span class="status-pill status-'+(s||'')+'">'+(label||s||'—')+'</span>';}
+function parseMoney(v){if(!v)return null;return parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));}
+function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-000000000001';}
+
+// ============ NAV ============
+const NAV_GROUPS=[
+  {label:'Geral',items:[['dashboard_saude','Dashboard da Saúde'],['secretaria_saude','Secretaria']]},
+  {label:'Atendimento',items:[['unidades','Unidades de Saúde'],['profissionais','Profissionais'],['pacientes','População/Cadastros'],['consultas','Consultas'],['atendimentos','Atendimentos'],['exames','Exames'],['odontologia','Odontologia']]},
+  {label:'Saúde Pública',items:[['vacinacao','Vacinação'],['farmacia','Farmácia'],['medicamentos','Medicamentos'],['visitas','Visitas Domiciliares'],['encaminhamentos','Encaminhamentos'],['regulacao','Regulação']]},
+  {label:'Logística',items:[['transporte','Transporte'],['frota','Frota'],['estoque','Estoque'],['compras','Compras'],['contratos','Contratos']]},
+  {label:'Gestão',items:[['programas','Programas de Saúde'],['campanhas','Campanhas'],['metas','Metas'],['indicadores','Indicadores'],['financeiro_saude','Financeiro']]},
+  {label:'Sistema',items:[['relatorios_saude','Relatórios'],['alertas_saude','Alertas'],['config_saude','Configurações']]},
+];
+
+let currentView='dashboard_saude';
+function buildNav(){
+  let h='';
+  NAV_GROUPS.forEach(g=>{
+    h+='<div class="nav-group-label">'+g.label+'</div>';
+    g.items.forEach(([k,l])=>{h+='<button class="nav-item'+(k==='dashboard_saude'?' active':'')+'" data-key="'+k+'" onclick="navigateTo(\''+k+'\')">'+l+'</button>';});
+  });
+  document.getElementById('sidebar-nav').innerHTML=h;
+}
+
+function navigateTo(key){
+  currentView=key;
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.key===key));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+key));
+  if(LOADERS[key])LOADERS[key]();
+}
+
+// ============ GENERIC CRUD BUILDER ============
+let caches={};
+const MODULES={
+  unidades:{table:'saude_unidades',title:'Unidades de Saúde',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['ubs','UBS'],['unidade_basica','Unidade Básica'],['posto','Posto de Saúde'],['odontologica','Odontológica'],['farmacia','Farmácia'],['centro_especialidades','Centro de Especialidades'],['apoio','Apoio'],['outro','Outro']]},
+    {id:'cnes',label:'CNES'},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
+    {id:'telefone',label:'Telefone'},{id:'email',label:'E-mail'},{id:'responsavel',label:'Responsável'},
+    {id:'horario_funcionamento',label:'Horário'},{id:'dias_atendimento',label:'Dias de atendimento'},{id:'servicos',label:'Serviços oferecidos'},
+    {id:'capacidade_atendimento',label:'Capacidade',type:'number'},{id:'populacao_referencia',label:'População referência',type:'number'},
+    {id:'ativa',label:'Ativa',type:'checkbox',default:true}
+  ],cols:['nome','tipo','bairro','telefone','responsavel','ativa'],colLabels:['Nome','Tipo','Bairro','Telefone','Responsável','Ativa'],
+  renderCol:(r,c)=>c==='ativa'?pill(r.ativa?'ativo':'inativo',r.ativa?'Ativa':'Inativa'):c==='tipo'?(r.tipo||'').toUpperCase():(r[c]||'—')},
+
+  profissionais:{table:'saude_profissionais',title:'Profissionais',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'matricula',label:'Matrícula'},
+    {id:'cargo',label:'Cargo'},{id:'funcao',label:'Função'},{id:'especialidade',label:'Especialidade'},
+    {id:'conselho',label:'Conselho (CRM, COREN...)'},{id:'registro_conselho',label:'Nº registro'},
+    {id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},{id:'carga_horaria',label:'Carga horária (h/sem)',type:'number'},
+    {id:'horario_trabalho',label:'Horário de trabalho'},{id:'data_admissao',label:'Data admissão',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['afastado','Afastado'],['ferias','Férias'],['inativo','Inativo']]}
+  ],cols:['nome','cargo','especialidade','situacao'],colLabels:['Nome','Cargo','Especialidade','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao,{ativo:'Ativo',afastado:'Afastado',ferias:'Férias',inativo:'Inativo'}[r.situacao]):(r[c]||'—')},
+
+  pacientes:{table:'saude_pacientes',title:'População / Cadastros',fields:[
+    {id:'nome',label:'Nome completo',span:2,required:true},{id:'codigo',label:'Código interno'},
+    {id:'data_nascimento',label:'Data de nascimento',type:'date'},{id:'sexo',label:'Sexo',type:'select',opts:[['M','Masculino'],['F','Feminino'],['I','Intersexo/Outro']]},
+    {id:'bairro',label:'Bairro'},{id:'sus_cartao',label:'Cartão SUS'},{id:'telefone',label:'Telefone'},
+    {id:'unidade_referencia_id',label:'Unidade de referência',type:'ref',ref:'unidades'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo'],['obito','Óbito'],['mudou','Mudou']]}
+  ],cols:['nome','data_nascimento','sexo','bairro','situacao'],colLabels:['Nome','Nascimento','Sexo','Bairro','Situação'],
+  renderCol:(r,c)=>c==='data_nascimento'?fmtDate(r.data_nascimento):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  consultas:{table:'saude_consultas',title:'Consultas',fields:[
+    {id:'paciente_id',label:'Paciente',type:'ref',ref:'pacientes',required:true},{id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},
+    {id:'profissional_id',label:'Profissional',type:'ref',ref:'profissionais'},{id:'especialidade',label:'Especialidade'},
+    {id:'data',label:'Data',type:'date',required:true},{id:'horario',label:'Horário',type:'time'},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['primeira_vez','Primeira vez'],['retorno','Retorno'],['urgencia','Urgência'],['demanda_espontanea','Demanda espontânea']]},
+    {id:'situacao',label:'Situação',type:'select',opts:[['agendada','Agendada'],['confirmada','Confirmada'],['realizada','Realizada'],['cancelada','Cancelada'],['faltou','Faltou'],['reagendada','Reagendada']]},
+    {id:'tempo_espera_min',label:'Tempo espera (min)',type:'number'},{id:'observacoes',label:'Observações',span:3}
+  ],cols:['data','especialidade','tipo','situacao'],colLabels:['Data','Especialidade','Tipo','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),
+  query:'order=data.desc'},
+
+  atendimentos:{table:'saude_atendimentos',title:'Atendimentos',fields:[
+    {id:'paciente_id',label:'Paciente',type:'ref',ref:'pacientes'},{id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},
+    {id:'profissional_id',label:'Profissional',type:'ref',ref:'profissionais'},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['enfermagem','Enfermagem'],['medico','Médico'],['procedimento','Procedimento'],['curativo','Curativo'],['afericao','Aferição'],['domiciliar','Domiciliar'],['demanda_espontanea','Demanda espontânea'],['outro','Outro']]},
+    {id:'data',label:'Data',type:'date',required:true},{id:'descricao',label:'Descrição',span:3},{id:'observacoes',label:'Observações',span:3}
+  ],cols:['data','tipo','descricao'],colLabels:['Data','Tipo','Descrição'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc'},
+
+  exames:{table:'saude_exames',title:'Exames',fields:[
+    {id:'paciente_id',label:'Paciente',type:'ref',ref:'pacientes'},{id:'tipo_exame',label:'Tipo de exame',required:true},
+    {id:'unidade_solicitante_id',label:'Unidade solicitante',type:'ref',ref:'unidades'},
+    {id:'profissional_solicitante_id',label:'Profissional solicitante',type:'ref',ref:'profissionais'},
+    {id:'data_solicitacao',label:'Data solicitação',type:'date'},{id:'prioridade',label:'Prioridade',type:'select',opts:[['normal','Normal'],['urgente','Urgente'],['emergencia','Emergência']]},
+    {id:'data_agendamento',label:'Data agendamento',type:'date'},{id:'data_realizacao',label:'Data realização',type:'date'},
+    {id:'local',label:'Local'},{id:'prestador',label:'Prestador'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitado','Solicitado'],['agendado','Agendado'],['realizado','Realizado'],['cancelado','Cancelado'],['pendente','Pendente']]}
+  ],cols:['tipo_exame','data_solicitacao','prioridade','situacao'],colLabels:['Exame','Solicitação','Prioridade','Situação'],
+  renderCol:(r,c)=>c==='data_solicitacao'?fmtDate(r.data_solicitacao):c==='situacao'?pill(r.situacao):c==='prioridade'?pill(r.prioridade):(r[c]||'—'),query:'order=data_solicitacao.desc'},
+
+  odontologia:{table:'saude_odontologia',title:'Odontologia',fields:[
+    {id:'paciente_id',label:'Paciente',type:'ref',ref:'pacientes'},{id:'profissional_id',label:'Profissional',type:'ref',ref:'profissionais'},
+    {id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},{id:'data',label:'Data',type:'date',required:true},
+    {id:'tipo_atendimento',label:'Tipo atendimento'},{id:'procedimento',label:'Procedimento'},{id:'tratamento',label:'Tratamento'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['agendado','Agendado'],['realizado','Realizado'],['cancelado','Cancelado'],['faltou','Faltou']]}
+  ],cols:['data','tipo_atendimento','procedimento','situacao'],colLabels:['Data','Tipo','Procedimento','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc'},
+
+  vacinacao:{table:'saude_vacinacao',title:'Vacinação',fields:[
+    {id:'vacina_id',label:'Vacina',type:'ref',ref:'vacinas'},{id:'dose',label:'Dose',type:'number'},
+    {id:'paciente_id',label:'Paciente',type:'ref',ref:'pacientes'},{id:'data',label:'Data',type:'date',required:true},
+    {id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},{id:'profissional_id',label:'Profissional',type:'ref',ref:'profissionais'},
+    {id:'lote',label:'Lote'},{id:'validade',label:'Validade',type:'date'},{id:'campanha',label:'Campanha'}
+  ],cols:['data','dose','lote','campanha'],colLabels:['Data','Dose','Lote','Campanha'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc'},
+
+  medicamentos:{table:'saude_medicamentos',title:'Medicamentos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'principio_ativo',label:'Princípio ativo'},
+    {id:'apresentacao',label:'Apresentação'},{id:'unidade_medida',label:'Unidade de medida'},
+    {id:'estoque_minimo',label:'Estoque mínimo',type:'number'},{id:'estoque_maximo',label:'Estoque máximo',type:'number'},
+    {id:'valor_unitario',label:'Valor unitário (R$)',type:'money'}
+  ],cols:['nome','principio_ativo','apresentacao','estoque_minimo'],colLabels:['Nome','Princípio ativo','Apresentação','Est. mín.'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  farmacia:{table:'saude_farmacia_mov',title:'Farmácia (Movimentações)',fields:[
+    {id:'medicamento_id',label:'Medicamento',type:'ref',ref:'medicamentos',required:true},{id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['entrada','Entrada'],['saida','Saída'],['dispensacao','Dispensação'],['ajuste','Ajuste'],['perda','Perda']]},
+    {id:'quantidade',label:'Quantidade',type:'number',required:true},{id:'lote',label:'Lote'},{id:'validade',label:'Validade',type:'date'},
+    {id:'fornecedor',label:'Fornecedor'},{id:'data',label:'Data',type:'date',required:true},{id:'observacoes',label:'Observações',span:3}
+  ],cols:['data','tipo','quantidade','lote','fornecedor'],colLabels:['Data','Tipo','Qtd','Lote','Fornecedor'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc'},
+
+  visitas:{table:'saude_visitas',title:'Visitas Domiciliares',fields:[
+    {id:'profissional_id',label:'Profissional',type:'ref',ref:'profissionais'},{id:'paciente_id',label:'Paciente/Família',type:'ref',ref:'pacientes'},
+    {id:'data',label:'Data',type:'date',required:true},{id:'localidade',label:'Localidade'},{id:'tipo_visita',label:'Tipo de visita'},
+    {id:'motivo',label:'Motivo',span:2},{id:'atendimento_realizado',label:'Atendimento realizado',span:3},
+    {id:'encaminhamento',label:'Encaminhamento',span:2},{id:'retorno_necessario',label:'Retorno necessário',type:'checkbox'}
+  ],cols:['data','localidade','tipo_visita','motivo'],colLabels:['Data','Localidade','Tipo','Motivo'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc'},
+
+  encaminhamentos:{table:'saude_encaminhamentos',title:'Encaminhamentos',fields:[
+    {id:'paciente_id',label:'Paciente',type:'ref',ref:'pacientes'},{id:'especialidade',label:'Especialidade',required:true},
+    {id:'profissional_solicitante_id',label:'Profissional solicitante',type:'ref',ref:'profissionais'},
+    {id:'data',label:'Data',type:'date',required:true},{id:'prioridade',label:'Prioridade',type:'select',opts:[['normal','Normal'],['urgente','Urgente'],['emergencia','Emergência']]},
+    {id:'motivo',label:'Motivo',span:2},{id:'unidade_destino',label:'Unidade destino'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['pendente','Pendente'],['agendado','Agendado'],['realizado','Realizado'],['cancelado','Cancelado']]},
+    {id:'data_agendamento',label:'Data agendamento',type:'date'},{id:'data_atendimento',label:'Data atendimento',type:'date'}
+  ],cols:['data','especialidade','prioridade','situacao'],colLabels:['Data','Especialidade','Prioridade','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'||c==='prioridade'?pill(r[c]):(r[c]||'—'),query:'order=data.desc'},
+
+  regulacao:{table:'saude_regulacao',title:'Regulação',fields:[
+    {id:'paciente_id',label:'Paciente',type:'ref',ref:'pacientes'},{id:'especialidade',label:'Especialidade',required:true},
+    {id:'prioridade',label:'Prioridade',type:'select',opts:[['normal','Normal'],['urgente','Urgente'],['emergencia','Emergência']]},
+    {id:'data_entrada',label:'Data entrada',type:'date',required:true},
+    {id:'situacao',label:'Situação',type:'select',opts:[['aguardando','Aguardando'],['agendado','Agendado'],['atendido','Atendido'],['cancelado','Cancelado']]},
+    {id:'data_agendamento',label:'Data agendamento',type:'date'},{id:'data_atendimento',label:'Data atendimento',type:'date'},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['data_entrada','especialidade','prioridade','situacao'],colLabels:['Entrada','Especialidade','Prioridade','Situação'],
+  renderCol:(r,c)=>c==='data_entrada'?fmtDate(r.data_entrada):c==='situacao'||c==='prioridade'?pill(r[c]):(r[c]||'—'),query:'order=data_entrada.desc'},
+
+  transporte:{table:'saude_transporte',title:'Transporte',fields:[
+    {id:'paciente_id',label:'Paciente',type:'ref',ref:'pacientes'},{id:'data',label:'Data',type:'date',required:true},
+    {id:'horario',label:'Horário',type:'time'},{id:'destino',label:'Destino',required:true},{id:'motivo',label:'Motivo'},
+    {id:'veiculo_id',label:'Veículo',type:'ref',ref:'frota'},{id:'motorista',label:'Motorista'},
+    {id:'passageiros',label:'Passageiros',type:'number'},{id:'km_inicial',label:'Km inicial',type:'number'},{id:'km_final',label:'Km final',type:'number'},
+    {id:'combustivel_litros',label:'Combustível (L)',type:'number'},{id:'custo',label:'Custo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['agendada','Agendada'],['realizada','Realizada'],['cancelada','Cancelada']]}
+  ],cols:['data','destino','motorista','passageiros','custo','situacao'],colLabels:['Data','Destino','Motorista','Pass.','Custo','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc'},
+
+  frota:{table:'saude_frota',title:'Frota',fields:[
+    {id:'veiculo',label:'Veículo',required:true},{id:'placa',label:'Placa'},{id:'modelo',label:'Modelo'},{id:'marca',label:'Marca'},
+    {id:'ano',label:'Ano',type:'number'},{id:'km_atual',label:'Km atual',type:'number'},{id:'combustivel',label:'Combustível'},
+    {id:'motorista_responsavel',label:'Motorista responsável'},{id:'seguro_vencimento',label:'Venc. seguro',type:'date'},
+    {id:'licenciamento_vencimento',label:'Venc. licenciamento',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['em_manutencao','Em manutenção'],['inativo','Inativo']]}
+  ],cols:['veiculo','placa','modelo','km_atual','situacao'],colLabels:['Veículo','Placa','Modelo','Km','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  estoque:{table:'saude_estoque',title:'Estoque',fields:[
+    {id:'material',label:'Material',span:2,required:true},{id:'categoria',label:'Categoria'},
+    {id:'unidade_medida',label:'Unidade de medida'},{id:'estoque_minimo',label:'Estoque mínimo',type:'number'},
+    {id:'estoque_maximo',label:'Estoque máximo',type:'number'},{id:'localizacao',label:'Localização'}
+  ],cols:['material','categoria','unidade_medida','estoque_minimo'],colLabels:['Material','Categoria','Un. medida','Est. mín.'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  compras:{table:'saude_compras',title:'Compras',fields:[
+    {id:'item',label:'Item',span:2,required:true},{id:'solicitacao',label:'Solicitação'},{id:'processo',label:'Processo'},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'cotacao',label:'Cotação (R$)',type:'money'},
+    {id:'fornecedor',label:'Fornecedor'},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data',label:'Data',type:'date'},
+    {id:'empenho',label:'Empenho'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitada','Solicitada'],['em_cotacao','Em cotação'],['empenhada','Empenhada'],['entregue','Entregue'],['cancelada','Cancelada']]}
+  ],cols:['item','fornecedor','valor','data','situacao'],colLabels:['Item','Fornecedor','Valor','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  contratos:{table:'saude_contratos',title:'Contratos',fields:[
+    {id:'numero',label:'Nº contrato'},{id:'processo',label:'Processo'},{id:'fornecedor',label:'Fornecedor',required:true},{id:'cnpj',label:'CNPJ'},
+    {id:'objeto',label:'Objeto',span:3},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data_inicio',label:'Início',type:'date'},
+    {id:'data_fim',label:'Término',type:'date'},{id:'fiscal',label:'Fiscal'},{id:'saldo',label:'Saldo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['aditado','Aditado'],['rescindido','Rescindido']]}
+  ],cols:['numero','fornecedor','objeto','valor','data_fim','situacao'],colLabels:['Nº','Fornecedor','Objeto','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  programas:{table:'saude_programas',title:'Programas de Saúde',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'descricao',label:'Descrição',span:3},
+    {id:'publico_alvo',label:'Público-alvo'},{id:'responsavel',label:'Responsável'},
+    {id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},{id:'meta',label:'Meta'},
+    {id:'periodo',label:'Período'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','publico_alvo','responsavel','orcamento'],colLabels:['Nome','Público-alvo','Responsável','Orçamento'],
+  renderCol:(r,c)=>c==='orcamento'?money(r.orcamento):(r[c]||'—')},
+
+  campanhas:{table:'saude_campanhas',title:'Campanhas',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'data',label:'Data',type:'date'},
+    {id:'local',label:'Local'},{id:'publico_alvo',label:'Público-alvo'},{id:'equipe',label:'Equipe'},
+    {id:'meta',label:'Meta (atendimentos)',type:'number'},{id:'atendimentos',label:'Atendimentos realizados',type:'number'},
+    {id:'custo',label:'Custo (R$)',type:'money'},{id:'resultado',label:'Resultado',span:3},{id:'materiais',label:'Materiais',span:3}
+  ],cols:['nome','data','meta','atendimentos','custo'],colLabels:['Nome','Data','Meta','Realizados','Custo'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  metas:{table:'saude_metas',title:'Metas',fields:[
+    {id:'indicador',label:'Indicador',span:2,required:true},{id:'periodo',label:'Período'},
+    {id:'meta_anual',label:'Meta anual',type:'number'},{id:'meta_mensal',label:'Meta mensal',type:'number'},{id:'meta_trimestral',label:'Meta trimestral',type:'number'},
+    {id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},{id:'profissional_id',label:'Profissional',type:'ref',ref:'profissionais'},
+    {id:'resultado',label:'Resultado',type:'number'},{id:'percentual',label:'% alcançado',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['atingida','Atingida'],['atencao','Atenção'],['abaixo','Abaixo da meta']]}
+  ],cols:['indicador','meta_mensal','resultado','percentual','situacao'],colLabels:['Indicador','Meta mensal','Resultado','%','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao,{atingida:'🟢 Atingida',atencao:'🟡 Atenção',abaixo:'🔴 Abaixo'}[r.situacao]):c==='percentual'?(r.percentual||0)+'%':(r[c]||'—')},
+
+  indicadores:{table:'saude_indicadores_config',title:'Indicadores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'descricao',label:'Descrição',span:3},
+    {id:'formula',label:'Fórmula',span:2},{id:'fonte',label:'Fonte dos dados'},
+    {id:'periodicidade',label:'Periodicidade',type:'select',opts:[['diario','Diário'],['semanal','Semanal'],['mensal','Mensal'],['trimestral','Trimestral'],['anual','Anual']]},
+    {id:'meta',label:'Meta',type:'number'},{id:'unidade_medida',label:'Unidade de medida'},{id:'responsavel',label:'Responsável'}
+  ],cols:['nome','formula','periodicidade','meta','responsavel'],colLabels:['Nome','Fórmula','Period.','Meta','Responsável'],
+  renderCol:(r,c)=>(r[c]||'—')},
+};
+
+// Ref name→label map
+const REF_TABLES={unidades:'saude_unidades',profissionais:'saude_profissionais',pacientes:'saude_pacientes',medicamentos:'saude_medicamentos',frota:'saude_frota',vacinas:'saude_vacinas'};
+const REF_LABEL_FIELD={unidades:'nome',profissionais:'nome',pacientes:'nome',medicamentos:'nome',frota:'veiculo',vacinas:'nome'};
+
+async function loadRefOptions(refKey){
+  if(caches[refKey])return caches[refKey];
+  try{const data=await sbGet(REF_TABLES[refKey],'select=id,'+REF_LABEL_FIELD[refKey]+'&order='+REF_LABEL_FIELD[refKey]+'.asc');caches[refKey]=data;return data;}catch(e){return[];}
+}
+
+function buildViews(){
+  let html='';
+  // Dashboard
+  html+='<section class="view active" id="view-dashboard_saude"><div class="topbar"><div><h1>Dashboard da Saúde</h1><div class="sub">Visão geral em tempo real</div></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Consultas por situação</h3><div class="bars" id="dash-consultas-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
+  // Secretaria
+  html+='<section class="view" id="view-secretaria_saude"><div class="topbar"><div><h1>Secretaria de Saúde</h1><div class="sub">Dados cadastrais da secretaria</div></div></div><div class="panel" id="sec-saude-panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="ss-nome"></div><div class="field"><label>CNPJ</label><input id="ss-cnpj"></div><div class="field"><label>Secretário(a)</label><input id="ss-secretario"></div><div class="field"><label>Adjunto(a)</label><input id="ss-adjunto"></div><div class="field"><label>Telefone</label><input id="ss-telefone"></div><div class="field"><label>WhatsApp</label><input id="ss-whatsapp"></div><div class="field"><label>E-mail</label><input id="ss-email"></div><div class="field span-3"><label>Endereço</label><input id="ss-endereco"></div><div class="field span-2"><label>Horário de atendimento</label><input id="ss-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="ss-orcamento" type="text" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="ss-meta" type="text" inputmode="decimal"></div><div class="field span-3"><label>Observações</label><textarea id="ss-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSecretaria()" id="ss-btn">Salvar</button></div></div></section>';
+
+  // CRUD modules
+  Object.keys(MODULES).forEach(key=>{
+    const m=MODULES[key];
+    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleCrudForm(\''+key+'\')">+ Novo</button></div></div>';
+    html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
+    html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="form-title-'+key+'">Novo registro</h3><div class="form-grid" id="form-fields-'+key+'">';
+    m.fields.forEach(f=>{
+      const span=f.span?'span-'+f.span:'';
+      if(f.type==='checkbox'){
+        html+='<div class="field '+span+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" '+(f.default?'checked':'')+' style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
+      }else if(f.type==='select'){
+        html+='<div class="field '+span+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'">';
+        (f.opts||[]).forEach(([v,l])=>{html+='<option value="'+v+'">'+l+'</option>';});
+        html+='</select></div>';
+      }else if(f.type==='ref'){
+        html+='<div class="field '+span+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'"><option value="">Selecione...</option></select></div>';
+      }else{
+        const t=f.type==='money'?'text':f.type||'text';
+        const im=f.type==='money'?' inputmode="decimal"':'';
+        html+='<div class="field '+span+'"><label>'+f.label+'</label><input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+im+'></div>';
+      }
+    });
+    html+='</div><div class="form-actions"><button class="btn-ghost" onclick="toggleCrudForm(\''+key+'\')">Cancelar</button><button class="btn-accent" onclick="submitCrud(\''+key+'\')" id="submit-'+key+'">Salvar</button></div></div>';
+    html+='<div class="panel"><h3>Registros</h3><p class="panel-sub" id="count-'+key+'"></p><div style="overflow-x:auto;"><table><thead><tr>';
+    m.colLabels.forEach(l=>{html+='<th>'+l+'</th>';});
+    html+='<th></th></tr></thead><tbody id="tbl-'+key+'"></tbody></table></div></div></section>';
+  });
+
+  // Financeiro
+  html+='<section class="view" id="view-financeiro_saude"><div class="topbar"><div><h1>Financeiro</h1><div class="sub">Execução orçamentária da Secretaria de Saúde</div></div></div><div class="kpi-grid" id="fin-kpi"></div><div class="grid-2"><div class="panel"><h3>Compras por situação</h3><div class="bars" id="fin-compras-bars"></div></div><div class="panel"><h3>Contratos por situação</h3><div class="bars" id="fin-contratos-bars"></div></div></div></section>';
+  // Relatórios
+  html+='<section class="view" id="view-relatorios_saude"><div class="topbar"><div><h1>Relatórios</h1><div class="sub">Exportar relatórios da Saúde</div></div></div><div class="panel"><h3>Gerar relatório</h3><p class="panel-sub">Selecione o módulo e exporte em PDF ou Excel</p><div class="form-grid">';
+  Object.keys(MODULES).forEach(k=>{html+='<div class="field"><button class="btn-ghost" style="width:100%;" onclick="exportPdf(\''+k+'\')">'+MODULES[k].title+' (PDF)</button></div>';});
+  html+='</div></div></section>';
+  // Alertas
+  html+='<section class="view" id="view-alertas_saude"><div class="topbar"><div><h1>Alertas</h1></div></div><div id="alertas-list"></div></section>';
+  // Config
+  html+='<section class="view" id="view-config_saude"><div class="topbar"><div><h1>Configurações</h1></div></div><div class="panel"><h3>Configurações do módulo Saúde</h3><p class="panel-sub">Configurações gerais estarão disponíveis em breve.</p></div></section>';
+
+  document.getElementById('main-content').innerHTML=html;
+}
+
+// ============ CRUD FUNCTIONS ============
+let editingId={};
+
+function toggleCrudForm(key){
+  const panel=document.getElementById('form-'+key);
+  const opening=panel.style.display==='none';
+  panel.style.display=opening?'block':'none';
+  if(opening&&!editingId[key]){
+    clearCrudForm(key);
+    document.getElementById('form-title-'+key).textContent='Novo registro';
+    document.getElementById('submit-'+key).textContent='Salvar';
+    loadRefSelects(key);
+  }
+  if(!opening)editingId[key]=null;
+}
+
+function clearCrudForm(key){
+  const m=MODULES[key];
+  m.fields.forEach(f=>{
+    const el=document.getElementById('cf-'+key+'-'+f.id);
+    if(!el)return;
+    if(f.type==='checkbox')el.checked=!!f.default;
+    else if(f.type==='select')el.selectedIndex=0;
+    else el.value='';
+  });
+}
+
+async function loadRefSelects(key){
+  const m=MODULES[key];
+  for(const f of m.fields){
+    if(f.type!=='ref')continue;
+    const sel=document.getElementById('cf-'+key+'-'+f.id);
+    const opts=await loadRefOptions(f.ref);
+    const lbl=REF_LABEL_FIELD[f.ref];
+    sel.innerHTML='<option value="">Selecione...</option>'+opts.map(o=>'<option value="'+o.id+'">'+o[lbl]+'</option>').join('');
+  }
+}
+
+async function submitCrud(key){
+  const m=MODULES[key];
+  const data={tenant_id:tid()};
+  m.fields.forEach(f=>{
+    const el=document.getElementById('cf-'+key+'-'+f.id);
+    if(!el)return;
+    let v;
+    if(f.type==='checkbox')v=el.checked;
+    else if(f.type==='money')v=parseMoney(el.value);
+    else if(f.type==='number')v=el.value?Number(el.value):null;
+    else if(f.type==='ref')v=el.value||null;
+    else v=el.value.trim()||null;
+    data[f.id]=v;
+  });
+  const btn=document.getElementById('submit-'+key);
+  btn.disabled=true;
+  try{
+    if(editingId[key]){await sbPatch(m.table,'id=eq.'+editingId[key],data);editingId[key]=null;}
+    else{await sbPost(m.table,data);}
+    toggleCrudForm(key);loadCrudData(key);
+  }catch(e){alert('Erro: '+e.message.slice(0,200));}
+  finally{btn.disabled=false;}
+}
+
+async function editCrud(key,id){
+  const m=MODULES[key];
+  try{
+    const rows=await sbGet(m.table,'id=eq.'+id);
+    const r=rows[0];if(!r)return;
+    editingId[key]=id;
+    document.getElementById('form-'+key).style.display='block';
+    document.getElementById('form-title-'+key).textContent='Editar registro';
+    document.getElementById('submit-'+key).textContent='Salvar alterações';
+    await loadRefSelects(key);
+    m.fields.forEach(f=>{
+      const el=document.getElementById('cf-'+key+'-'+f.id);
+      if(!el)return;
+      if(f.type==='checkbox')el.checked=!!r[f.id];
+      else if(f.type==='money')el.value=r[f.id]||'';
+      else el.value=r[f.id]||'';
+    });
+  }catch(e){alert('Erro ao carregar: '+e.message.slice(0,200));}
+}
+
+async function deleteCrud(key,id){
+  if(!confirm('Tem certeza que deseja excluir?'))return;
+  try{await sbDel(MODULES[key].table,'id=eq.'+id);loadCrudData(key);}catch(e){alert('Erro: '+e.message.slice(0,200));}
+}
+
+async function loadCrudData(key){
+  const m=MODULES[key];
+  try{
+    const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));
+    caches[key+'_data']=data;
+    document.getElementById('count-'+key).textContent=data.length+' registro(s)';
+    const tbody=document.getElementById('tbl-'+key);
+    tbody.innerHTML=data.length?data.map(r=>{
+      let row='<tr>';
+      m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});
+      row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+key+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+key+'\',\''+r.id+'\')">Excluir</button></td></tr>';
+      return row;
+    }).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro cadastrado.</td></tr>';
+    buildKpis(key,data);
+  }catch(e){document.getElementById('tbl-'+key).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);padding:14px;">Erro ao carregar: '+e.message.slice(0,100)+'</td></tr>';}
+}
+
+function buildKpis(key,data){
+  const el=document.getElementById('kpi-'+key);
+  if(!el)return;
+  const n=data.length;
+  let kpis='<div class="kpi"><div class="ico">Total</div><div class="num">'+n+'</div><div class="lbl">registros</div></div>';
+  if(key==='consultas'){
+    const real=data.filter(r=>r.situacao==='realizada').length;
+    const faltas=data.filter(r=>r.situacao==='faltou').length;
+    const agend=data.filter(r=>r.situacao==='agendada').length;
+    const absen=n>0?Math.round(faltas/n*100):0;
+    kpis+='<div class="kpi"><div class="ico">Realizadas</div><div class="num" style="color:var(--ok);">'+real+'</div><div class="lbl">consultas</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Faltas</div><div class="num" style="color:var(--danger);">'+faltas+'</div><div class="lbl">'+absen+'% absenteísmo</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Agendadas</div><div class="num">'+agend+'</div><div class="lbl">aguardando</div></div>';
+  }else if(key==='exames'){
+    const pend=data.filter(r=>r.situacao==='pendente'||r.situacao==='solicitado').length;
+    const real=data.filter(r=>r.situacao==='realizado').length;
+    kpis+='<div class="kpi"><div class="ico">Realizados</div><div class="num" style="color:var(--ok);">'+real+'</div><div class="lbl">exames</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Pendentes</div><div class="num" style="color:var(--warn);">'+pend+'</div><div class="lbl">aguardando</div></div>';
+  }else if(key==='encaminhamentos'){
+    const pend=data.filter(r=>r.situacao==='pendente').length;
+    kpis+='<div class="kpi"><div class="ico">Pendentes</div><div class="num" style="color:var(--warn);">'+pend+'</div><div class="lbl">na fila</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Realizados</div><div class="num" style="color:var(--ok);">'+data.filter(r=>r.situacao==='realizado').length+'</div><div class="lbl">atendidos</div></div>';
+  }else if(key==='regulacao'){
+    const aguard=data.filter(r=>r.situacao==='aguardando').length;
+    kpis+='<div class="kpi"><div class="ico">Aguardando</div><div class="num" style="color:var(--danger);">'+aguard+'</div><div class="lbl">na fila</div></div>';
+  }else if(key==='metas'){
+    const at=data.filter(r=>r.situacao==='atingida').length;
+    const ab=data.filter(r=>r.situacao==='abaixo').length;
+    kpis+='<div class="kpi"><div class="ico">Atingidas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">metas</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Abaixo</div><div class="num" style="color:var(--danger);">'+ab+'</div><div class="lbl">metas</div></div>';
+  }else if(key==='contratos'){
+    const vig=data.filter(r=>r.situacao==='vigente').length;
+    const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);
+    kpis+='<div class="kpi"><div class="ico">Vigentes</div><div class="num">'+vig+'</div><div class="lbl">contratos</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Valor total</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">em contratos</div></div>';
+  }
+  el.innerHTML=kpis;
+}
+
+// ============ DASHBOARD ============
+async function loadDashboard(){
+  try{
+    const [consultas,atend,exames,vac,odonto,med,transp,visitas,encam,reg,metas,alertas]=await Promise.all([
+      sbGet('saude_consultas','select=id,situacao').catch(()=>[]),
+      sbGet('saude_atendimentos','select=id').catch(()=>[]),
+      sbGet('saude_exames','select=id,situacao').catch(()=>[]),
+      sbGet('saude_vacinacao','select=id').catch(()=>[]),
+      sbGet('saude_odontologia','select=id').catch(()=>[]),
+      sbGet('saude_farmacia_mov','select=id,tipo').catch(()=>[]),
+      sbGet('saude_transporte','select=id,custo').catch(()=>[]),
+      sbGet('saude_visitas','select=id').catch(()=>[]),
+      sbGet('saude_encaminhamentos','select=id,situacao').catch(()=>[]),
+      sbGet('saude_regulacao','select=id,situacao').catch(()=>[]),
+      sbGet('saude_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
+      sbGet('saude_alertas','select=*&lido=eq.false&order=criado_em.desc&limit=10').catch(()=>[]),
+    ]);
+    const examPend=exames.filter(e=>e.situacao==='pendente'||e.situacao==='solicitado').length;
+    const regAguard=reg.filter(r=>r.situacao==='aguardando').length;
+    const encamPend=encam.filter(e=>e.situacao==='pendente').length;
+    const custTransp=transp.reduce((s,t)=>s+(Number(t.custo)||0),0);
+
+    document.getElementById('dash-kpi').innerHTML=[
+      ['Consultas',consultas.length,'total'],['Atendimentos',atend.length,'total'],
+      ['Exames',exames.length,examPend+' pendentes'],['Vacinas',vac.length,'doses aplicadas'],
+      ['Odontologia',odonto.length,'atendimentos'],['Farmácia',med.filter(m=>m.tipo==='dispensacao').length,'dispensações'],
+      ['Transporte',transp.length,moneyShort(custTransp)+' em custos'],['Visitas',visitas.length,'domiciliares'],
+      ['Encaminhamentos',encam.length,encamPend+' pendentes'],['Demanda reprimida',regAguard,'aguardando regulação'],
+      ['Metas',metas.filter(m=>m.situacao==='atingida').length+'/'+metas.length,'atingidas'],
+      ['Alertas',alertas.length,'não lidos'],
+    ].map(([ico,num,lbl])=>'<div class="kpi"><div class="ico">'+ico+'</div><div class="num">'+num+'</div><div class="lbl">'+lbl+'</div></div>').join('');
+
+    // Consultas by situacao
+    const cBySit={};consultas.forEach(c=>{cBySit[c.situacao]=(cBySit[c.situacao]||0)+1;});
+    const sitLabels={agendada:'Agendada',confirmada:'Confirmada',realizada:'Realizada',cancelada:'Cancelada',faltou:'Faltou',reagendada:'Reagendada'};
+    const maxC=Math.max(1,...Object.values(cBySit));
+    document.getElementById('dash-consultas-bars').innerHTML=Object.entries(cBySit).map(([s,v])=>'<div class="bar-row"><span>'+(sitLabels[s]||s)+'</span><div class="bar-track"><div class="bar-fill bar-fill-royal" style="width:'+Math.round(v/maxC*100)+'%"></div></div><span class="val">'+v+'</span></div>').join('')||'<p style="color:var(--muted);font-size:12px;">Nenhuma consulta cadastrada.</p>';
+
+    // Metas
+    document.getElementById('dash-metas').innerHTML=metas.length?metas.slice(0,8).map(m=>{
+      const cor=m.situacao==='atingida'?'ok':m.situacao==='atencao'?'warn':'danger';
+      const ico=m.situacao==='atingida'?'🟢':m.situacao==='atencao'?'🟡':'🔴';
+      return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;"><span>'+ico+'</span><span style="flex:1;">'+m.indicador+'</span><span style="font-weight:700;color:var(--'+cor+');">'+(m.percentual||0)+'%</span></div>';
+    }).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhuma meta cadastrada.</p>';
+
+    // Alertas
+    document.getElementById('dash-alertas').innerHTML=alertas.length?alertas.map(a=>{
+      const cor=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'';
+      const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';
+      return'<div class="diag diag-'+(a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok')+'" style="margin-bottom:8px;">'+ico+' '+a.mensagem+'</div>';
+    }).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum alerta pendente.</p>';
+  }catch(e){document.getElementById('dash-kpi').innerHTML='<div class="diag diag-danger">Erro ao carregar dashboard: '+e.message.slice(0,200)+'</div>';}
+}
+
+// ============ SECRETARIA ============
+let secSaudeId=null;
+async function loadSecretaria(){
+  try{
+    const rows=await sbGet('saude_secretaria','select=*&limit=1');
+    if(rows.length){
+      const s=rows[0];secSaudeId=s.id;
+      ['nome','cnpj','secretario','telefone','whatsapp','email','endereco','horario'].forEach(f=>{
+        const el=document.getElementById('ss-'+f);if(el)el.value=s[f==='adjunto'?'secretario_adjunto':f==='horario'?'horario_atendimento':f]||'';
+      });
+      document.getElementById('ss-adjunto').value=s.secretario_adjunto||'';
+      document.getElementById('ss-orcamento').value=s.orcamento_anual||'';
+      document.getElementById('ss-meta').value=s.meta_anual||'';
+      document.getElementById('ss-obs').value=s.observacoes||'';
+    }
+  }catch(e){}
+}
+async function salvarSecretaria(){
+  const data={tenant_id:tid(),nome:document.getElementById('ss-nome').value.trim()||'Secretaria Municipal de Saúde',
+    cnpj:document.getElementById('ss-cnpj').value.trim()||null,secretario:document.getElementById('ss-secretario').value.trim()||null,
+    secretario_adjunto:document.getElementById('ss-adjunto').value.trim()||null,telefone:document.getElementById('ss-telefone').value.trim()||null,
+    whatsapp:document.getElementById('ss-whatsapp').value.trim()||null,email:document.getElementById('ss-email').value.trim()||null,
+    endereco:document.getElementById('ss-endereco').value.trim()||null,horario_atendimento:document.getElementById('ss-horario').value.trim()||null,
+    orcamento_anual:parseMoney(document.getElementById('ss-orcamento').value),meta_anual:parseMoney(document.getElementById('ss-meta').value),
+    observacoes:document.getElementById('ss-obs').value.trim()||null,atualizado_em:new Date().toISOString()};
+  const btn=document.getElementById('ss-btn');btn.disabled=true;
+  try{
+    if(secSaudeId){await sbPatch('saude_secretaria','id=eq.'+secSaudeId,data);}
+    else{const r=await sbPost('saude_secretaria',data);secSaudeId=r[0].id;}
+    alert('Secretaria salva com sucesso!');
+  }catch(e){alert('Erro: '+e.message.slice(0,200));}
+  finally{btn.disabled=false;}
+}
+
+// ============ FINANCEIRO ============
+async function loadFinanceiro(){
+  try{
+    const [sec,compras,contratos]=await Promise.all([
+      sbGet('saude_secretaria','select=orcamento_anual&limit=1').catch(()=>[]),
+      sbGet('saude_compras','select=valor,situacao').catch(()=>[]),
+      sbGet('saude_contratos','select=valor,saldo,situacao').catch(()=>[]),
+    ]);
+    const orc=sec.length?Number(sec[0].orcamento_anual)||0:0;
+    const totalCompras=compras.reduce((s,c)=>s+(Number(c.valor)||0),0);
+    const totalContratos=contratos.reduce((s,c)=>s+(Number(c.valor)||0),0);
+    const executado=totalCompras+totalContratos;
+    const pctExec=orc>0?Math.round(executado/orc*100):0;
+    document.getElementById('fin-kpi').innerHTML=[
+      ['Orçamento',moneyShort(orc),'anual previsto'],['Executado',moneyShort(executado),pctExec+'% do orçamento'],
+      ['Compras',moneyShort(totalCompras),compras.length+' processos'],['Contratos',moneyShort(totalContratos),contratos.length+' contratos'],
+    ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
+
+    const cSit={};compras.forEach(c=>{cSit[c.situacao]=(cSit[c.situacao]||0)+1;});
+    const maxCS=Math.max(1,...Object.values(cSit));
+    document.getElementById('fin-compras-bars').innerHTML=Object.entries(cSit).map(([s,v])=>'<div class="bar-row"><span>'+s+'</span><div class="bar-track"><div class="bar-fill bar-fill-royal" style="width:'+Math.round(v/maxCS*100)+'%"></div></div><span class="val">'+v+'</span></div>').join('')||'<p style="color:var(--muted);font-size:12px;">Sem compras.</p>';
+
+    const ctSit={};contratos.forEach(c=>{ctSit[c.situacao]=(ctSit[c.situacao]||0)+1;});
+    const maxCT=Math.max(1,...Object.values(ctSit));
+    document.getElementById('fin-contratos-bars').innerHTML=Object.entries(ctSit).map(([s,v])=>'<div class="bar-row"><span>'+s+'</span><div class="bar-track"><div class="bar-fill bar-fill-royal" style="width:'+Math.round(v/maxCT*100)+'%"></div></div><span class="val">'+v+'</span></div>').join('')||'<p style="color:var(--muted);font-size:12px;">Sem contratos.</p>';
+  }catch(e){}
+}
+
+// ============ ALERTAS ============
+async function loadAlertas(){
+  try{
+    const alertas=await sbGet('saude_alertas','select=*&order=criado_em.desc');
+    document.getElementById('alertas-list').innerHTML=alertas.length?alertas.map(a=>{
+      const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';
+      const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';
+      return'<div class="diag diag-'+cls+'" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">'+ico+' '+a.mensagem+(a.lido?'':' <button class="btn-ghost" style="font-size:10px;padding:3px 8px;" onclick="marcarAlertaLido(\''+a.id+'\')">Marcar lido</button>')+'</div>';
+    }).join(''):'<div class="panel"><p style="color:var(--muted);text-align:center;padding:30px;">Nenhum alerta registrado.</p></div>';
+  }catch(e){}
+}
+async function marcarAlertaLido(id){
+  try{await sbPatch('saude_alertas','id=eq.'+id,{lido:true});loadAlertas();}catch(e){}
+}
+
+// ============ EXPORTS ============
+function exportPdf(key){
+  const m=MODULES[key];if(!m)return;
+  const data=caches[key+'_data']||[];
+  const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');
+  doc.setFontSize(16);doc.text(m.title+' — Conecta Gestão Saúde',14,18);
+  doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR')+' às '+new Date().toLocaleTimeString('pt-BR'),14,26);
+  const rows=data.map(r=>m.cols.map(c=>{const v=m.renderCol(r,c);return v.replace(/<[^>]+>/g,'');}));
+  doc.autoTable({head:[m.colLabels],body:rows,startY:32,styles:{fontSize:9},headStyles:{fillColor:[37,99,235]}});
+  doc.save(key+'_saude.pdf');
+}
+function exportXlsx(key){
+  const m=MODULES[key];if(!m)return;
+  const data=caches[key+'_data']||[];
+  const rows=data.map(r=>{const o={};m.cols.forEach((c,i)=>{o[m.colLabels[i]]=m.renderCol(r,c).replace(/<[^>]+>/g,'');});return o;});
+  const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,m.title.slice(0,31));
+  XLSX.writeFile(wb,key+'_saude.xlsx');
+}
+
+// ============ LOADERS MAP ============
+const LOADERS={
+  dashboard_saude:loadDashboard,
+  secretaria_saude:loadSecretaria,
+  financeiro_saude:loadFinanceiro,
+  alertas_saude:loadAlertas,
+};
+Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>loadCrudData(k);});
+</script>
+<div id="cg-dev-credit" style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>
