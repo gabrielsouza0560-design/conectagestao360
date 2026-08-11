@@ -106,6 +106,8 @@ td{padding:9px 8px;border-bottom:1px solid var(--line);}tr:last-child td{border-
 </div>
 <script>
 const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+const SBC_URL="https://qcwjugzpnuykazwtyecb.supabase.co",SBC_KEY="sb_publishable_2Hf4XzG4mTv3penBUQY_8A_0nSzLru1";
+async function sbGetComercio(t,q){const r=await fetch(SBC_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SBC_KEY,Authorization:'Bearer '+SBC_KEY}});if(!r.ok)throw new Error(await r.text());return r.json();}
 let session=null;
 function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
 async function doLogin(){
@@ -446,7 +448,7 @@ async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await
 function buildViews(){
   let html='';
   // Dashboard
-  html+='<section class="view active" id="view-dashboard_ic"><div class="topbar"><div><h1>Dashboard — Indústria e Comércio</h1><div class="sub">Central de Desenvolvimento Econômico</div></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Empresas por situação</h3><div class="bars" id="dash-emp-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="grid-2"><div class="panel"><h3>Mercado de trabalho</h3><div id="dash-trabalho"></div></div><div class="panel"><h3>Crédito e empreendedorismo</h3><div id="dash-credito"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
+  html+='<section class="view active" id="view-dashboard_ic"><div class="topbar"><div><h1>Dashboard — Indústria e Comércio</h1><div class="sub">Central de Desenvolvimento Econômico</div></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Empresas por situação</h3><div class="bars" id="dash-emp-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="grid-2"><div class="panel"><h3>Mercado de trabalho</h3><div id="dash-trabalho"></div></div><div class="panel"><h3>Crédito e empreendedorismo</h3><div id="dash-credito"></div></div></div><div class="panel"><h3>Comércio Local — Conecta Comércio</h3><p class="panel-sub">Dados ao vivo do app público de comércio, vagas e prestadores</p><div class="kpi-grid" id="dash-comercio-kpi"></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
   // Secretaria
   html+='<section class="view" id="view-secretaria_ic"><div class="topbar"><div><h1>Secretaria de Indústria e Comércio</h1></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="si-nome"></div><div class="field"><label>Secretário(a)</label><input id="si-secretario"></div><div class="field"><label>Telefone</label><input id="si-telefone"></div><div class="field"><label>WhatsApp</label><input id="si-whatsapp"></div><div class="field"><label>E-mail</label><input id="si-email"></div><div class="field span-3"><label>Endereço</label><input id="si-endereco"></div><div class="field"><label>Horário</label><input id="si-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="si-orcamento" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="si-meta" inputmode="decimal"></div><div class="field span-3"><label>Observações</label><textarea id="si-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSec()" id="si-btn">Salvar</button></div></div></section>';
   // CRUD modules
@@ -504,7 +506,31 @@ function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)ret
   el.innerHTML=h;}
 
 // Dashboard
+async function loadDashboardComercio(){
+  try{
+    const [empresas,produtos,vagas,prestadores,feirantes]=await Promise.all([
+      sbGetComercio('empresas','select=id,visualizacoes&status=eq.aprovada').catch(()=>[]),
+      sbGetComercio('produtos','select=id&ativo=eq.true').catch(()=>[]),
+      sbGetComercio('vagas','select=id&status=eq.aberta').catch(()=>[]),
+      sbGetComercio('prestadores','select=id&status=eq.aprovado').catch(()=>[]),
+      sbGetComercio('feirantes','select=id&status=eq.aprovado').catch(()=>[]),
+    ]);
+    const visualizacoes=empresas.reduce((s,e)=>s+(Number(e.visualizacoes)||0),0);
+    document.getElementById('dash-comercio-kpi').innerHTML=[
+      ['Empresas','Empresas aprovadas',empresas.length],
+      ['Produtos','Produtos ativos',produtos.length],
+      ['Vagas','Vagas abertas',vagas.length],
+      ['Prestadores','Prestadores aprovados',prestadores.length],
+      ['Feirantes','Feirantes aprovados',feirantes.length],
+      ['Visualizações','Total de visualizações',visualizacoes],
+    ].map(([i,l,n])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
+  }catch(e){
+    document.getElementById('dash-comercio-kpi').innerHTML='<div class="diag diag-warn">Não foi possível conectar ao Conecta Comércio: '+e.message.slice(0,150)+'</div>';
+  }
+}
+
 async function loadDashboard(){try{
+  loadDashboardComercio();
   const [emp,meis,vag,atend,fom,micro,cap,ev,fe,inv,inc,met,al,trab]=await Promise.all([
     sbGet('ic_empresas','select=id,situacao,porte,bairro,numero_funcionarios').catch(()=>[]),
     sbGet('ic_meis','select=id,situacao').catch(()=>[]),
