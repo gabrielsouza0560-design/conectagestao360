@@ -4,6 +4,7 @@
     { "source": "/cadastro", "destination": "/conecta-gestao-cadastro.html" },
     { "source": "/dashboard", "destination": "/conecta-gestao-dashboard-prefeito.html" },
     { "source": "/saude", "destination": "/conecta-gestao-saude.html" },
-    { "source": "/industria", "destination": "/conecta-gestao-industria-comercio.html" }
+    { "source": "/industria", "destination": "/conecta-gestao-industria-comercio.html" },
+    { "source": "/educacao", "destination": "/conecta-gestao-educacao.html" }
   ]
 }

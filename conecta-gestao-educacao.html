@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Educação · Gabriel Oliveira</title>
+<meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#2563EB">
+<style>
+:root{--royal:#2563EB;--neon:#3B82F6;--light:#60A5FA;--darkblue:#0F172A;--bg:#F8FAFC;--surface:#FFFFFF;--ink:#0F172A;--ink-soft:#475569;--line:rgba(15,23,42,.08);--ok:#059669;--danger:#DC2626;--warn:#D97706;--muted:#94A3B8;--radius:18px;--sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;--shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);}
+*{box-sizing:border-box;}body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}button{font-family:inherit;cursor:pointer;}select,input,textarea{font-family:inherit;}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
+#login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+@media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+.login-brand{background:linear-gradient(150deg,var(--darkblue) 0%,#16265A 45%,var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+.login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle,rgba(96,165,250,.25),transparent 70%);}
+.brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+.brand-name{font-size:19px;font-weight:800;}.brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+.brand-quote{position:relative;z-index:1;max-width:420px;}.brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;}.brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+.brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+.login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-form{width:100%;max-width:380px;}.login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+.field{margin-bottom:18px;}.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(37,99,235,.35);}
+.btn-primary:hover{transform:translateY(-1px);}.btn-primary:disabled{opacity:.6;pointer-events:none;}
+.login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
+header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.hd-left{display:flex;align-items:center;gap:12px;}.hd-left .name{font-size:16px;font-weight:800;}.hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+.hd-right{display:flex;align-items:center;gap:12px;font-size:12px;color:#B6C4DD;}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;}.btn-ghost:hover{border-color:var(--royal);color:var(--royal);}
+.btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 12px rgba(37,99,235,.35);}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;}.logout-btn:hover{border-color:var(--light);color:var(--light);}
+.back-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;text-decoration:none;}.back-btn:hover{border-color:var(--light);color:var(--light);}
+.app-body{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:240px;background:var(--darkblue);padding:12px 8px;overflow-y:auto;flex-shrink:0;}
+.sidebar::-webkit-scrollbar{width:4px;}.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+.nav-group-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:14px 10px 4px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:#B6C4DD;font-size:12px;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:background .15s;}
+.nav-item:hover{background:rgba(59,130,246,.12);}.nav-item.active{background:linear-gradient(90deg,rgba(37,99,235,.4),rgba(59,130,246,.15));color:#fff;font-weight:700;}
+main{flex:1;padding:28px 36px 60px;max-width:1300px;overflow-x:hidden;}
+@media(max-width:860px){.sidebar{display:none;}main{padding:20px;}}
+.view{display:none;}.view.active{display:block;}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.topbar h1{font-size:24px;margin:0 0 2px;font-weight:800;}.topbar .sub{font-size:12px;color:var(--muted);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:1000px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);transition:transform .2s;}.kpi:hover{transform:translateY(-2px);}
+.kpi .ico{font-size:10px;color:var(--royal);text-transform:uppercase;letter-spacing:.8px;font-weight:800;margin-bottom:6px;}
+.kpi .num{font-size:22px;color:var(--ink);font-weight:800;}.kpi .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.panel h3{font-size:15px;margin:0 0 4px;font-weight:800;}.panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 14px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+.field.span-2{grid-column:span 2;}.field.span-3{grid-column:span 3;}
+.form-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);font-weight:700;}
+td{padding:9px 8px;border-bottom:1px solid var(--line);}tr:last-child td{border-bottom:none;}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.status-ativa,.status-ativo,.status-atingida,.status-vigente,.status-aprovado,.status-disponivel,.status-funcionando,.status-concluida,.status-realizada,.status-resolvido{background:#D1FAE5;color:var(--ok);}
+.status-inativa,.status-inativo,.status-encerrada,.status-cancelada,.status-reprovado,.status-vencido,.status-abaixo,.status-expirada,.status-indisponivel{background:#FEF2F2;color:var(--danger);}
+.status-em_andamento,.status-atencao,.status-pendente,.status-aberta,.status-em_analise,.status-emprestado,.status-manutencao,.status-aguardando{background:#FEF3C7;color:var(--warn);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:1000px){.grid-2{grid-template-columns:1fr;}}
+.diag{padding:14px;border-radius:12px;font-size:12.5px;line-height:1.6;margin-bottom:8px;}
+.diag-ok{background:#D1FAE5;border:1px solid rgba(5,150,105,.25);color:#065F46;}
+.diag-warn{background:#FEF3C7;border:1px solid rgba(217,119,6,.25);color:#92400E;}
+.diag-danger{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
+.bars{display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:grid;grid-template-columns:160px 1fr 44px;align-items:center;gap:10px;font-size:12px;}
+.bar-track{background:#EFF6FF;border-radius:5px;height:8px;overflow:hidden;}.bar-fill{height:100%;border-radius:5px;}
+.bar-fill-royal{background:linear-gradient(90deg,var(--royal),var(--light));}
+.bar-fill-ok{background:linear-gradient(90deg,var(--ok),#34D399);}
+.bar-row .val{text-align:right;color:var(--ink-soft);font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name">Conecta Gestão<small>Educação</small></div></div>
+    <div class="brand-quote"><h1>Central de Gestão Educacional Municipal.</h1><p>Escolas, alunos, matrículas, frequência, transporte, alimentação, infraestrutura — inteligência para decisão.</p></div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap"><div class="login-form">
+    <h2>Acessar</h2><p class="sub">Entre com sua conta institucional.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div></div>
+</div>
+<div id="app" style="display:none;">
+<header>
+  <div class="hd-left"><div class="logo">CG</div><div class="name">Conecta Gestão<small>Educação</small></div></div>
+  <div class="hd-right"><span id="hd-role"></span><a class="back-btn" href="conecta-gestao-painel-admin.html">← Painel</a><button class="logout-btn" onclick="doLogout()">Sair</button></div>
+</header>
+<div class="app-body">
+<aside class="sidebar" id="sidebar-nav"></aside>
+<main id="main-content"></main>
+</div>
+</div>
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+let session=null;
+function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),senha=document.getElementById('login-senha').value,err=document.getElementById('login-error'),btn=document.getElementById('login-btn');
+  err.classList.remove('show');if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
+    session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    try{localStorage.setItem('cg_session',JSON.stringify(session));}catch(e){}
+    enterApp();
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+function doLogout(){session=null;try{localStorage.removeItem('cg_session');}catch(e){}document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+function tryAutoLogin(){
+  try{const s=JSON.parse(localStorage.getItem('cg_session'));if(!s||!s.access_token)return false;
+    const c=decodeJwt(s.access_token);if(!c.exp||c.exp*1000<Date.now())return false;
+    session={access_token:s.access_token,claims:c};enterApp();return true;
+  }catch(e){return false;}
+}
+function enterApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');buildNav();buildViews();navigateTo('dashboard_ed');}
+window.addEventListener('DOMContentLoaded',()=>{tryAutoLogin();});
+
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPatch(t,q,d){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbDel(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'DELETE',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());}
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';}
+function moneyShort(v){if(!v)return'R$ 0';const n=Number(v);if(n>=1e6)return'R$ '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'R$ '+(n/1e3).toFixed(0)+'k';return'R$ '+n.toFixed(0);}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function pill(s,label){return'<span class="status-pill status-'+(s||'')+'">'+(label||s||'—')+'</span>';}
+function parseMoney(v){if(!v)return null;return parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));}
+function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-000000000001';}
+
+const NAV_GROUPS=[
+  {label:'Geral',items:[['dashboard_ed','Dashboard'],['secretaria_ed','Secretaria']]},
+  {label:'Ensino',items:[['escolas','Escolas'],['alunos','Alunos'],['matriculas','Matrículas'],['vagas_ed','Vagas e Lista de Espera'],['turmas','Turmas']]},
+  {label:'Pessoas',items:[['professores','Professores'],['servidores_ed','Servidores']]},
+  {label:'Pedagógico',items:[['frequencia','Frequência'],['avaliacoes','Avaliações e Notas'],['aprendizagem','Aprendizagem'],['ed_infantil','Educação Infantil'],['ed_especial','Educação Especial']]},
+  {label:'Logística',items:[['transporte_ed','Transporte Escolar'],['frota_ed','Frota'],['frota_abast_ed','Abastecimentos'],['frota_manut_ed','Manutenções Frota']]},
+  {label:'Alimentação',items:[['alimentacao','Alimentação Escolar'],['estoque_ed','Estoque']]},
+  {label:'Recursos',items:[['biblioteca','Biblioteca'],['tecnologia','Tecnologia'],['infraestrutura_ed','Infraestrutura'],['manutencao_ed','Manutenção']]},
+  {label:'Programas',items:[['programas_ed','Programas'],['projetos_ed','Projetos'],['eventos_ed','Eventos']]},
+  {label:'Comunidade',items:[['familia','Família e Comunidade'],['ocorrencias','Ocorrências']]},
+  {label:'Gestão',items:[['compras_ed','Compras'],['contratos_ed','Contratos'],['financeiro_ed','Financeiro'],['metas_ed','Metas'],['indicadores_ed','Indicadores']]},
+  {label:'Sistema',items:[['relatorios_ed','Relatórios'],['alertas_ed','Alertas'],['documentos_ed','Documentos'],['auditoria_ed','Auditoria'],['config_ed','Configurações']]},
+];
+let currentView='dashboard_ed';
+function buildNav(){let h='';NAV_GROUPS.forEach(g=>{h+='<div class="nav-group-label">'+g.label+'</div>';g.items.forEach(([k,l])=>{h+='<button class="nav-item'+(k==='dashboard_ed'?' active':'')+'" data-key="'+k+'" onclick="navigateTo(\''+k+'\')">'+l+'</button>';});});document.getElementById('sidebar-nav').innerHTML=h;}
+function navigateTo(key){currentView=key;document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.key===key));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+key));if(LOADERS[key])LOADERS[key]();}
+
+let caches={};
+const MODULES={
+  escolas:{table:'ed_escolas',title:'Escolas',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'codigo_inep',label:'Código INEP'},
+    {id:'cnpj',label:'CNPJ'},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
+    {id:'telefone',label:'Telefone'},{id:'email',label:'E-mail'},{id:'diretor',label:'Diretor(a)'},
+    {id:'coordenador',label:'Coordenador(a)'},{id:'modalidade',label:'Modalidade'},{id:'niveis_ensino',label:'Níveis de ensino'},
+    {id:'turnos',label:'Turnos'},{id:'numero_salas',label:'Nº salas',type:'number'},{id:'capacidade',label:'Capacidade',type:'number'},
+    {id:'numero_alunos',label:'Nº alunos',type:'number'},{id:'numero_professores',label:'Nº professores',type:'number'},
+    {id:'biblioteca',label:'Biblioteca',type:'checkbox'},{id:'laboratorio',label:'Laboratório',type:'checkbox'},
+    {id:'quadra',label:'Quadra',type:'checkbox'},{id:'cozinha',label:'Cozinha',type:'checkbox'},
+    {id:'refeitorio',label:'Refeitório',type:'checkbox'},{id:'acessibilidade',label:'Acessibilidade',type:'checkbox'},
+    {id:'internet',label:'Internet',type:'checkbox'},{id:'computadores',label:'Computadores',type:'number'},
+    {id:'climatizacao',label:'Climatização',type:'checkbox'},
+    {id:'situacao_estrutura',label:'Situação da estrutura',type:'select',opts:[['boa','Boa'],['regular','Regular'],['precaria','Precária'],['reforma','Em reforma']]},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['nome','bairro','diretor','numero_alunos','capacidade','situacao_estrutura'],colLabels:['Nome','Bairro','Diretor(a)','Alunos','Capac.','Estrutura'],
+  renderCol:(r,c)=>c==='situacao_estrutura'?pill(r.situacao_estrutura):(r[c]||'—')},
+
+  alunos:{table:'ed_alunos',title:'Alunos',fields:[
+    {id:'identificador',label:'Identificador'},{id:'nome',label:'Nome',span:2,required:true},
+    {id:'data_nascimento',label:'Data de nascimento',type:'date'},{id:'sexo',label:'Sexo',type:'select',opts:[['M','Masculino'],['F','Feminino']]},
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'turma',label:'Turma'},{id:'serie_ano',label:'Série/Ano'},{id:'turno',label:'Turno',type:'select',opts:[['matutino','Matutino'],['vespertino','Vespertino'],['integral','Integral']]},
+    {id:'data_matricula',label:'Data da matrícula',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['transferido','Transferido'],['cancelado','Cancelado'],['concluido','Concluído']]},
+    {id:'bairro',label:'Bairro'},{id:'responsavel',label:'Responsável'},{id:'contatos',label:'Contatos'},
+    {id:'transporte',label:'Transporte escolar',type:'checkbox'},{id:'alimentacao',label:'Alimentação',type:'checkbox',default:true},
+    {id:'atendimento_especializado',label:'Atend. especializado',type:'checkbox'}
+  ],cols:['nome','serie_ano','turma','turno','situacao'],colLabels:['Nome','Série','Turma','Turno','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  matriculas:{table:'ed_matriculas',title:'Matrículas',fields:[
+    {id:'aluno_id',label:'Aluno',type:'ref',ref:'alunos_ed'},{id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'ano_letivo',label:'Ano letivo'},{id:'serie',label:'Série'},{id:'turma',label:'Turma'},
+    {id:'turno',label:'Turno',type:'select',opts:[['matutino','Matutino'],['vespertino','Vespertino'],['integral','Integral']]},
+    {id:'data',label:'Data',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['transferida','Transferida'],['cancelada','Cancelada'],['concluida','Concluída'],['remanejada','Remanejada']]},
+    {id:'transferencia',label:'Transferência',type:'checkbox'},{id:'remanejamento',label:'Remanejamento',type:'checkbox'},
+    {id:'motivo',label:'Motivo',span:3}
+  ],cols:['ano_letivo','serie','turma','turno','situacao','data'],colLabels:['Ano','Série','Turma','Turno','Situação','Data'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  vagas_ed:{table:'ed_vagas',title:'Vagas e Lista de Espera',fields:[
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},{id:'serie',label:'Série'},{id:'turma',label:'Turma'},
+    {id:'turno',label:'Turno'},{id:'vagas_disponiveis',label:'Vagas disponíveis',type:'number'},
+    {id:'vagas_ocupadas',label:'Vagas ocupadas',type:'number'},{id:'capacidade',label:'Capacidade',type:'number'},
+    {id:'lista_espera',label:'Lista de espera',type:'number'},{id:'prioridade',label:'Prioridade'},
+    {id:'situacao',label:'Situação'}
+  ],cols:['serie','turno','vagas_disponiveis','vagas_ocupadas','lista_espera','capacidade'],colLabels:['Série','Turno','Disponíveis','Ocupadas','Espera','Capac.'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  turmas:{table:'ed_turmas',title:'Turmas',fields:[
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},{id:'serie_ano',label:'Série/Ano'},{id:'turma',label:'Turma',required:true},
+    {id:'sala',label:'Sala'},{id:'turno',label:'Turno',type:'select',opts:[['matutino','Matutino'],['vespertino','Vespertino'],['integral','Integral']]},
+    {id:'professor_responsavel',label:'Professor responsável'},{id:'quantidade_alunos',label:'Qtd. alunos',type:'number'},
+    {id:'capacidade',label:'Capacidade',type:'number'},{id:'disciplinas',label:'Disciplinas',span:2},{id:'horarios',label:'Horários'}
+  ],cols:['turma','serie_ano','turno','professor_responsavel','quantidade_alunos','capacidade'],colLabels:['Turma','Série','Turno','Professor','Alunos','Capac.'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  professores:{table:'ed_professores',title:'Professores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'matricula',label:'Matrícula'},
+    {id:'cargo',label:'Cargo'},{id:'funcao',label:'Função'},{id:'formacao',label:'Formação'},
+    {id:'graduacao',label:'Graduação'},{id:'especializacao',label:'Especialização'},{id:'disciplina',label:'Disciplina'},
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},{id:'turma',label:'Turma'},
+    {id:'carga_horaria',label:'Carga horária (h)',type:'number'},{id:'jornada',label:'Jornada'},{id:'turno',label:'Turno'},
+    {id:'data_admissao',label:'Admissão',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['afastado','Afastado'],['licenca','Licença'],['inativo','Inativo']]}
+  ],cols:['nome','disciplina','turno','carga_horaria','situacao'],colLabels:['Nome','Disciplina','Turno','CH','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  servidores_ed:{table:'ed_servidores',title:'Servidores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'cargo',label:'Cargo'},
+    {id:'funcao',label:'Função'},{id:'setor',label:'Setor'},{id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'carga_horaria',label:'Carga horária',type:'number'},{id:'data_admissao',label:'Admissão',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['afastado','Afastado'],['licenca','Licença'],['inativo','Inativo']]},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['nome','cargo','setor','carga_horaria','situacao'],colLabels:['Nome','Cargo','Setor','CH','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  frequencia:{table:'ed_frequencia',title:'Frequência',fields:[
+    {id:'aluno_id',label:'Aluno',type:'ref',ref:'alunos_ed'},{id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'turma',label:'Turma'},{id:'data',label:'Data',type:'date',required:true},{id:'disciplina',label:'Disciplina'},
+    {id:'presenca',label:'Presença',type:'checkbox',default:true},{id:'falta',label:'Falta',type:'checkbox'},
+    {id:'falta_justificada',label:'Falta justificada',type:'checkbox'},{id:'motivo',label:'Motivo',span:3}
+  ],cols:['data','turma','disciplina','presenca','falta'],colLabels:['Data','Turma','Disciplina','Presença','Falta'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='presenca'?(r.presenca?'Sim':'Não'):c==='falta'?(r.falta?'Sim':'—'):(r[c]||'—'),query:'order=data.desc'},
+
+  avaliacoes:{table:'ed_avaliacoes',title:'Avaliações e Notas',fields:[
+    {id:'aluno_id',label:'Aluno',type:'ref',ref:'alunos_ed'},{id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'turma',label:'Turma'},{id:'disciplina',label:'Disciplina'},{id:'avaliacao',label:'Avaliação'},
+    {id:'periodo',label:'Período'},{id:'nota',label:'Nota',type:'number'},{id:'media',label:'Média',type:'number'},
+    {id:'recuperacao',label:'Recuperação',type:'number'},
+    {id:'resultado',label:'Resultado',type:'select',opts:[['aprovado','Aprovado'],['reprovado','Reprovado'],['recuperacao','Recuperação'],['em_andamento','Em andamento']]}
+  ],cols:['turma','disciplina','periodo','nota','media','resultado'],colLabels:['Turma','Disciplina','Período','Nota','Média','Resultado'],
+  renderCol:(r,c)=>c==='resultado'?pill(r.resultado):(r[c]||'—')},
+
+  aprendizagem:{table:'ed_aprendizagem',title:'Aprendizagem',fields:[
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},{id:'turma',label:'Turma'},{id:'serie',label:'Série'},
+    {id:'disciplina',label:'Disciplina'},{id:'avaliacao_diagnostica',label:'Avaliação diagnóstica'},{id:'habilidade',label:'Habilidade'},
+    {id:'competencia',label:'Competência'},{id:'resultado',label:'Resultado'},{id:'intervencao',label:'Intervenção'},
+    {id:'acompanhamento',label:'Acompanhamento',span:2},{id:'evolucao',label:'Evolução'},
+    {id:'meta',label:'Meta'},{id:'periodo',label:'Período'},{id:'ano',label:'Ano'}
+  ],cols:['turma','disciplina','habilidade','resultado','periodo'],colLabels:['Turma','Disciplina','Habilidade','Resultado','Período'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  ed_infantil:{table:'ed_educacao_infantil',title:'Educação Infantil',fields:[
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['creche','Creche'],['pre_escola','Pré-escola']]},
+    {id:'criancas_matriculadas',label:'Crianças matriculadas',type:'number'},{id:'vagas',label:'Vagas',type:'number'},
+    {id:'lista_espera',label:'Lista de espera',type:'number'},{id:'frequencia_media',label:'Frequência média (%)',type:'number'},
+    {id:'turmas',label:'Turmas',type:'number'},{id:'profissionais',label:'Profissionais',type:'number'},
+    {id:'capacidade',label:'Capacidade',type:'number'},{id:'alimentacao',label:'Alimentação'},{id:'atividades',label:'Atividades'},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['tipo','criancas_matriculadas','vagas','lista_espera','frequencia_media'],colLabels:['Tipo','Matrículas','Vagas','Espera','Freq.%'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):(r[c]||'—')},
+
+  ed_especial:{table:'ed_educacao_especial',title:'Educação Especial',fields:[
+    {id:'aluno_id',label:'Aluno',type:'ref',ref:'alunos_ed'},{id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'atendimento_especializado',label:'Atendimento especializado',span:2},{id:'profissional_apoio',label:'Profissional de apoio'},
+    {id:'sala_recursos',label:'Sala de recursos',type:'checkbox'},{id:'recursos_necessarios',label:'Recursos necessários',span:2},
+    {id:'atendimento',label:'Atendimento'},{id:'frequencia',label:'Frequência'},{id:'acompanhamento',label:'Acompanhamento',span:2},
+    {id:'encaminhamentos',label:'Encaminhamentos',span:3}
+  ],cols:['atendimento_especializado','profissional_apoio','atendimento','frequencia'],colLabels:['Atendimento','Profissional','Tipo','Frequência'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  transporte_ed:{table:'ed_transporte',title:'Transporte Escolar',fields:[
+    {id:'aluno_id',label:'Aluno',type:'ref',ref:'alunos_ed'},{id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'rota',label:'Rota'},{id:'veiculo',label:'Veículo'},{id:'motorista',label:'Motorista'},{id:'monitor',label:'Monitor'},
+    {id:'ponto_embarque',label:'Ponto de embarque'},{id:'destino',label:'Destino'},{id:'horario',label:'Horário'},
+    {id:'quilometragem',label:'Km',type:'number'},{id:'passageiros',label:'Passageiros',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo'],['suspenso','Suspenso']]}
+  ],cols:['rota','veiculo','motorista','passageiros','quilometragem','situacao'],colLabels:['Rota','Veículo','Motorista','Passag.','Km','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  frota_ed:{table:'ed_frota',title:'Frota',fields:[
+    {id:'veiculo',label:'Veículo',span:2,required:true},{id:'placa',label:'Placa'},
+    {id:'modelo',label:'Modelo'},{id:'marca',label:'Marca'},{id:'ano',label:'Ano',type:'number'},
+    {id:'capacidade',label:'Capacidade',type:'number'},{id:'quilometragem',label:'Km',type:'number'},
+    {id:'combustivel',label:'Combustível'},{id:'motorista',label:'Motorista'},{id:'seguro',label:'Seguro'},
+    {id:'licenciamento',label:'Licenciamento'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['manutencao','Manutenção'],['inativo','Inativo']]}
+  ],cols:['veiculo','placa','capacidade','quilometragem','situacao'],colLabels:['Veículo','Placa','Capac.','Km','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  frota_abast_ed:{table:'ed_frota_abastecimentos',title:'Abastecimentos',fields:[
+    {id:'veiculo_id',label:'Veículo',type:'ref',ref:'frota_ed'},{id:'data',label:'Data',type:'date',required:true},
+    {id:'combustivel',label:'Combustível'},{id:'litros',label:'Litros',type:'number'},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'quilometragem',label:'Km',type:'number'},{id:'posto',label:'Posto'},{id:'motorista',label:'Motorista'}
+  ],cols:['data','combustivel','litros','valor','quilometragem'],colLabels:['Data','Combustível','Litros','Valor','Km'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):(r[c]||'—'),query:'order=data.desc'},
+
+  frota_manut_ed:{table:'ed_frota_manutencoes',title:'Manutenções Frota',fields:[
+    {id:'veiculo_id',label:'Veículo',type:'ref',ref:'frota_ed'},{id:'data',label:'Data',type:'date',required:true},
+    {id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:2},{id:'oficina',label:'Oficina'},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'quilometragem',label:'Km',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['realizada','Realizada'],['pendente','Pendente'],['agendada','Agendada']]}
+  ],cols:['data','tipo','oficina','valor','situacao'],colLabels:['Data','Tipo','Oficina','Valor','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc'},
+
+  alimentacao:{table:'ed_alimentacao',title:'Alimentação Escolar',fields:[
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},{id:'data',label:'Data',type:'date',required:true},
+    {id:'cardapio',label:'Cardápio',span:2},{id:'refeicao',label:'Refeição'},
+    {id:'quantidade_planejada',label:'Planejada',type:'number'},{id:'quantidade_preparada',label:'Preparada',type:'number'},
+    {id:'quantidade_servida',label:'Servida',type:'number'},{id:'alunos_atendidos',label:'Alunos atendidos',type:'number'},
+    {id:'fornecedor',label:'Fornecedor'},{id:'custo',label:'Custo (R$)',type:'money'},{id:'desperdicio',label:'Desperdício'}
+  ],cols:['data','refeicao','quantidade_servida','alunos_atendidos','custo'],colLabels:['Data','Refeição','Servidas','Alunos','Custo'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):(r[c]||'—'),query:'order=data.desc'},
+
+  estoque_ed:{table:'ed_estoque',title:'Estoque',fields:[
+    {id:'produto',label:'Produto',span:2,required:true},
+    {id:'categoria',label:'Categoria',type:'select',opts:[['alimento','Alimento'],['material_escolar','Material escolar'],['material_pedagogico','Material pedagógico'],['limpeza','Limpeza'],['uniforme','Uniforme'],['equipamento','Equipamento'],['outro','Outro']]},
+    {id:'unidade',label:'Unidade'},{id:'quantidade',label:'Quantidade',type:'number'},{id:'estoque_minimo',label:'Estoque mínimo',type:'number'},
+    {id:'estoque_maximo',label:'Estoque máximo',type:'number'},{id:'entrada',label:'Entrada',type:'number'},{id:'saida',label:'Saída',type:'number'},
+    {id:'saldo',label:'Saldo',type:'number'},{id:'validade',label:'Validade',type:'date'},{id:'localizacao',label:'Localização'},
+    {id:'fornecedor',label:'Fornecedor'}
+  ],cols:['produto','categoria','quantidade','saldo','validade'],colLabels:['Produto','Categoria','Qtd.','Saldo','Validade'],
+  renderCol:(r,c)=>c==='validade'?fmtDate(r.validade):c==='categoria'?pill(r.categoria):(r[c]||'—')},
+
+  biblioteca:{table:'ed_biblioteca',title:'Biblioteca',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'autor',label:'Autor'},
+    {id:'categoria',label:'Categoria'},{id:'isbn',label:'ISBN'},{id:'quantidade',label:'Quantidade',type:'number'},
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},{id:'localizacao',label:'Localização'},
+    {id:'emprestimo',label:'Empréstimo',type:'date'},{id:'devolucao',label:'Devolução',type:'date'},{id:'aluno',label:'Aluno'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['disponivel','Disponível'],['emprestado','Emprestado'],['indisponivel','Indisponível']]}
+  ],cols:['titulo','autor','categoria','quantidade','situacao'],colLabels:['Título','Autor','Categoria','Qtd.','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  tecnologia:{table:'ed_tecnologia',title:'Tecnologia',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['computador','Computador'],['notebook','Notebook'],['tablet','Tablet'],['projetor','Projetor'],['impressora','Impressora'],['lousa_digital','Lousa digital'],['rede','Equipamento de rede'],['outro','Outro']],required:true},
+    {id:'patrimonio',label:'Patrimônio'},{id:'numero_serie',label:'Nº série'},
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},{id:'localizacao',label:'Localização'},
+    {id:'data_aquisicao',label:'Aquisição',type:'date'},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['funcionando','Funcionando'],['manutencao','Manutenção'],['inativo','Inativo']]},
+    {id:'responsavel',label:'Responsável'}
+  ],cols:['tipo','patrimonio','localizacao','valor','situacao'],colLabels:['Tipo','Patrimônio','Local','Valor','Situação'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):c==='tipo'?pill(r.tipo):(r[c]||'—')},
+
+  infraestrutura_ed:{table:'ed_infraestrutura',title:'Infraestrutura',fields:[
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'salas',label:'Salas'},{id:'banheiros',label:'Banheiros'},{id:'cozinha',label:'Cozinha'},
+    {id:'refeitorio',label:'Refeitório'},{id:'quadra',label:'Quadra'},{id:'biblioteca',label:'Biblioteca'},
+    {id:'laboratorio',label:'Laboratório'},{id:'telhado',label:'Telhado'},{id:'pintura',label:'Pintura'},
+    {id:'iluminacao',label:'Iluminação'},{id:'eletrica',label:'Elétrica'},{id:'hidraulica',label:'Hidráulica'},
+    {id:'internet',label:'Internet'},{id:'climatizacao',label:'Climatização'},{id:'seguranca',label:'Segurança'},
+    {id:'acessibilidade',label:'Acessibilidade'}
+  ],cols:['salas','telhado','eletrica','internet','acessibilidade'],colLabels:['Salas','Telhado','Elétrica','Internet','Acessib.'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  manutencao_ed:{table:'ed_manutencao',title:'Manutenção',fields:[
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},{id:'problema',label:'Problema',span:2,required:true},
+    {id:'prioridade',label:'Prioridade',type:'select',opts:[['alta','Alta'],['media','Média'],['baixa','Baixa']]},
+    {id:'data',label:'Data',type:'date'},{id:'responsavel',label:'Responsável'},
+    {id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'custo',label:'Custo (R$)',type:'money'},
+    {id:'conclusao',label:'Conclusão',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['aberta','Aberta'],['em_andamento','Em andamento'],['resolvido','Resolvido'],['pendente','Pendente']]}
+  ],cols:['problema','prioridade','data','custo','situacao'],colLabels:['Problema','Prioridade','Data','Custo','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):c==='situacao'?pill(r.situacao):c==='prioridade'?pill(r.prioridade):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  programas_ed:{table:'ed_programas',title:'Programas',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'objetivo',label:'Objetivo',span:3},
+    {id:'publico',label:'Público'},{id:'escola',label:'Escola'},{id:'responsavel',label:'Responsável'},
+    {id:'periodo',label:'Período'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'participantes',label:'Participantes',type:'number'},
+    {id:'meta',label:'Meta',span:2},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','responsavel','participantes','orcamento'],colLabels:['Nome','Responsável','Particip.','Orçamento'],
+  renderCol:(r,c)=>c==='orcamento'?money(r.orcamento):(r[c]||'—')},
+
+  projetos_ed:{table:'ed_projetos',title:'Projetos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'objetivo',label:'Objetivo',span:3},
+    {id:'publico',label:'Público'},{id:'escola',label:'Escola'},{id:'responsavel',label:'Responsável'},
+    {id:'periodo',label:'Período'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'participantes',label:'Participantes',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_andamento','Em andamento'],['concluida','Concluído'],['cancelada','Cancelado']]},
+    {id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','responsavel','participantes','situacao'],colLabels:['Nome','Responsável','Particip.','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  eventos_ed:{table:'ed_eventos',title:'Eventos',fields:[
+    {id:'evento',label:'Evento',span:2,required:true},{id:'escola',label:'Escola'},
+    {id:'data',label:'Data',type:'date'},{id:'responsavel',label:'Responsável'},{id:'participantes',label:'Participantes',type:'number'},
+    {id:'atividades',label:'Atividades',span:2},{id:'custo',label:'Custo (R$)',type:'money'},
+    {id:'resultado',label:'Resultado',span:3}
+  ],cols:['evento','escola','data','participantes','custo'],colLabels:['Evento','Escola','Data','Particip.','Custo'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  familia:{table:'ed_familia',title:'Família e Comunidade',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['reuniao','Reunião'],['atendimento','Atendimento'],['acao_comunitaria','Ação comunitária'],['comunicacao','Comunicação']]},
+    {id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},{id:'data',label:'Data',type:'date',required:true},
+    {id:'participacao',label:'Participação',type:'number'},{id:'responsaveis',label:'Responsáveis presentes',type:'number'},
+    {id:'atendimentos',label:'Atendimentos'},{id:'encaminhamentos',label:'Encaminhamentos'},{id:'acoes',label:'Ações',span:2},
+    {id:'comunicacao',label:'Comunicação'}
+  ],cols:['tipo','data','participacao','responsaveis'],colLabels:['Tipo','Data','Participação','Responsáveis'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc'},
+
+  ocorrencias:{table:'ed_ocorrencias',title:'Ocorrências',fields:[
+    {id:'data',label:'Data',type:'date',required:true},{id:'escola_id',label:'Escola',type:'ref',ref:'escolas_ed'},
+    {id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:3},
+    {id:'providencia',label:'Providência',span:2},{id:'responsavel',label:'Responsável'},
+    {id:'encaminhamento',label:'Encaminhamento',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['aberta','Aberta'],['em_andamento','Em andamento'],['resolvido','Resolvida'],['encerrada','Encerrada']]}
+  ],cols:['data','tipo','responsavel','situacao'],colLabels:['Data','Tipo','Responsável','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc'},
+
+  compras_ed:{table:'ed_compras',title:'Compras',fields:[
+    {id:'solicitacao',label:'Solicitação'},{id:'processo',label:'Processo'},{id:'item',label:'Item',span:2,required:true},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'cotacao',label:'Cotação (R$)',type:'money'},
+    {id:'fornecedor',label:'Fornecedor'},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data',label:'Data',type:'date'},
+    {id:'entrega',label:'Entrega',type:'date'},{id:'nota_fiscal',label:'Nota fiscal'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['pendente','Pendente'],['em_andamento','Em andamento'],['concluida','Concluída'],['cancelada','Cancelada']]}
+  ],cols:['item','fornecedor','valor','data','situacao'],colLabels:['Item','Fornecedor','Valor','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  contratos_ed:{table:'ed_contratos',title:'Contratos',fields:[
+    {id:'numero',label:'Nº contrato'},{id:'processo',label:'Processo'},{id:'fornecedor',label:'Fornecedor',required:true},{id:'cnpj',label:'CNPJ'},
+    {id:'objeto',label:'Objeto',span:3},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data_inicio',label:'Início',type:'date'},
+    {id:'data_fim',label:'Término',type:'date'},{id:'fiscal',label:'Fiscal'},{id:'saldo',label:'Saldo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrada','Encerrado'],['vencido','Vencido'],['cancelada','Cancelado']]}
+  ],cols:['numero','fornecedor','valor','data_fim','situacao'],colLabels:['Nº','Fornecedor','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  financeiro_ed:{table:'ed_financeiro',title:'Financeiro',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['receita','Receita'],['despesa','Despesa'],['empenho','Empenho'],['liquidacao','Liquidação'],['pagamento','Pagamento']],required:true},
+    {id:'descricao',label:'Descrição',span:2},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'programa',label:'Programa'},{id:'projeto',label:'Projeto'},{id:'fonte_recurso',label:'Fonte'},
+    {id:'fornecedor',label:'Fornecedor'},{id:'contrato',label:'Contrato'},{id:'data',label:'Data',type:'date'}
+  ],cols:['data','tipo','descricao','valor','programa'],colLabels:['Data','Tipo','Descrição','Valor','Programa'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  metas_ed:{table:'ed_metas',title:'Metas',fields:[
+    {id:'indicador',label:'Indicador',span:2,required:true},{id:'periodo',label:'Período'},
+    {id:'meta_anual',label:'Meta anual',type:'number'},{id:'meta_mensal',label:'Meta mensal',type:'number'},{id:'meta_trimestral',label:'Meta trimestral',type:'number'},
+    {id:'meta_escola',label:'Meta por escola'},{id:'meta_programa',label:'Meta por programa'},{id:'responsavel',label:'Responsável'},
+    {id:'prazo',label:'Prazo',type:'date'},{id:'resultado',label:'Resultado',type:'number'},{id:'percentual',label:'% alcançado',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['atingida','Atingida'],['atencao','Atenção'],['abaixo','Abaixo da meta'],['em_andamento','Em andamento']]}
+  ],cols:['indicador','meta_mensal','resultado','percentual','situacao'],colLabels:['Indicador','Meta','Resultado','%','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao,{atingida:'Atingida',atencao:'Atenção',abaixo:'Abaixo',em_andamento:'Em andamento'}[r.situacao]):c==='percentual'?(r.percentual||0)+'%':(r[c]||'—')},
+
+  indicadores_ed:{table:'ed_indicadores',title:'Indicadores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'descricao',label:'Descrição',span:3},
+    {id:'formula',label:'Fórmula',span:2},{id:'fonte',label:'Fonte'},
+    {id:'periodicidade',label:'Periodicidade'},{id:'meta',label:'Meta',type:'number'},{id:'resultado',label:'Resultado',type:'number'},
+    {id:'unidade_medida',label:'Unidade'},{id:'responsavel',label:'Responsável'},{id:'status',label:'Status'},
+    {id:'historico',label:'Histórico',span:3}
+  ],cols:['nome','formula','periodicidade','meta','resultado'],colLabels:['Nome','Fórmula','Period.','Meta','Resultado'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  documentos_ed:{table:'ed_documentos',title:'Documentos',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:2},
+    {id:'modulo',label:'Módulo'},{id:'url',label:'URL',span:2},{id:'data',label:'Data',type:'date'}
+  ],cols:['titulo','tipo','modulo','data'],colLabels:['Título','Tipo','Módulo','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+};
+
+const REF_TABLES={escolas_ed:'ed_escolas',alunos_ed:'ed_alunos',frota_ed:'ed_frota'};
+const REF_LABEL_FIELD={escolas_ed:'nome',alunos_ed:'nome',frota_ed:'veiculo'};
+async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await sbGet(REF_TABLES[k],'select=id,'+REF_LABEL_FIELD[k]+'&order='+REF_LABEL_FIELD[k]+'.asc');caches[k]=d;return d;}catch(e){return[];}}
+
+function buildViews(){
+  let html='';
+  html+='<section class="view active" id="view-dashboard_ed"><div class="topbar"><div><h1>Dashboard — Educação</h1><div class="sub">Central de Gestão Educacional Municipal</div></div><div><button class="btn-accent" onclick="gerarRelatorioMensal()">Gerar Relatório Mensal</button></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Matrículas por situação</h3><div class="bars" id="dash-mat-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="grid-2"><div class="panel"><h3>O que está bom</h3><div id="dash-bom"></div></div><div class="panel"><h3>O que precisa de atenção</h3><div id="dash-atencao"></div></div></div><div class="grid-2"><div class="panel"><h3>Transporte e alimentação</h3><div id="dash-logistica"></div></div><div class="panel"><h3>Infraestrutura</h3><div id="dash-infra"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
+  html+='<section class="view" id="view-secretaria_ed"><div class="topbar"><div><h1>Secretaria de Educação</h1></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="se-nome"></div><div class="field"><label>CNPJ</label><input id="se-cnpj"></div><div class="field"><label>Secretário(a)</label><input id="se-secretario"></div><div class="field"><label>Secretário(a) adjunto(a)</label><input id="se-secretario_adjunto"></div><div class="field"><label>Telefone</label><input id="se-telefone"></div><div class="field"><label>WhatsApp</label><input id="se-whatsapp"></div><div class="field"><label>E-mail</label><input id="se-email"></div><div class="field span-3"><label>Endereço</label><input id="se-endereco"></div><div class="field"><label>Horário</label><input id="se-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="se-orcamento" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="se-meta" inputmode="decimal"></div><div class="field span-3"><label>Responsáveis pelos setores</label><textarea id="se-responsaveis" rows="2"></textarea></div><div class="field span-3"><label>Observações</label><textarea id="se-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSec()" id="se-btn">Salvar</button></div></div></section>';
+  Object.keys(MODULES).forEach(key=>{const m=MODULES[key];
+    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
+    html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
+    html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="ft-'+key+'">Novo registro</h3><div class="form-grid">';
+    m.fields.forEach(f=>{const sp=f.span?'span-'+f.span:'';
+      if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" '+(f.default?'checked':'')+' style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
+      else if(f.type==='select'){html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'">';(f.opts||[]).forEach(([v,l])=>{html+='<option value="'+v+'">'+l+'</option>';});html+='</select></div>';}
+      else if(f.type==='ref')html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'"><option value="">Selecione...</option></select></div>';
+      else{const t=f.type==='money'?'text':f.type||'text';html+='<div class="field '+sp+'"><label>'+f.label+'</label><input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+(f.type==='money'?' inputmode="decimal"':'')+'></div>';}
+    });
+    html+='</div><div class="form-actions"><button class="btn-ghost" onclick="toggleForm(\''+key+'\')">Cancelar</button><button class="btn-accent" onclick="submitCrud(\''+key+'\')" id="sb-'+key+'">Salvar</button></div></div>';
+    html+='<div class="panel"><h3>Registros</h3><p class="panel-sub" id="cnt-'+key+'"></p><div style="overflow-x:auto;"><table><thead><tr>';
+    m.colLabels.forEach(l=>{html+='<th>'+l+'</th>';});
+    html+='<th></th></tr></thead><tbody id="tbl-'+key+'"></tbody></table></div></div></section>';
+  });
+  html+='<section class="view" id="view-relatorios_ed"><div class="topbar"><div><h1>Relatórios</h1></div></div><div class="panel"><h3>Exportar relatórios</h3><div class="form-grid">';
+  Object.keys(MODULES).forEach(k=>{html+='<div class="field"><button class="btn-ghost" style="width:100%;" onclick="exportPdf(\''+k+'\')">'+MODULES[k].title+' (PDF)</button></div>';});
+  html+='</div></div></section>';
+  html+='<section class="view" id="view-alertas_ed"><div class="topbar"><div><h1>Alertas</h1></div></div><div id="alertas-list"></div></section>';
+  html+='<section class="view" id="view-auditoria_ed"><div class="topbar"><div><h1>Auditoria</h1></div></div><div class="panel"><h3>Registros de auditoria</h3><p class="panel-sub" id="cnt-audit"></p><div style="overflow-x:auto;"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Módulo</th></tr></thead><tbody id="tbl-audit"></tbody></table></div></div></section>';
+  html+='<section class="view" id="view-config_ed"><div class="topbar"><div><h1>Configurações</h1></div></div><div class="panel"><h3>Configurações do módulo</h3><p class="panel-sub">Configurações gerais em breve.</p></div></section>';
+  document.getElementById('main-content').innerHTML=html;
+}
+
+let editingId={};
+function toggleForm(k){const p=document.getElementById('form-'+k);const o=p.style.display==='none';p.style.display=o?'block':'none';if(o&&!editingId[k]){clearForm(k);document.getElementById('ft-'+k).textContent='Novo registro';document.getElementById('sb-'+k).textContent='Salvar';loadRefs(k);}if(!o)editingId[k]=null;}
+function clearForm(k){MODULES[k].fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!f.default;else if(f.type==='select')el.selectedIndex=0;else el.value='';});}
+async function loadRefs(k){for(const f of MODULES[k].fields){if(f.type!=='ref')continue;const sel=document.getElementById('cf-'+k+'-'+f.id);const opts=await loadRefOptions(f.ref);const lbl=REF_LABEL_FIELD[f.ref];sel.innerHTML='<option value="">Selecione...</option>'+opts.map(o=>'<option value="'+o.id+'">'+o[lbl]+'</option>').join('');}}
+async function submitCrud(k){const m=MODULES[k],data={tenant_id:tid()};m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;let v;if(f.type==='checkbox')v=el.checked;else if(f.type==='money')v=parseMoney(el.value);else if(f.type==='number')v=el.value?Number(el.value):null;else if(f.type==='ref')v=el.value||null;else v=el.value.trim()||null;data[f.id]=v;});const btn=document.getElementById('sb-'+k);btn.disabled=true;try{if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+async function editCrud(k,id){const m=MODULES[k];try{const rows=await sbGet(m.table,'id=eq.'+id);const r=rows[0];if(!r)return;editingId[k]=id;document.getElementById('form-'+k).style.display='block';document.getElementById('ft-'+k).textContent='Editar registro';document.getElementById('sb-'+k).textContent='Salvar alterações';await loadRefs(k);m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!r[f.id];else el.value=r[f.id]||'';});}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function deleteCrud(k,id){if(!confirm('Excluir?'))return;try{await sbDel(MODULES[k].table,'id=eq.'+id);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
+
+function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)return;const n=data.length;let h='<div class="kpi"><div class="ico">Total</div><div class="num">'+n+'</div><div class="lbl">registros</div></div>';
+  if(k==='escolas'){const cap=data.reduce((s,r)=>s+(Number(r.capacidade)||0),0);const alu=data.reduce((s,r)=>s+(Number(r.numero_alunos)||0),0);h+='<div class="kpi"><div class="ico">Alunos</div><div class="num">'+alu+'</div><div class="lbl">matriculados</div></div><div class="kpi"><div class="ico">Capacidade</div><div class="num">'+cap+'</div><div class="lbl">total</div></div><div class="kpi"><div class="ico">Ocupação</div><div class="num">'+(cap?Math.round(alu/cap*100):0)+'%</div><div class="lbl">das vagas</div></div>';}
+  else if(k==='alunos'){const at=data.filter(r=>r.situacao==='ativo').length;const tr=data.filter(r=>r.transporte).length;const ae=data.filter(r=>r.atendimento_especializado).length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">alunos</div></div><div class="kpi"><div class="ico">Transporte</div><div class="num">'+tr+'</div><div class="lbl">utilizam</div></div><div class="kpi"><div class="ico">Atend. especial.</div><div class="num">'+ae+'</div><div class="lbl">alunos</div></div>';}
+  else if(k==='matriculas'){const at=data.filter(r=>r.situacao==='ativa').length;const tr=data.filter(r=>r.situacao==='transferida').length;const cn=data.filter(r=>r.situacao==='cancelada').length;h+='<div class="kpi"><div class="ico">Ativas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">matrículas</div></div><div class="kpi"><div class="ico">Transferidas</div><div class="num" style="color:var(--warn);">'+tr+'</div><div class="lbl">matrículas</div></div><div class="kpi"><div class="ico">Canceladas</div><div class="num" style="color:var(--danger);">'+cn+'</div><div class="lbl">matrículas</div></div>';}
+  else if(k==='vagas_ed'){const disp=data.reduce((s,r)=>s+(Number(r.vagas_disponiveis)||0),0);const oc=data.reduce((s,r)=>s+(Number(r.vagas_ocupadas)||0),0);const esp=data.reduce((s,r)=>s+(Number(r.lista_espera)||0),0);h+='<div class="kpi"><div class="ico">Disponíveis</div><div class="num" style="color:var(--ok);">'+disp+'</div><div class="lbl">vagas</div></div><div class="kpi"><div class="ico">Ocupadas</div><div class="num">'+oc+'</div><div class="lbl">vagas</div></div><div class="kpi"><div class="ico">Lista de espera</div><div class="num" style="color:var(--warn);">'+esp+'</div><div class="lbl">aguardando</div></div>';}
+  else if(k==='professores'){const at=data.filter(r=>r.situacao==='ativo').length;const af=data.filter(r=>r.situacao==='afastado'||r.situacao==='licenca').length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">professores</div></div><div class="kpi"><div class="ico">Afastados</div><div class="num" style="color:var(--warn);">'+af+'</div><div class="lbl">professores</div></div>';}
+  else if(k==='frequencia'){const pr=data.filter(r=>r.presenca).length;const fa=data.filter(r=>r.falta).length;const pct=n?(pr/n*100).toFixed(1):0;h+='<div class="kpi"><div class="ico">Presenças</div><div class="num" style="color:var(--ok);">'+pr+'</div><div class="lbl">registros</div></div><div class="kpi"><div class="ico">Faltas</div><div class="num" style="color:var(--danger);">'+fa+'</div><div class="lbl">registros</div></div><div class="kpi"><div class="ico">Frequência</div><div class="num">'+pct+'%</div><div class="lbl">média</div></div>';}
+  else if(k==='avaliacoes'){const ap=data.filter(r=>r.resultado==='aprovado').length;const rp=data.filter(r=>r.resultado==='reprovado').length;const md=data.filter(r=>r.media).reduce((s,r)=>s+Number(r.media),0);const cnt=data.filter(r=>r.media).length;h+='<div class="kpi"><div class="ico">Aprovados</div><div class="num" style="color:var(--ok);">'+ap+'</div><div class="lbl">alunos</div></div><div class="kpi"><div class="ico">Reprovados</div><div class="num" style="color:var(--danger);">'+rp+'</div><div class="lbl">alunos</div></div><div class="kpi"><div class="ico">Média geral</div><div class="num">'+(cnt?(md/cnt).toFixed(1):'—')+'</div><div class="lbl">nota</div></div>';}
+  else if(k==='transporte_ed'){const at=data.filter(r=>r.situacao==='ativo').length;const pass=data.reduce((s,r)=>s+(Number(r.passageiros)||0),0);h+='<div class="kpi"><div class="ico">Rotas ativas</div><div class="num">'+at+'</div><div class="lbl">rotas</div></div><div class="kpi"><div class="ico">Passageiros</div><div class="num">'+pass+'</div><div class="lbl">transportados</div></div>';}
+  else if(k==='alimentacao'){const ref=data.reduce((s,r)=>s+(Number(r.quantidade_servida)||0),0);const alu=data.reduce((s,r)=>s+(Number(r.alunos_atendidos)||0),0);const cst=data.reduce((s,r)=>s+(Number(r.custo)||0),0);h+='<div class="kpi"><div class="ico">Refeições</div><div class="num">'+ref+'</div><div class="lbl">servidas</div></div><div class="kpi"><div class="ico">Alunos</div><div class="num">'+alu+'</div><div class="lbl">atendidos</div></div><div class="kpi"><div class="ico">Custo</div><div class="num">'+moneyShort(cst)+'</div><div class="lbl">total</div></div>';}
+  else if(k==='estoque_ed'){const baixo=data.filter(r=>r.quantidade&&r.estoque_minimo&&Number(r.quantidade)<=Number(r.estoque_minimo)).length;h+='<div class="kpi"><div class="ico">Estoque baixo</div><div class="num" style="color:var(--danger);">'+baixo+'</div><div class="lbl">itens</div></div>';}
+  else if(k==='manutencao_ed'){const ab=data.filter(r=>r.situacao==='aberta'||r.situacao==='pendente').length;const res=data.filter(r=>r.situacao==='resolvido').length;const cst=data.reduce((s,r)=>s+(Number(r.custo)||0),0);h+='<div class="kpi"><div class="ico">Abertas</div><div class="num" style="color:var(--warn);">'+ab+'</div><div class="lbl">solicitações</div></div><div class="kpi"><div class="ico">Resolvidas</div><div class="num" style="color:var(--ok);">'+res+'</div><div class="lbl">solicitações</div></div><div class="kpi"><div class="ico">Custo</div><div class="num">'+moneyShort(cst)+'</div><div class="lbl">total</div></div>';}
+  else if(k==='metas_ed'){const at=data.filter(r=>r.situacao==='atingida').length;const ab=data.filter(r=>r.situacao==='abaixo').length;h+='<div class="kpi"><div class="ico">Atingidas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">metas</div></div><div class="kpi"><div class="ico">Abaixo</div><div class="num" style="color:var(--danger);">'+ab+'</div><div class="lbl">metas</div></div>';}
+  else if(k==='contratos_ed'){const vig=data.filter(r=>r.situacao==='vigente').length;const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);h+='<div class="kpi"><div class="ico">Vigentes</div><div class="num">'+vig+'</div><div class="lbl">contratos</div></div><div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">total</div></div>';}
+  else if(k==='biblioteca'){const disp=data.filter(r=>r.situacao==='disponivel').length;const emp=data.filter(r=>r.situacao==='emprestado').length;h+='<div class="kpi"><div class="ico">Disponíveis</div><div class="num" style="color:var(--ok);">'+disp+'</div><div class="lbl">títulos</div></div><div class="kpi"><div class="ico">Emprestados</div><div class="num" style="color:var(--warn);">'+emp+'</div><div class="lbl">títulos</div></div>';}
+  else if(k==='tecnologia'){const func=data.filter(r=>r.situacao==='funcionando').length;const man=data.filter(r=>r.situacao==='manutencao').length;h+='<div class="kpi"><div class="ico">Funcionando</div><div class="num" style="color:var(--ok);">'+func+'</div><div class="lbl">equipamentos</div></div><div class="kpi"><div class="ico">Manutenção</div><div class="num" style="color:var(--warn);">'+man+'</div><div class="lbl">equipamentos</div></div>';}
+  el.innerHTML=h;}
+
+async function loadDashboard(){try{
+  const [esc,alu,mat,vag,tur,prof,freq,aval,transp,alim,est,man,met,al]=await Promise.all([
+    sbGet('ed_escolas','select=id,nome,numero_alunos,capacidade,situacao_estrutura').catch(()=>[]),
+    sbGet('ed_alunos','select=id,situacao,transporte,atendimento_especializado').catch(()=>[]),
+    sbGet('ed_matriculas','select=id,situacao').catch(()=>[]),
+    sbGet('ed_vagas','select=id,vagas_disponiveis,vagas_ocupadas,lista_espera').catch(()=>[]),
+    sbGet('ed_turmas','select=id,quantidade_alunos,capacidade').catch(()=>[]),
+    sbGet('ed_professores','select=id,situacao').catch(()=>[]),
+    sbGet('ed_frequencia','select=id,presenca,falta').catch(()=>[]),
+    sbGet('ed_avaliacoes','select=id,resultado,media').catch(()=>[]),
+    sbGet('ed_transporte','select=id,situacao,passageiros').catch(()=>[]),
+    sbGet('ed_alimentacao','select=id,quantidade_servida,alunos_atendidos,custo').catch(()=>[]),
+    sbGet('ed_estoque','select=id,quantidade,estoque_minimo').catch(()=>[]),
+    sbGet('ed_manutencao','select=id,situacao').catch(()=>[]),
+    sbGet('ed_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
+    sbGet('ed_alertas','select=*&lido=eq.false&order=criado_em.desc&limit=10').catch(()=>[]),
+  ]);
+  const aluAt=alu.filter(a=>a.situacao==='ativo').length;const matAt=mat.filter(m=>m.situacao==='ativa').length;
+  const profAt=prof.filter(p=>p.situacao==='ativo').length;
+  const freqPr=freq.filter(f=>f.presenca).length;const freqPct=freq.length?(freqPr/freq.length*100).toFixed(1):'—';
+  const avalAp=aval.filter(a=>a.resultado==='aprovado').length;const avalRp=aval.filter(a=>a.resultado==='reprovado').length;
+  const vagDisp=vag.reduce((s,v)=>s+(Number(v.vagas_disponiveis)||0),0);const espera=vag.reduce((s,v)=>s+(Number(v.lista_espera)||0),0);
+  const transpAt=transp.filter(t=>t.situacao==='ativo').length;const pass=transp.reduce((s,t)=>s+(Number(t.passageiros)||0),0);
+  const refServ=alim.reduce((s,a)=>s+(Number(a.quantidade_servida)||0),0);
+  const custoAlim=alim.reduce((s,a)=>s+(Number(a.custo)||0),0);
+  const manAb=man.filter(m=>m.situacao==='aberta'||m.situacao==='pendente').length;
+  const escCap=esc.reduce((s,e)=>s+(Number(e.capacidade)||0),0);const escAlu=esc.reduce((s,e)=>s+(Number(e.numero_alunos)||0),0);
+  document.getElementById('dash-kpi').innerHTML=[
+    ['Alunos',aluAt,'ativos'],['Matrículas',matAt,'ativas'],
+    ['Escolas',esc.length,'cadastradas'],['Professores',profAt,'ativos'],
+    ['Frequência',freqPct+'%','média'],['Aprovação',avalAp,'alunos aprovados'],
+    ['Reprovação',avalRp,'alunos reprovados'],['Vagas disponíveis',vagDisp,'vagas'],
+    ['Lista de espera',espera,'aguardando'],['Transportados',pass,'alunos'],
+    ['Refeições',refServ,'servidas'],['Gasto alimentação',moneyShort(custoAlim),'total'],
+    ['Manutenção pendente',manAb,'problemas'],['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+'/'+met.length,'metas'],
+  ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
+  const mSit={};mat.forEach(m=>{mSit[m.situacao]=(mSit[m.situacao]||0)+1;});const maxM=Math.max(1,...Object.values(mSit));
+  const sitL={ativa:'Ativa',transferida:'Transferida',cancelada:'Cancelada',concluida:'Concluída',remanejada:'Remanejada'};
+  document.getElementById('dash-mat-bars').innerHTML=Object.entries(mSit).map(([s,v])=>'<div class="bar-row"><span>'+(sitL[s]||s)+'</span><div class="bar-track"><div class="bar-fill bar-fill-royal" style="width:'+Math.round(v/maxM*100)+'%"></div></div><span class="val">'+v+'</span></div>').join('')||'<p style="color:var(--muted);font-size:12px;">Sem dados.</p>';
+  document.getElementById('dash-metas').innerHTML=met.length?met.slice(0,8).map(m=>{const ico=m.situacao==='atingida'?'🟢':m.situacao==='atencao'?'🟡':'🔴';const cor=m.situacao==='atingida'?'ok':m.situacao==='atencao'?'warn':'danger';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;"><span>'+ico+'</span><span style="flex:1;">'+m.indicador+'</span><span style="font-weight:700;color:var(--'+cor+');">'+(m.percentual||0)+'%</span></div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Sem metas cadastradas.</p>';
+  const bom=[],atencao=[];
+  if(freqPct!=='—'&&Number(freqPct)>=90)bom.push('Frequência em '+freqPct+'%');else if(freqPct!=='—')atencao.push('Frequência em '+freqPct+'% — abaixo do ideal');
+  if(espera===0)bom.push('Sem lista de espera');else atencao.push(espera+' alunos na lista de espera');
+  if(manAb===0)bom.push('Sem manutenção pendente');else atencao.push(manAb+' problemas de infraestrutura pendentes');
+  if(met.filter(m=>m.situacao==='abaixo').length)atencao.push(met.filter(m=>m.situacao==='abaixo').length+' metas abaixo do esperado');
+  const estBaixo=est.filter(e=>e.quantidade&&e.estoque_minimo&&Number(e.quantidade)<=Number(e.estoque_minimo)).length;
+  if(estBaixo)atencao.push(estBaixo+' itens com estoque baixo');else bom.push('Estoque em níveis adequados');
+  document.getElementById('dash-bom').innerHTML=bom.length?bom.map(b=>'<div class="diag diag-ok">🟢 '+b+'</div>').join(''):'<p style="color:var(--muted);font-size:12px;">Dados insuficientes para análise.</p>';
+  document.getElementById('dash-atencao').innerHTML=atencao.length?atencao.map(a=>'<div class="diag diag-warn">🟡 '+a+'</div>').join(''):'<div class="diag diag-ok">🟢 Tudo dentro do esperado.</div>';
+  document.getElementById('dash-logistica').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+pass+'</div><div style="font-size:11px;color:var(--ink-soft);">Alunos transportados</div></div>'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+transpAt+'</div><div style="font-size:11px;color:var(--ink-soft);">Rotas ativas</div></div>'+
+    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+refServ+'</div><div style="font-size:11px;color:var(--ink-soft);">Refeições servidas</div></div>'+
+    '<div style="padding:10px;background:#FEF3C7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+moneyShort(custoAlim)+'</div><div style="font-size:11px;color:var(--ink-soft);">Custo alimentação</div></div></div>';
+  const precaria=esc.filter(e=>e.situacao_estrutura==='precaria').length;const reforma=esc.filter(e=>e.situacao_estrutura==='reforma').length;
+  document.getElementById('dash-infra').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+(escCap?Math.round(escAlu/escCap*100):0)+'%</div><div style="font-size:11px;color:var(--ink-soft);">Ocupação escolar</div></div>'+
+    '<div style="padding:10px;background:#FEF3C7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+manAb+'</div><div style="font-size:11px;color:var(--ink-soft);">Manutenção pendente</div></div>'+
+    '<div style="padding:10px;background:#FEF2F2;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--danger);">'+precaria+'</div><div style="font-size:11px;color:var(--ink-soft);">Estrutura precária</div></div>'+
+    '<div style="padding:10px;background:#FEF3C7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+reforma+'</div><div style="font-size:11px;color:var(--ink-soft);">Em reforma</div></div></div>';
+  document.getElementById('dash-alertas').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'">'+ico+' '+a.mensagem+'</div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum alerta.</p>';
+}catch(e){document.getElementById('dash-kpi').innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,200)+'</div>';}}
+
+let secId=null;
+async function loadSec(){try{const rows=await sbGet('ed_secretaria','select=*&limit=1');if(rows.length){const s=rows[0];secId=s.id;['nome','cnpj','secretario','secretario_adjunto','telefone','whatsapp','email','endereco'].forEach(f=>{const el=document.getElementById('se-'+f);if(el)el.value=s[f]||'';});document.getElementById('se-horario').value=s.horario_atendimento||'';document.getElementById('se-orcamento').value=s.orcamento_anual||'';document.getElementById('se-meta').value=s.meta_anual||'';document.getElementById('se-responsaveis').value=s.responsaveis_setores||'';document.getElementById('se-obs').value=s.observacoes||'';}}catch(e){}}
+async function salvarSec(){const data={tenant_id:tid(),nome:document.getElementById('se-nome').value.trim()||'Secretaria Municipal de Educação',cnpj:document.getElementById('se-cnpj').value.trim()||null,secretario:document.getElementById('se-secretario').value.trim()||null,secretario_adjunto:document.getElementById('se-secretario_adjunto').value.trim()||null,telefone:document.getElementById('se-telefone').value.trim()||null,whatsapp:document.getElementById('se-whatsapp').value.trim()||null,email:document.getElementById('se-email').value.trim()||null,endereco:document.getElementById('se-endereco').value.trim()||null,horario_atendimento:document.getElementById('se-horario').value.trim()||null,orcamento_anual:parseMoney(document.getElementById('se-orcamento').value),meta_anual:parseMoney(document.getElementById('se-meta').value),responsaveis_setores:document.getElementById('se-responsaveis').value.trim()||null,observacoes:document.getElementById('se-obs').value.trim()||null,atualizado_em:new Date().toISOString()};const btn=document.getElementById('se-btn');btn.disabled=true;try{if(secId){await sbPatch('ed_secretaria','id=eq.'+secId,data);}else{const r=await sbPost('ed_secretaria',data);secId=r[0].id;}alert('Salvo!');}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+
+async function loadAlertas(){try{const al=await sbGet('ed_alertas','select=*&order=criado_em.desc');document.getElementById('alertas-list').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'" style="display:flex;justify-content:space-between;align-items:center;">'+ico+' '+a.mensagem+(a.lido?'':' <button class="btn-ghost" style="font-size:10px;padding:3px 8px;" onclick="marcarLido(\''+a.id+'\')">Lido</button>')+'</div>';}).join(''):'<div class="panel"><p style="color:var(--muted);text-align:center;padding:30px;">Nenhum alerta.</p></div>';}catch(e){}}
+async function marcarLido(id){try{await sbPatch('ed_alertas','id=eq.'+id,{lido:true});loadAlertas();}catch(e){}}
+
+async function loadAuditoria(){try{const rows=await sbGet('ed_auditoria','select=*&order=data.desc&limit=100');document.getElementById('cnt-audit').textContent=rows.length+' registro(s)';document.getElementById('tbl-audit').innerHTML=rows.length?rows.map(r=>'<tr><td>'+new Date(r.data).toLocaleString('pt-BR')+'</td><td>'+(r.usuario||'—')+'</td><td>'+(r.acao||'—')+'</td><td>'+(r.modulo||'—')+'</td></tr>').join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Sem registros.</td></tr>';}catch(e){}}
+
+function exportPdf(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFontSize(16);doc.text(m.title+' — Conecta Gestão Educação',14,18);doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,26);const rows=data.map(r=>m.cols.map(c=>{const v=m.renderCol(r,c);return v.replace(/<[^>]+>/g,'');}));doc.autoTable({head:[m.colLabels],body:rows,startY:32,styles:{fontSize:9},headStyles:{fillColor:[37,99,235]}});doc.save(k+'_educacao.pdf');}
+function exportXlsx(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const rows=data.map(r=>{const o={};m.cols.forEach((c,i)=>{o[m.colLabels[i]]=m.renderCol(r,c).replace(/<[^>]+>/g,'');});return o;});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,m.title.slice(0,31));XLSX.writeFile(wb,k+'_educacao.xlsx');}
+
+async function gerarRelatorioMensal(){
+  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');let y=20;
+  doc.setFontSize(18);doc.text('Relatório Mensal — Educação',14,y);y+=10;
+  doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,y);y+=12;
+  try{
+    const [esc,alu,mat,prof,freq,aval,transp,alim,man,met]=await Promise.all([
+      sbGet('ed_escolas','select=id,nome,numero_alunos,capacidade').catch(()=>[]),
+      sbGet('ed_alunos','select=id,situacao').catch(()=>[]),
+      sbGet('ed_matriculas','select=id,situacao').catch(()=>[]),
+      sbGet('ed_professores','select=id,situacao').catch(()=>[]),
+      sbGet('ed_frequencia','select=id,presenca,falta').catch(()=>[]),
+      sbGet('ed_avaliacoes','select=id,resultado,media').catch(()=>[]),
+      sbGet('ed_transporte','select=id,passageiros').catch(()=>[]),
+      sbGet('ed_alimentacao','select=id,quantidade_servida,custo').catch(()=>[]),
+      sbGet('ed_manutencao','select=id,situacao').catch(()=>[]),
+      sbGet('ed_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
+    ]);
+    const items=[
+      ['Escolas cadastradas',esc.length],['Alunos ativos',alu.filter(a=>a.situacao==='ativo').length],
+      ['Matrículas ativas',mat.filter(m=>m.situacao==='ativa').length],['Professores ativos',prof.filter(p=>p.situacao==='ativo').length],
+      ['Frequência média',freq.length?(freq.filter(f=>f.presenca).length/freq.length*100).toFixed(1)+'%':'Dados insuficientes'],
+      ['Aprovados',aval.filter(a=>a.resultado==='aprovado').length],['Reprovados',aval.filter(a=>a.resultado==='reprovado').length],
+      ['Alunos transportados',transp.reduce((s,t)=>s+(Number(t.passageiros)||0),0)],
+      ['Refeições servidas',alim.reduce((s,a)=>s+(Number(a.quantidade_servida)||0),0)],
+      ['Custo alimentação',moneyShort(alim.reduce((s,a)=>s+(Number(a.custo)||0),0))],
+      ['Manutenção pendente',man.filter(m=>m.situacao==='aberta'||m.situacao==='pendente').length],
+      ['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+' de '+met.length],
+    ];
+    doc.autoTable({head:[['Indicador','Valor']],body:items,startY:y,styles:{fontSize:10},headStyles:{fillColor:[37,99,235]}});
+    doc.save('relatorio_mensal_educacao.pdf');
+    alert('Relatório mensal gerado!');
+  }catch(e){alert('Erro: '+e.message.slice(0,200));}
+}
+
+const LOADERS={dashboard_ed:loadDashboard,secretaria_ed:loadSec,alertas_ed:loadAlertas,auditoria_ed:loadAuditoria};
+Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>loadData(k);});
+</script>
+<div style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>
