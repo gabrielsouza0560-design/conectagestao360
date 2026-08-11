@@ -439,19 +439,20 @@ const FALLBACK = {
 };
 
 let LIVE = false;
-let DATA = { secretarias: [], acoes: [], publicacoes: [], indicadores: [], mapa_pontos: [], promessas: [] };
+let DATA = { secretarias: [], acoes: [], publicacoes: [], indicadores: [], mapa_pontos: [], promessas: [], evento_midias: [] };
 
 async function loadData(){
   try {
-    const [secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas] = await Promise.all([
+    const [secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas, evento_midias] = await Promise.all([
       sbGet("secretarias", "select=id,nome&order=nome.asc"),
       sbGet("acoes", "select=titulo,descricao,bairro,ano,data,status,valor_investido,origem_recurso,secretarias(nome),categorias(nome)&publicada_no_portal=eq.true&order=criado_em.desc"),
       sbGet("publicacoes", "select=titulo,corpo,tipo&status_aprovacao=eq.aprovado&order=publicado_em.desc"),
       sbGet("indicadores", "select=chave,valor,secretarias(nome)"),
       sbGet("mapa_pontos", "select=categoria,nome,latitude,longitude"),
       sbGet("promessas_campanha", "select=titulo,eixo,ano_previsto,status,secretarias(nome)&order=eixo.asc"),
+      sbGet("evento_midias", "select=tipo,url,categoria,legenda,acoes(titulo)&order=criado_em.desc&limit=60"),
     ]);
-    DATA = { secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas };
+    DATA = { secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas, evento_midias };
     LIVE = true;
   } catch (err) {
     console.warn("Não foi possível carregar dados ao vivo do Supabase — usando dados de demonstração.", err.message);
@@ -573,7 +574,7 @@ function populate(){
   document.getElementById('contas-tbl').innerHTML = acoes.map(a => `
     <tr><td>${a.titulo}</td><td>${a.secretarias?.nome||'—'}</td><td>${a.origem_recurso||'—'}</td><td style="font-family:var(--mono);">${money(a.valor_investido)}</td><td>${statusPill(a.status)}</td></tr>`).join('') || '<tr><td colspan="5">Nenhuma ação publicada ainda.</td></tr>';
 
-  document.getElementById('gal-grid').innerHTML = Array.from({length:8}).map((_,i) => `<div class="gal-item">${["Foto","Vídeo","Drone","Antes/Depois"][i%4]}<br>#${i+1}</div>`).join('');
+  renderGaleriaPublica(DATA.evento_midias || []);
   document.getElementById('downloads-list').innerHTML = DOWNLOADS.map(d => `<div class="dl-row"><div><div class="dl-name">${d[0]}</div><div class="dl-meta">${d[1]}</div></div><button class="dl-btn" onclick="toast('Download iniciado (demonstração)')">Baixar</button></div>`).join('');
 
   const VOZ_TYPES = ["Sugestão","Elogio","Crítica","Reclamação","Pedido de melhoria","Denúncia","Solicitação"];
@@ -617,6 +618,31 @@ function applyObrasFilter(){
   });
 
   document.getElementById('obras-grid').innerHTML = filtradas.map(obraCard).join('') || '<p class="dl-meta">Nenhuma obra encontrada com esses filtros.</p>';
+}
+
+const GALERIA_CATEGORIA_LABEL_PUBLICO = {
+  divulgacao:'Divulgação', montagem:'Montagem', evento:'Evento', publico:'Público',
+  comerciantes:'Comerciantes', atracoes:'Atrações', autoridades:'Autoridades', encerramento:'Encerramento',
+  antes_obra:'Antes da obra', depois_obra:'Depois da obra', outro:'',
+};
+
+function renderGaleriaPublica(itens){
+  const grid = document.getElementById('gal-grid');
+  if(!itens.length){
+    grid.innerHTML = '<p class="dl-meta">Nenhuma foto ou vídeo publicado ainda.</p>';
+    return;
+  }
+  grid.innerHTML = itens.map(m => {
+    const legenda = m.legenda || (m.acoes ? m.acoes.titulo : '') || '';
+    const catLabel = GALERIA_CATEGORIA_LABEL_PUBLICO[m.categoria] || '';
+    if(!m.url){
+      return `<div class="gal-item">${m.tipo === 'video' ? 'Vídeo' : 'Foto'}<br>${catLabel || legenda}</div>`;
+    }
+    const midia = m.tipo === 'video'
+      ? `<video src="${m.url}" muted style="width:100%;height:100%;object-fit:cover;"></video>`
+      : `<img src="${m.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" alt="${legenda.replace(/"/g,'')}">`;
+    return `<a href="${m.url}" target="_blank" rel="noopener" class="gal-item" style="padding:0;overflow:hidden;position:relative;background:#000;" title="${(legenda + (catLabel ? ' · ' + catLabel : '')).replace(/"/g,'')}">${midia}</a>`;
+  }).join('');
 }
 
 const STATUS_LABEL_LINHA = { planejado:'Planejado', em_andamento:'Em andamento', concluido:'Concluído', cancelado:'Cancelado' };
