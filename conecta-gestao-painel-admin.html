@@ -2034,10 +2034,13 @@ async function baixarPdfDossie(){
       return notas.length ? (notas.reduce((s,v) => s + Number(v.nota), 0) / notas.length / 2).toFixed(1) : null;
     };
     const totalPatrocinios = dossiePatrocinios.reduce((s,p) => s + (Number(p.valor)||0), 0);
+    const totalTaxasBarracas = dossieComerciantes.reduce((s,c) => s + (c.isento ? 0 : (Number(c.valor_cobrado)||0)), 0);
+    const totalReceitas = totalPatrocinios + totalTaxasBarracas;
+    const investimentoMunicipal = Number(f.valor_investido) || 0;
+    const saldoFinal = totalReceitas - investimentoMunicipal;
     const totalAlimentos = dossieArrecadacao.reduce((s,a) => s + (Number(a.quantidade_kg)||0), 0);
     const concluidos = dossieChecklist.filter(c => c.concluido).length;
     const pctChecklist = dossieChecklist.length ? Math.round((concluidos / dossieChecklist.length) * 100) : 0;
-    const investimentoLiquido = (Number(f.valor_investido)||0) - totalPatrocinios;
     const mediaMorador = media('morador');
     const mediaComerciante = media('comerciante');
 
@@ -2078,16 +2081,32 @@ async function baixarPdfDossie(){
       y += 4;
     }
 
-    // Investimentos
-    secao('Investimentos');
+    // Prestação de contas — balanço financeiro
+    secao('Prestação de Contas — Balanço Financeiro');
     doc.autoTable({
       startY: y,
-      head: [['Categoria', 'Valor']],
+      head: [['Receitas', 'Valor']],
       body: [
-        ['Investimento municipal', moneyR(f.valor_investido)],
-        ['Total de patrocínios', moneyR(totalPatrocinios)],
-        ['Investimento líquido (municipal − patrocínios)', moneyR(investimentoLiquido)],
-        ['Retorno econômico estimado', moneyR(f.valor_retorno_estimado)],
+        ['Patrocínios recebidos', moneyR(totalPatrocinios)],
+        ['Taxas de comerciantes/barracas', moneyR(totalTaxasBarracas)],
+        ['Total de receitas', moneyR(totalReceitas)],
+      ],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [5,150,105] },
+    });
+    y = doc.lastAutoTable.finalY + 6;
+    doc.autoTable({
+      startY: y,
+      head: [['Despesas', 'Valor']],
+      body: [['Investimento municipal na festa', moneyR(investimentoMunicipal)]],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [220,38,38] },
+    });
+    y = doc.lastAutoTable.finalY + 6;
+    doc.autoTable({
+      startY: y,
+      head: [['Resultado', 'Valor']],
+      body: [
+        [saldoFinal >= 0 ? 'Saldo positivo (receitas − investimento)' : 'Saldo negativo (receitas − investimento)', moneyR(Math.abs(saldoFinal))],
+        ['Retorno econômico estimado para o comércio local', moneyR(f.valor_retorno_estimado)],
       ],
       styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
     });
@@ -2205,7 +2224,7 @@ async function baixarPdfDossie(){
     doc.setFontSize(9); doc.setTextColor(60);
     const partes = [];
     partes.push('A festa "' + (f.titulo || '') + '" contou com ' + dossieComerciantes.length + ' comerciante(s)/barraca(s)' + (dossieCriancas.length ? ' e ' + dossieCriancas.length + ' criança(s) no desfile' : '') + '.');
-    if(totalPatrocinios) partes.push('Foram arrecadados ' + moneyR(totalPatrocinios) + ' em patrocínios, resultando em investimento líquido de ' + moneyR(investimentoLiquido) + '.');
+    partes.push('O investimento municipal foi de ' + moneyR(investimentoMunicipal) + ', contra ' + moneyR(totalReceitas) + ' em receitas (patrocínios + taxas de barracas), resultando em ' + (saldoFinal >= 0 ? 'saldo positivo' : 'saldo negativo') + ' de ' + moneyR(Math.abs(saldoFinal)) + '.');
     if(totalAlimentos) partes.push('A competição de arrecadação de alimentos reuniu ' + totalAlimentos.toLocaleString('pt-BR') + ' kg de doações.');
     if(mediaMorador || mediaComerciante) partes.push('A avaliação pública registrou nota média de ' + (mediaMorador || '—') + '/5 entre moradores e ' + (mediaComerciante || '—') + '/5 entre comerciantes.');
     partes.push('O evento foi ' + pctChecklist + '% preparado conforme o checklist cadastrado.');
@@ -2246,6 +2265,9 @@ async function baixarExcelDossie(){
       return notas.length ? (notas.reduce((s,v) => s + Number(v.nota), 0) / notas.length / 2).toFixed(1) : '';
     };
     const totalPatrocinios = dossiePatrocinios.reduce((s,p) => s + (Number(p.valor)||0), 0);
+    const totalTaxasBarracas = dossieComerciantes.reduce((s,c) => s + (c.isento ? 0 : (Number(c.valor_cobrado)||0)), 0);
+    const totalReceitas = totalPatrocinios + totalTaxasBarracas;
+    const investimentoMunicipal = Number(f.valor_investido) || 0;
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{
@@ -2253,9 +2275,11 @@ async function baixarExcelDossie(){
       'Tipo de evento': TIPO_EVENTO_LABEL[f.tipo_evento] || '', 'Local': f.local || '', 'Endereço': f.endereco || '',
       'Data início': f.data || '', 'Data fim': f.data_fim || '', 'Horário início': f.hora_inicio || '', 'Horário fim': f.hora_fim || '',
       'Finalidade': f.finalidade || '', 'Objetivos': f.objetivos || '', 'Público-alvo': f.publico_alvo || '',
-      'Público estimado': f.publico_estimado || '', 'Investimento municipal (R$)': Number(f.valor_investido) || 0,
-      'Total patrocínios (R$)': totalPatrocinios, 'Investimento líquido (R$)': (Number(f.valor_investido)||0) - totalPatrocinios,
-      'Retorno estimado (R$)': Number(f.valor_retorno_estimado) || 0,
+      'Público estimado': f.publico_estimado || '',
+      'Receita — Patrocínios (R$)': totalPatrocinios, 'Receita — Taxas de barracas (R$)': totalTaxasBarracas,
+      'Receita total (R$)': totalReceitas, 'Despesa — Investimento municipal (R$)': investimentoMunicipal,
+      'Saldo (receitas − investimento) (R$)': totalReceitas - investimentoMunicipal,
+      'Retorno estimado para o comércio (R$)': Number(f.valor_retorno_estimado) || 0,
       'Avaliação moradores (0-5)': media('morador'), 'Avaliação comerciantes (0-5)': media('comerciante'),
     }]), 'Dados gerais');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieComerciantes.map(c => ({
