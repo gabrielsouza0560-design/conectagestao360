@@ -9,7 +9,7 @@ Retrato honesto do que **realmente funciona com dados reais** vs. **protótipo v
 ### Infraestrutura
 - Banco Supabase completo com **25 tabelas** no schema `gestao360` isolado
 - **RLS por tenant + escopo por secretaria** ativo em todas as tabelas
-- Site publicado no ar: https://conectagestao360.netlify.app
+- Site publicado no ar: https://conectagestao360.vercel.app
 - Sistema **multi-tenant** preparado (hoje só o tenant demo está em uso)
 - Hook JWT do Supabase Auth **ativo**, injetando `perfil`, `tenant_id`, `secretaria_id` no token
 - **pg_cron** rodando todo dia às 08:00 UTC (job de alertas de prazo)

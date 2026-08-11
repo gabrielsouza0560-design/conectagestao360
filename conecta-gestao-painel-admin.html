@@ -506,7 +506,51 @@
           <div class="field"><label>Contrapartida</label><input id="dp-contrapartida" placeholder="Ex.: Logo no material de divulgação"></div>
           <div class="field span-3"><label>Observações</label><input id="dp-observacoes"></div>
         </div>
-        <div class="form-actions"><button class="btn-accent" onclick="addPatrocinio()">+ Adicionar patrocínio</button></div>
+        <div class="form-actions"><button class="btn-ghost" id="btn-cancel-patrocinio" style="display:none;" onclick="cancelarEdicaoPatrocinio()">Cancelar</button><button class="btn-accent" id="btn-add-patrocinio" onclick="addPatrocinio()">+ Adicionar patrocínio</button></div>
+
+        <h4 style="margin:26px 0 8px;">🎤 Atrações</h4>
+        <p class="panel-sub" id="dossie-total-atracoes"></p>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Atração</th><th>Tipo</th><th>Data/hora</th><th>Responsável</th><th>Valor</th><th>Situação</th><th></th></tr></thead>
+            <tbody id="tbl-dossie-atracoes"></tbody>
+          </table>
+        </div>
+        <div class="form-grid" style="margin-top:12px;">
+          <div class="field"><label>Nome da atração</label><input id="da-nome" placeholder="Ex.: Banda Show da Cidade"></div>
+          <div class="field"><label>Tipo</label>
+            <select id="da-tipo">
+              <option value="banda">Banda</option>
+              <option value="dj">DJ</option>
+              <option value="show">Show</option>
+              <option value="artista">Artista</option>
+              <option value="apresentacao_cultural">Apresentação cultural</option>
+              <option value="grupo_danca">Grupo de dança</option>
+              <option value="teatro">Teatro</option>
+              <option value="atividade_infantil">Atividade infantil</option>
+              <option value="palestra">Palestra</option>
+              <option value="competicao">Competição</option>
+              <option value="outra">Outra</option>
+            </select>
+          </div>
+          <div class="field"><label>Data</label><input id="da-data" type="date"></div>
+          <div class="field"><label>Horário</label><input id="da-horario" type="time"></div>
+          <div class="field"><label>Responsável</label><input id="da-responsavel"></div>
+          <div class="field"><label>Valor (R$)</label><input id="da-valor" type="text" inputmode="decimal" placeholder="Ex.: 3.000,00"></div>
+          <div class="field"><label>Forma de contratação</label><input id="da-forma-contratacao" placeholder="Ex.: Cachê direto, empresa de eventos..."></div>
+          <div class="field"><label>Forma de pagamento</label><input id="da-forma-pagamento"></div>
+          <div class="field"><label>Situação</label>
+            <select id="da-situacao">
+              <option value="a_contratar">A contratar</option>
+              <option value="contratada">Contratada</option>
+              <option value="a_pagar">A pagar</option>
+              <option value="pago">Pago</option>
+            </select>
+          </div>
+          <div class="field span-3"><label>Descrição</label><input id="da-descricao"></div>
+          <div class="field span-3"><label>Observações</label><input id="da-observacoes"></div>
+        </div>
+        <div class="form-actions"><button class="btn-ghost" id="btn-cancel-atracao" style="display:none;" onclick="cancelarEdicaoAtracao()">Cancelar</button><button class="btn-accent" id="btn-add-atracao" onclick="addAtracao()">+ Adicionar atração</button></div>
 
         <h4 style="margin:26px 0 8px;">🎈 Ficha da criança do desfile</h4>
         <div class="form-grid">
@@ -536,7 +580,13 @@
           <div class="field span-3"><label>Qual o sonho quando crescer</label><input id="dcr-sonho"></div>
           <div class="field span-3"><label>Escreva um pouco sobre a criança</label><textarea id="dcr-sobre" rows="3"></textarea></div>
         </div>
-        <div class="form-actions"><button class="btn-accent" onclick="addCriancaDesfile()">+ Adicionar criança ao desfile</button></div>
+        <div class="fieldset-label">Campanha Solidária (mínimo: 50 itens alimentícios OU R$250 em doações — destinação: APAE)</div>
+        <div class="form-grid">
+          <div class="field"><label>Itens alimentícios (não perecíveis)</label><input id="dcr-itens-alimentos" type="number" min="0" value="0" placeholder="Mínimo 50"></div>
+          <div class="field"><label>Doação financeira (R$)</label><input id="dcr-valor-financeiro" type="text" inputmode="decimal" value="0" placeholder="Mínimo R$250,00"></div>
+          <div class="field"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:24px;"><input type="checkbox" id="dcr-autorizado" style="width:auto;margin-right:8px;vertical-align:middle;"> Responsável autorizou participação e uso de imagem</label></div>
+        </div>
+        <div class="form-actions"><button class="btn-ghost" id="btn-cancel-crianca" style="display:none;" onclick="cancelarEdicaoCrianca()">Cancelar</button><button class="btn-accent" id="btn-add-crianca" onclick="addCriancaDesfile()">+ Adicionar criança ao desfile</button></div>
 
         <h4 style="margin:26px 0 8px;">Crianças cadastradas — APAE</h4>
         <div id="dossie-lista-criancas-apae" style="margin-bottom:10px;"></div>
@@ -1363,6 +1413,22 @@ async function sbPost(table, body){
   return res.json();
 }
 
+async function sbPatch(table, id, body){
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?id=eq.' + id, {
+    method: 'PATCH',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + session.access_token,
+      'Content-Profile': 'gestao360',
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    },
+    body: JSON.stringify(body),
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 async function registrarAuditoria(entidade, entidadeId, acao, detalhes){
   try {
     const corpo = Object.assign({ realizado_por: session.claims.perfil || null }, detalhes || {});
@@ -1832,7 +1898,11 @@ async function loadFestas(){
 let dossieAcaoId = null;
 let dossieComerciantes = [];
 let dossiePatrocinios = [];
+let dossieAtracoes = [];
 let dossieCriancas = [];
+let editandoCriancaId = null;
+let editandoPatrocinioId = null;
+let editandoAtracaoId = null;
 let dossieArrecadacao = [];
 let dossieChecklist = [];
 
@@ -1845,6 +1915,12 @@ const PATROCINIO_TIPO_LABEL = {
   financeiro:'Financeiro', material:'Material', servico:'Serviço', brinde:'Brinde',
   estrutura:'Estrutura', alimentacao:'Alimentação', roupas_desfile:'Roupas para o desfile', outro:'Outro',
 };
+const ATRACAO_TIPO_LABEL = {
+  banda:'Banda', dj:'DJ', show:'Show', artista:'Artista', apresentacao_cultural:'Apresentação cultural',
+  grupo_danca:'Grupo de dança', teatro:'Teatro', atividade_infantil:'Atividade infantil',
+  palestra:'Palestra', competicao:'Competição', outra:'Outra',
+};
+const ATRACAO_SITUACAO_LABEL = { a_contratar:'A contratar', contratada:'Contratada', a_pagar:'A pagar', pago:'Pago' };
 const CHECKLIST_ITENS_PADRAO = [
   'Local definido','Data definida','Programação definida','Atrações contratadas','Estrutura contratada',
   'Segurança definida','Polícia Militar comunicada','Conselho Tutelar comunicado','Corpo de Bombeiros comunicado',
@@ -1869,9 +1945,10 @@ function fecharDossie(){
 async function carregarDossie(){
   if(!dossieAcaoId) return;
   try {
-    [dossieComerciantes, dossiePatrocinios, dossieCriancas, dossieArrecadacao, dossieChecklist] = await Promise.all([
+    [dossieComerciantes, dossiePatrocinios, dossieAtracoes, dossieCriancas, dossieArrecadacao, dossieChecklist] = await Promise.all([
       sbGet('evento_comerciantes', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
       sbGet('evento_patrocinios', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+      sbGet('evento_atracoes', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=data.asc.nullslast'),
       sbGet('evento_desfile_criancas', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
       sbGet('evento_arrecadacao_alimentos', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
       sbGet('evento_checklist', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
@@ -1905,6 +1982,8 @@ function renderDossie(){
     '<div class="kpi"><div class="num">' + locais + '</div><div class="lbl">Comerciantes locais</div></div>' +
     '<div class="kpi"><div class="num">' + money(totalPatrocinios) + '</div><div class="lbl">Total em patrocínios</div></div>' +
     '<div class="kpi"><div class="num">' + dossieCriancas.length + '</div><div class="lbl">Crianças no desfile</div></div>' +
+    '<div class="kpi"><div class="num">' + dossieCriancas.filter(c => c.meta_atingida).length + '/' + dossieCriancas.length + '</div><div class="lbl">Meta solidária atingida</div></div>' +
+    '<div class="kpi"><div class="num">' + dossieCriancas.filter(c => c.autorizado).length + '/' + dossieCriancas.length + '</div><div class="lbl">Autorizações</div></div>' +
     '<div class="kpi"><div class="num">' + totalAlimentos.toLocaleString('pt-BR') + ' kg</div><div class="lbl">Alimentos arrecadados</div></div>' +
     '<div class="kpi"><div class="num">' + pctChecklist + '%</div><div class="lbl">Evento preparado</div></div>';
 
@@ -1925,20 +2004,48 @@ function renderDossie(){
         '<td>' + (p.quantidade_pecas != null ? p.quantidade_pecas : '—') + '</td>' +
         '<td>' + money(p.valor) + '</td>' +
         '<td>' + (p.contrapartida || p.descricao_apoio || '—') + '</td>' +
-        '<td><button class="btn-ghost" onclick="deleteDossieItem(\'evento_patrocinios\',\'' + p.id + '\')">remover</button></td></tr>').join('')
+        '<td><button class="btn-ghost" onclick="editarPatrocinio(\'' + p.id + '\')">editar</button> <button class="btn-ghost" style="color:var(--danger);" onclick="deleteDossieItem(\'evento_patrocinios\',\'' + p.id + '\')">remover</button></td></tr>').join('')
     : '<tr><td colspan="7" class="empty">Nenhum patrocínio cadastrado ainda.</td></tr>';
+
+  const totalAtracoes = dossieAtracoes.reduce((s,a) => s + (Number(a.valor)||0), 0);
+  document.getElementById('dossie-total-atracoes').textContent = dossieAtracoes.length ? 'Total em atrações: ' + money(totalAtracoes) : '';
+  document.getElementById('tbl-dossie-atracoes').innerHTML = dossieAtracoes.length
+    ? dossieAtracoes.map(a => '<tr><td>' + a.nome + '</td>' +
+        '<td>' + (ATRACAO_TIPO_LABEL[a.tipo] || a.tipo || '—') + '</td>' +
+        '<td>' + (a.data ? new Date(a.data).toLocaleDateString('pt-BR') : '—') + (a.horario ? ' ' + a.horario.slice(0,5) : '') + '</td>' +
+        '<td>' + (a.responsavel || '—') + '</td>' +
+        '<td>' + money(a.valor) + '</td>' +
+        '<td>' + (ATRACAO_SITUACAO_LABEL[a.situacao] || a.situacao || '—') + '</td>' +
+        '<td><button class="btn-ghost" onclick="editarAtracao(\'' + a.id + '\')">editar</button> <button class="btn-ghost" style="color:var(--danger);" onclick="deleteDossieItem(\'evento_atracoes\',\'' + a.id + '\')">remover</button></td></tr>').join('')
+    : '<tr><td colspan="7" class="empty">Nenhuma atração cadastrada ainda.</td></tr>';
 
   const ficaCriancaCard = (c) => {
     const idadeTxt = c.idade != null ? c.idade + ' anos' : (c.data_nascimento ? new Date(c.data_nascimento).toLocaleDateString('pt-BR') : '');
     const linha1 = [c.escola, c.serie ? 'série ' + c.serie : null, idadeTxt].filter(Boolean).join(' · ');
     const linhaResp = [c.responsavel_nome, c.responsavel_parentesco, c.responsavel_whatsapp].filter(Boolean).join(' · ');
+    const itens = Number(c.doacao_itens_alimentos) || 0;
+    const valor = Number(c.doacao_valor_financeiro) || 0;
+    const doacaoParts = [];
+    if (itens > 0) doacaoParts.push(itens + ' itens');
+    if (valor > 0) doacaoParts.push('R$' + valor.toLocaleString('pt-BR', {minimumFractionDigits:2}));
+    const doacaoTxt = doacaoParts.length ? doacaoParts.join(' + ') : 'nenhuma';
+    const metaOk = c.meta_atingida;
+    const metaPill = metaOk
+      ? '<span class="status-pill status-concluido">Meta atingida</span>'
+      : '<span class="status-pill status-cancelado">Meta pendente</span>';
+    const autPill = c.autorizado
+      ? '<span class="status-pill status-concluido" style="margin-left:6px;">Autorizado</span>'
+      : '<span class="status-pill status-em_andamento" style="margin-left:6px;">Sem autorização</span>';
     return '<div style="padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
       '<strong>' + c.nome + '</strong>' +
-      '<button class="btn-ghost" style="padding:2px 8px;font-size:11px;" onclick="deleteDossieItem(\'evento_desfile_criancas\',\'' + c.id + '\')">remover</button></div>' +
+      '<div>' + metaPill + autPill +
+      ' <button class="btn-ghost" style="padding:2px 8px;font-size:11px;" onclick="editarCrianca(\'' + c.id + '\')">editar</button>' +
+      ' <button class="btn-ghost" style="padding:2px 8px;font-size:11px;color:var(--danger);" onclick="deleteDossieItem(\'evento_desfile_criancas\',\'' + c.id + '\')">remover</button></div></div>' +
       (linha1 ? '<div style="color:var(--ink-soft);margin-top:2px;">' + linha1 + '</div>' : '') +
       (linhaResp ? '<div style="color:var(--muted);font-size:12px;margin-top:2px;">Responsável: ' + linhaResp + '</div>' : '') +
       (c.responsavel_endereco ? '<div style="color:var(--muted);font-size:12px;">' + c.responsavel_endereco + '</div>' : '') +
+      '<div style="color:var(--muted);font-size:12px;margin-top:2px;">Doação: ' + doacaoTxt + '</div>' +
       (c.gosta_de_fazer ? '<div style="color:var(--muted);font-size:12px;margin-top:2px;">Gosta de: ' + c.gosta_de_fazer + '</div>' : '') +
       (c.sonho ? '<div style="color:var(--muted);font-size:12px;">Sonho: ' + c.sonho + '</div>' : '') +
       (c.sobre_a_crianca ? '<div style="color:var(--muted);font-size:12px;font-style:italic;margin-top:2px;">' + c.sobre_a_crianca + '</div>' : '') +
@@ -2004,56 +2111,193 @@ function toggleDpQuantidadePecas(){
   document.getElementById('dp-quantidade-pecas-wrap').style.display = document.getElementById('dp-tipo').value === 'roupas_desfile' ? 'block' : 'none';
 }
 
+function editarPatrocinio(id){
+  const p = dossiePatrocinios.find(x => x.id === id);
+  if(!p) return;
+  editandoPatrocinioId = id;
+  document.getElementById('dp-nome').value = p.nome || '';
+  document.getElementById('dp-razao-social').value = p.razao_social || '';
+  document.getElementById('dp-nome-fantasia').value = p.nome_fantasia || '';
+  document.getElementById('dp-cnpj').value = p.cnpj_cpf || '';
+  document.getElementById('dp-responsavel').value = p.responsavel || '';
+  document.getElementById('dp-telefone').value = p.telefone || '';
+  document.getElementById('dp-endereco').value = p.endereco || '';
+  document.getElementById('dp-tipo').value = p.tipo_apoio || 'financeiro';
+  toggleDpQuantidadePecas();
+  document.getElementById('dp-quantidade-pecas').value = p.quantidade_pecas != null ? p.quantidade_pecas : '';
+  document.getElementById('dp-valor').value = p.valor ? Number(p.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '';
+  document.getElementById('dp-forma-pagamento').value = p.forma_pagamento || '';
+  document.getElementById('dp-descricao').value = p.descricao_apoio || '';
+  document.getElementById('dp-contrapartida').value = p.contrapartida || '';
+  document.getElementById('dp-observacoes').value = p.observacoes || '';
+  document.getElementById('btn-add-patrocinio').textContent = 'Salvar alterações';
+  document.getElementById('btn-cancel-patrocinio').style.display = 'inline-block';
+  document.getElementById('btn-add-patrocinio').scrollIntoView({behavior:'smooth', block:'center'});
+}
+function cancelarEdicaoPatrocinio(){
+  editandoPatrocinioId = null;
+  ['dp-nome','dp-razao-social','dp-nome-fantasia','dp-cnpj','dp-responsavel','dp-telefone','dp-endereco','dp-quantidade-pecas','dp-valor','dp-forma-pagamento','dp-descricao','dp-contrapartida','dp-observacoes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('dp-quantidade-pecas-wrap').style.display = 'none';
+  document.getElementById('btn-add-patrocinio').textContent = '+ Adicionar patrocínio';
+  document.getElementById('btn-cancel-patrocinio').style.display = 'none';
+}
 async function addPatrocinio(){
   const nome = document.getElementById('dp-nome').value.trim();
   if(!nome || !dossieAcaoId) return;
+  const dados = {
+    nome: nome,
+    razao_social: document.getElementById('dp-razao-social').value.trim() || null,
+    nome_fantasia: document.getElementById('dp-nome-fantasia').value.trim() || null,
+    cnpj_cpf: document.getElementById('dp-cnpj').value.trim() || null,
+    responsavel: document.getElementById('dp-responsavel').value.trim() || null,
+    telefone: document.getElementById('dp-telefone').value.trim() || null,
+    endereco: document.getElementById('dp-endereco').value.trim() || null,
+    tipo_apoio: document.getElementById('dp-tipo').value || null,
+    quantidade_pecas: parseInt(document.getElementById('dp-quantidade-pecas').value) || null,
+    valor: parseMoneyBR(document.getElementById('dp-valor').value),
+    forma_pagamento: document.getElementById('dp-forma-pagamento').value.trim() || null,
+    descricao_apoio: document.getElementById('dp-descricao').value.trim() || null,
+    contrapartida: document.getElementById('dp-contrapartida').value.trim() || null,
+    observacoes: document.getElementById('dp-observacoes').value.trim() || null,
+  };
   try {
-    await sbPost('evento_patrocinios', {
-      tenant_id: session.claims.tenant_id, acao_id: dossieAcaoId,
-      nome: nome,
-      razao_social: document.getElementById('dp-razao-social').value.trim() || null,
-      nome_fantasia: document.getElementById('dp-nome-fantasia').value.trim() || null,
-      cnpj_cpf: document.getElementById('dp-cnpj').value.trim() || null,
-      responsavel: document.getElementById('dp-responsavel').value.trim() || null,
-      telefone: document.getElementById('dp-telefone').value.trim() || null,
-      endereco: document.getElementById('dp-endereco').value.trim() || null,
-      tipo_apoio: document.getElementById('dp-tipo').value || null,
-      quantidade_pecas: parseInt(document.getElementById('dp-quantidade-pecas').value) || null,
-      valor: parseMoneyBR(document.getElementById('dp-valor').value),
-      forma_pagamento: document.getElementById('dp-forma-pagamento').value.trim() || null,
-      descricao_apoio: document.getElementById('dp-descricao').value.trim() || null,
-      contrapartida: document.getElementById('dp-contrapartida').value.trim() || null,
-      observacoes: document.getElementById('dp-observacoes').value.trim() || null,
-    });
-    ['dp-nome','dp-razao-social','dp-nome-fantasia','dp-cnpj','dp-responsavel','dp-telefone','dp-endereco','dp-quantidade-pecas','dp-valor','dp-forma-pagamento','dp-descricao','dp-contrapartida','dp-observacoes'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('dp-quantidade-pecas-wrap').style.display = 'none';
+    if(editandoPatrocinioId){
+      await sbPatch('evento_patrocinios', editandoPatrocinioId, dados);
+    } else {
+      dados.tenant_id = session.claims.tenant_id;
+      dados.acao_id = dossieAcaoId;
+      await sbPost('evento_patrocinios', dados);
+    }
+    cancelarEdicaoPatrocinio();
     await carregarDossie();
   } catch (e) {
-    alert('Não foi possível adicionar: ' + e.message.slice(0,200));
+    alert('Não foi possível salvar: ' + e.message.slice(0,200));
   }
 }
 
+function editarAtracao(id){
+  const a = dossieAtracoes.find(x => x.id === id);
+  if(!a) return;
+  editandoAtracaoId = id;
+  document.getElementById('da-nome').value = a.nome || '';
+  document.getElementById('da-tipo').value = a.tipo || 'banda';
+  document.getElementById('da-data').value = a.data || '';
+  document.getElementById('da-horario').value = a.horario ? a.horario.slice(0,5) : '';
+  document.getElementById('da-responsavel').value = a.responsavel || '';
+  document.getElementById('da-valor').value = a.valor ? Number(a.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '';
+  document.getElementById('da-forma-contratacao').value = a.forma_contratacao || '';
+  document.getElementById('da-forma-pagamento').value = a.forma_pagamento || '';
+  document.getElementById('da-situacao').value = a.situacao || 'a_contratar';
+  document.getElementById('da-descricao').value = a.descricao || '';
+  document.getElementById('da-observacoes').value = a.observacoes || '';
+  document.getElementById('btn-add-atracao').textContent = 'Salvar alterações';
+  document.getElementById('btn-cancel-atracao').style.display = 'inline-block';
+  document.getElementById('btn-add-atracao').scrollIntoView({behavior:'smooth', block:'center'});
+}
+function cancelarEdicaoAtracao(){
+  editandoAtracaoId = null;
+  ['da-nome','da-data','da-horario','da-responsavel','da-valor','da-forma-contratacao','da-forma-pagamento','da-descricao','da-observacoes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('btn-add-atracao').textContent = '+ Adicionar atração';
+  document.getElementById('btn-cancel-atracao').style.display = 'none';
+}
+async function addAtracao(){
+  const nome = document.getElementById('da-nome').value.trim();
+  if(!nome || !dossieAcaoId) return;
+  const dados = {
+    nome: nome,
+    tipo: document.getElementById('da-tipo').value || null,
+    data: document.getElementById('da-data').value || null,
+    horario: document.getElementById('da-horario').value || null,
+    descricao: document.getElementById('da-descricao').value.trim() || null,
+    responsavel: document.getElementById('da-responsavel').value.trim() || null,
+    valor: parseMoneyBR(document.getElementById('da-valor').value),
+    forma_contratacao: document.getElementById('da-forma-contratacao').value.trim() || null,
+    forma_pagamento: document.getElementById('da-forma-pagamento').value.trim() || null,
+    situacao: document.getElementById('da-situacao').value || 'a_contratar',
+    observacoes: document.getElementById('da-observacoes').value.trim() || null,
+  };
+  try {
+    if(editandoAtracaoId){
+      await sbPatch('evento_atracoes', editandoAtracaoId, dados);
+    } else {
+      dados.tenant_id = session.claims.tenant_id;
+      dados.acao_id = dossieAcaoId;
+      await sbPost('evento_atracoes', dados);
+    }
+    cancelarEdicaoAtracao();
+    await carregarDossie();
+  } catch (e) {
+    alert('Não foi possível salvar: ' + e.message.slice(0,200));
+  }
+}
+
+function editarCrianca(id){
+  const c = dossieCriancas.find(x => x.id === id);
+  if(!c) return;
+  editandoCriancaId = id;
+  document.getElementById('dcr-categoria').value = c.categoria || 'apae';
+  document.getElementById('dcr-nome').value = c.nome || '';
+  document.getElementById('dcr-nascimento').value = c.data_nascimento || '';
+  document.getElementById('dcr-idade').value = c.idade != null ? c.idade : '';
+  document.getElementById('dcr-escola').value = c.escola || '';
+  document.getElementById('dcr-serie').value = c.serie || '';
+  document.getElementById('dcr-resp-nome').value = c.responsavel_nome || '';
+  document.getElementById('dcr-resp-parentesco').value = c.responsavel_parentesco || '';
+  document.getElementById('dcr-resp-whatsapp').value = c.responsavel_whatsapp || '';
+  document.getElementById('dcr-resp-endereco').value = c.responsavel_endereco || '';
+  document.getElementById('dcr-gosta').value = c.gosta_de_fazer || '';
+  document.getElementById('dcr-sonho').value = c.sonho || '';
+  document.getElementById('dcr-sobre').value = c.sobre_a_crianca || '';
+  document.getElementById('dcr-itens-alimentos').value = Number(c.doacao_itens_alimentos) || 0;
+  document.getElementById('dcr-valor-financeiro').value = Number(c.doacao_valor_financeiro) || 0;
+  document.getElementById('dcr-autorizado').checked = !!c.autorizado;
+  document.getElementById('btn-add-crianca').textContent = 'Salvar alterações';
+  document.getElementById('btn-cancel-crianca').style.display = 'inline-block';
+  document.getElementById('btn-add-crianca').scrollIntoView({behavior:'smooth', block:'center'});
+}
+function cancelarEdicaoCrianca(){
+  editandoCriancaId = null;
+  ['dcr-nome','dcr-nascimento','dcr-idade','dcr-escola','dcr-serie','dcr-resp-nome','dcr-resp-parentesco','dcr-resp-whatsapp','dcr-resp-endereco','dcr-gosta','dcr-sonho','dcr-sobre'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('dcr-itens-alimentos').value = '0';
+  document.getElementById('dcr-valor-financeiro').value = '0';
+  document.getElementById('dcr-autorizado').checked = false;
+  document.getElementById('btn-add-crianca').textContent = '+ Adicionar criança ao desfile';
+  document.getElementById('btn-cancel-crianca').style.display = 'none';
+}
 async function addCriancaDesfile(){
   const nome = document.getElementById('dcr-nome').value.trim();
   if(!nome || !dossieAcaoId) return;
+  const itensAlimentos = parseInt(document.getElementById('dcr-itens-alimentos').value) || 0;
+  const valorFinanceiro = parseFloat(document.getElementById('dcr-valor-financeiro').value.replace(/\./g,'').replace(',','.')) || 0;
+  const metaAtingida = itensAlimentos >= 50 || valorFinanceiro >= 250 || (itensAlimentos > 0 && valorFinanceiro > 0 && (itensAlimentos / 50 + valorFinanceiro / 250) >= 1);
+  const dados = {
+    categoria: document.getElementById('dcr-categoria').value,
+    nome: nome,
+    data_nascimento: document.getElementById('dcr-nascimento').value || null,
+    idade: parseInt(document.getElementById('dcr-idade').value) || null,
+    escola: document.getElementById('dcr-escola').value.trim() || null,
+    serie: document.getElementById('dcr-serie').value.trim() || null,
+    responsavel_nome: document.getElementById('dcr-resp-nome').value.trim() || null,
+    responsavel_parentesco: document.getElementById('dcr-resp-parentesco').value.trim() || null,
+    responsavel_whatsapp: document.getElementById('dcr-resp-whatsapp').value.trim() || null,
+    responsavel_endereco: document.getElementById('dcr-resp-endereco').value.trim() || null,
+    gosta_de_fazer: document.getElementById('dcr-gosta').value.trim() || null,
+    sonho: document.getElementById('dcr-sonho').value.trim() || null,
+    sobre_a_crianca: document.getElementById('dcr-sobre').value.trim() || null,
+    doacao_itens_alimentos: itensAlimentos,
+    doacao_valor_financeiro: valorFinanceiro,
+    meta_atingida: metaAtingida,
+    autorizado: document.getElementById('dcr-autorizado').checked,
+  };
   try {
-    await sbPost('evento_desfile_criancas', {
-      tenant_id: session.claims.tenant_id, acao_id: dossieAcaoId,
-      categoria: document.getElementById('dcr-categoria').value,
-      nome: nome,
-      data_nascimento: document.getElementById('dcr-nascimento').value || null,
-      idade: parseInt(document.getElementById('dcr-idade').value) || null,
-      escola: document.getElementById('dcr-escola').value.trim() || null,
-      serie: document.getElementById('dcr-serie').value.trim() || null,
-      responsavel_nome: document.getElementById('dcr-resp-nome').value.trim() || null,
-      responsavel_parentesco: document.getElementById('dcr-resp-parentesco').value.trim() || null,
-      responsavel_whatsapp: document.getElementById('dcr-resp-whatsapp').value.trim() || null,
-      responsavel_endereco: document.getElementById('dcr-resp-endereco').value.trim() || null,
-      gosta_de_fazer: document.getElementById('dcr-gosta').value.trim() || null,
-      sonho: document.getElementById('dcr-sonho').value.trim() || null,
-      sobre_a_crianca: document.getElementById('dcr-sobre').value.trim() || null,
-    });
-    ['dcr-nome','dcr-nascimento','dcr-idade','dcr-escola','dcr-serie','dcr-resp-nome','dcr-resp-parentesco','dcr-resp-whatsapp','dcr-resp-endereco','dcr-gosta','dcr-sonho','dcr-sobre'].forEach(id => document.getElementById(id).value = '');
+    if(editandoCriancaId){
+      await sbPatch('evento_desfile_criancas', editandoCriancaId, dados);
+    } else {
+      dados.tenant_id = session.claims.tenant_id;
+      dados.acao_id = dossieAcaoId;
+      await sbPost('evento_desfile_criancas', dados);
+    }
+    cancelarEdicaoCrianca();
     await carregarDossie();
   } catch (e) {
     alert('Não foi possível adicionar: ' + e.message.slice(0,200));
@@ -2220,10 +2464,11 @@ async function baixarPdfDossie(){
     secao('Resumo geral');
     doc.autoTable({
       startY: y,
-      head: [['Comerciantes', 'Barracas', 'Crianças no desfile', 'Alimentos arrecadados', 'Documentos', 'Fotos/vídeos', 'Preparo']],
+      head: [['Comerciantes', 'Barracas', 'Atrações', 'Crianças no desfile', 'Alimentos arrecadados', 'Documentos', 'Fotos/vídeos', 'Preparo']],
       body: [[
         dossieComerciantes.length,
         dossieComerciantes.filter(c=>c.numero_barraca).length,
+        dossieAtracoes.length,
         dossieCriancas.length,
         totalAlimentos.toLocaleString('pt-BR') + ' kg',
         documentos.length,
@@ -2256,18 +2501,39 @@ async function baixarPdfDossie(){
     });
     afterTable();
 
+    secao('Atrações');
+    doc.autoTable({
+      startY: y,
+      head: [['Atração', 'Tipo', 'Data/hora', 'Responsável', 'Valor', 'Situação']],
+      body: dossieAtracoes.length
+        ? dossieAtracoes.map(a => [a.nome, ATRACAO_TIPO_LABEL[a.tipo] || a.tipo || '—', (a.data ? new Date(a.data).toLocaleDateString('pt-BR') : '—') + (a.horario ? ' ' + a.horario.slice(0,5) : ''), a.responsavel || '—', moneyR(a.valor), ATRACAO_SITUACAO_LABEL[a.situacao] || a.situacao || '—'])
+        : [['Nenhuma atração cadastrada', '', '', '', '', '']],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
     secao('Crianças do desfile');
     doc.autoTable({
       startY: y,
-      head: [['Nome', 'Categoria', 'Idade', 'Escola/série', 'Responsável', 'WhatsApp']],
+      head: [['Nome', 'Categoria', 'Idade', 'Escola/série', 'Responsável', 'WhatsApp', 'Doação', 'Meta', 'Autorização']],
       body: dossieCriancas.length
-        ? dossieCriancas.map(c => [
-            c.nome, c.categoria === 'apae' ? 'APAE' : 'Cidade',
-            c.idade != null ? c.idade : (c.data_nascimento ? new Date(c.data_nascimento).toLocaleDateString('pt-BR') : '—'),
-            [c.escola, c.serie].filter(Boolean).join(' / ') || '—',
-            c.responsavel_nome || '—', c.responsavel_whatsapp || '—',
-          ])
-        : [['Nenhuma criança cadastrada', '', '', '', '', '']],
+        ? dossieCriancas.map(c => {
+            const itens = Number(c.doacao_itens_alimentos) || 0;
+            const valor = Number(c.doacao_valor_financeiro) || 0;
+            const dParts = [];
+            if (itens > 0) dParts.push(itens + ' itens');
+            if (valor > 0) dParts.push('R$' + valor.toLocaleString('pt-BR', {minimumFractionDigits:2}));
+            return [
+              c.nome, c.categoria === 'apae' ? 'APAE' : 'Cidade',
+              c.idade != null ? c.idade : (c.data_nascimento ? new Date(c.data_nascimento).toLocaleDateString('pt-BR') : '—'),
+              [c.escola, c.serie].filter(Boolean).join(' / ') || '—',
+              c.responsavel_nome || '—', c.responsavel_whatsapp || '—',
+              dParts.join(' + ') || '—',
+              c.meta_atingida ? 'Sim' : 'Não',
+              c.autorizado ? 'Sim' : 'Não',
+            ];
+          })
+        : [['Nenhuma criança cadastrada', '', '', '', '', '', '', '', '']],
       styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
     });
     afterTable();
@@ -2402,6 +2668,12 @@ async function baixarExcelDossie(){
       'Tipo de apoio': PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '', 'Quantidade de peças': p.quantidade_pecas != null ? p.quantidade_pecas : '',
       'Valor (R$)': Number(p.valor) || 0, 'Contrapartida': p.contrapartida || '', 'Descrição': p.descricao_apoio || '',
     }))), 'Patrocínios');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieAtracoes.map(a => ({
+      'Atração': a.nome, 'Tipo': ATRACAO_TIPO_LABEL[a.tipo] || a.tipo || '', 'Data': a.data || '', 'Horário': a.horario || '',
+      'Responsável': a.responsavel || '', 'Valor (R$)': Number(a.valor) || 0, 'Forma de contratação': a.forma_contratacao || '',
+      'Forma de pagamento': a.forma_pagamento || '', 'Situação': ATRACAO_SITUACAO_LABEL[a.situacao] || a.situacao || '',
+      'Descrição': a.descricao || '', 'Observações': a.observacoes || '',
+    }))), 'Atrações');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieCriancas.map(c => ({
       'Nome': c.nome, 'Categoria': c.categoria === 'apae' ? 'APAE' : 'Cidade',
       'Data de nascimento': c.data_nascimento || '', 'Idade': c.idade != null ? c.idade : '',
@@ -2410,6 +2682,10 @@ async function baixarExcelDossie(){
       'Responsável — WhatsApp': c.responsavel_whatsapp || '', 'Responsável — Endereço': c.responsavel_endereco || '',
       'O que mais gosta de fazer': c.gosta_de_fazer || '', 'Sonho quando crescer': c.sonho || '',
       'Sobre a criança': c.sobre_a_crianca || '',
+      'Itens alimentícios': Number(c.doacao_itens_alimentos) || 0,
+      'Doação financeira (R$)': Number(c.doacao_valor_financeiro) || 0,
+      'Meta atingida': c.meta_atingida ? 'Sim' : 'Não',
+      'Autorização': c.autorizado ? 'Sim' : 'Não',
     }))), 'Crianças do desfile');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieArrecadacao.map(a => ({
       'Participante': a.participante, 'Alimento': a.alimento || '', 'Quantidade (kg)': Number(a.quantidade_kg) || 0,

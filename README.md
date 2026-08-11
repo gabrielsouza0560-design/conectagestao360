@@ -4,14 +4,14 @@ Plataforma SaaS multi-tenant para gestão pública municipal.
 Combina painel administrativo interno com portal público de transparência.
 
 **Nome do projeto:** Conecta Gestão (antes chamado internamente de Gestão 360 Brasil)
-**Ambiente:** Netlify (frontend estático) + Supabase (backend)
-**Site em produção:** https://conectagestao360.netlify.app
+**Ambiente:** Vercel (frontend estático) + Supabase (backend)
+**Site em produção:** https://conectagestao360.vercel.app
 
 ## Stack
 
 - **Frontend:** HTML/CSS/JS puro (sem framework), Inter font, glassmorphism azul royal
 - **Backend:** Supabase (Postgres + Auth + RLS)
-- **Deploy:** Netlify (drag-and-drop ou `netlify deploy --prod --dir=.`)
+- **Deploy:** Vercel
 
 ## Estrutura de arquivos
 
@@ -39,14 +39,10 @@ Combina painel administrativo interno com portal público de transparência.
 ## Deploy
 
 ```bash
-# Opção 1 — CLI (recomendado)
-netlify deploy --prod --dir=.
-
-# Opção 2 — drag-and-drop
-# https://app.netlify.com/projects/conectagestao360
+vercel --prod
 ```
 
-Site atual: `conectagestao360.netlify.app`
+Site atual: `conectagestao360.vercel.app`
 
 ## Migrations do banco
 

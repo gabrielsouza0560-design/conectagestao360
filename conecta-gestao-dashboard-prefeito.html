@@ -232,6 +232,40 @@
       <tbody id="obras-destaque"></tbody>
     </table>
   </div>
+
+  <div class="panel">
+    <h3>Captação de Recursos</h3>
+    <p class="panel-sub">Funil de oportunidades — convênios, emendas e financiamentos</p>
+    <div class="kpi-grid" id="recursos-kpi-grid" style="margin-bottom:18px;"></div>
+    <table>
+      <thead><tr><th>Oportunidade</th><th>Fonte</th><th>Valor</th><th>Etapa</th><th>Prazo</th></tr></thead>
+      <tbody id="recursos-destaque"></tbody>
+    </table>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h3>Festas e Eventos</h3>
+      <p class="panel-sub">Resumo dos eventos cadastrados</p>
+      <div class="kpi-grid" id="festas-kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;"></div>
+      <table>
+        <thead><tr><th>Evento</th><th>Data</th><th>Comerciantes</th><th>Crianças</th><th>Patrocínios</th></tr></thead>
+        <tbody id="festas-destaque"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h3>Plano de Governo</h3>
+      <p class="panel-sub">Cumprimento das promessas de campanha</p>
+      <div id="promessas-resumo" style="margin-bottom:14px;"></div>
+      <div class="bars" id="promessas-bars"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Manifestações da População</h3>
+    <p class="panel-sub">Sua Voz — sugestões, elogios, críticas e reclamações</p>
+    <div class="kpi-grid" id="manifestacoes-kpi-grid" style="grid-template-columns:repeat(4,1fr);"></div>
+  </div>
 </main>
 </div>
 
@@ -333,7 +367,7 @@ async function populate(){
 
   try {
     const [acoes, indicadores, mapaPontos, avaliacoes] = await Promise.all([
-      sbGet('acoes', 'select=id,titulo,ano,data,status,valor_investido,bairro,quantidade_beneficiados,secretarias(nome)&order=criado_em.desc'),
+      sbGet('acoes', 'select=id,titulo,ano,data,status,valor_investido,bairro,quantidade_beneficiados,eh_evento,secretarias(nome)&order=criado_em.desc'),
       sbGet('indicadores', 'select=chave,valor,secretarias(nome)'),
       sbGet('mapa_pontos', 'select=categoria,nome'),
       sbGet('avaliacoes', 'select=nota,secretaria_id,secretarias(nome)'),
@@ -441,6 +475,93 @@ async function populate(){
     document.getElementById('obras-destaque').innerHTML = destaque.length
       ? destaque.map(o => `<tr><td>${o.titulo}</td><td>${o.secretarias?.nome||'—'}</td><td>${o.bairro||'—'}</td><td>${statusPillDash(o.status)}</td><td style="font-family:var(--mono);">${money(o.valor_investido)}</td></tr>`).join('')
       : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Nenhuma obra em destaque ainda.</td></tr>';
+
+    // ---------- Captação de Recursos ----------
+    try {
+      const recursos = await sbGet('captacao_recursos', 'select=id,titulo,fonte,valor_estimado,etapa,prazo_submissao,secretarias(nome)&order=criado_em.desc');
+      const ETAPA_LABEL = {prospectando:'Prospectando',em_elaboracao:'Em elaboração',submetido:'Submetido',aprovado:'Aprovado',reprovado:'Reprovado',em_execucao:'Em execução',concluido:'Concluído'};
+      const ETAPA_PILL = {prospectando:'status-planejado',em_elaboracao:'status-em_andamento',submetido:'status-em_andamento',aprovado:'status-concluido',reprovado:'status-cancelado',em_execucao:'status-em_andamento',concluido:'status-concluido'};
+      const totalRec = recursos.length;
+      const aprovados = recursos.filter(r => r.etapa === 'aprovado' || r.etapa === 'em_execucao' || r.etapa === 'concluido');
+      const valorAprov = aprovados.reduce((s,r) => s + (Number(r.valor_estimado)||0), 0);
+      const emAndamento = recursos.filter(r => r.etapa === 'em_elaboracao' || r.etapa === 'submetido');
+      const valorPipeline = emAndamento.reduce((s,r) => s + (Number(r.valor_estimado)||0), 0);
+      document.getElementById('recursos-kpi-grid').innerHTML =
+        '<div class="kpi"><div class="ico">Total</div><div class="num">' + totalRec + '</div><div class="lbl">oportunidades cadastradas</div></div>' +
+        '<div class="kpi"><div class="ico">Aprovados</div><div class="num">' + moneyShort(valorAprov) + '</div><div class="lbl">' + aprovados.length + ' recursos aprovados</div></div>' +
+        '<div class="kpi"><div class="ico">Pipeline</div><div class="num">' + moneyShort(valorPipeline) + '</div><div class="lbl">' + emAndamento.length + ' em tramitação</div></div>' +
+        '<div class="kpi"><div class="ico">Prospectando</div><div class="num">' + recursos.filter(r => r.etapa === 'prospectando').length + '</div><div class="lbl">novas oportunidades</div></div>';
+      const topRec = recursos.slice(0,8);
+      document.getElementById('recursos-destaque').innerHTML = topRec.length
+        ? topRec.map(r => '<tr><td>' + r.titulo + '</td><td>' + (r.fonte||'—') + '</td><td style="font-family:var(--mono);">' + money(r.valor_estimado) + '</td><td><span class="status-pill ' + (ETAPA_PILL[r.etapa]||'') + '">' + (ETAPA_LABEL[r.etapa]||r.etapa) + '</span></td><td>' + (r.prazo_submissao ? new Date(r.prazo_submissao).toLocaleDateString('pt-BR') : '—') + '</td></tr>').join('')
+        : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Nenhum recurso cadastrado ainda.</td></tr>';
+    } catch(e) { console.warn('Recursos não carregado:', e.message); }
+
+    // ---------- Festas e Eventos ----------
+    try {
+      const festas = acoes.filter(a => a.eh_evento);
+      const festasIds = festas.map(f => f.id);
+      let totalCom = 0, totalCri = 0, totalPat = 0;
+      const festasRows = [];
+      for(const f of festas.slice(0,6)){
+        const [coms, cris, pats] = await Promise.all([
+          sbGet('evento_comerciantes', 'select=id&acao_id=eq.' + f.id).catch(() => []),
+          sbGet('evento_desfile_criancas', 'select=id&acao_id=eq.' + f.id).catch(() => []),
+          sbGet('evento_patrocinios', 'select=id,valor&acao_id=eq.' + f.id).catch(() => []),
+        ]);
+        totalCom += coms.length; totalCri += cris.length; totalPat += pats.reduce((s,p) => s + (Number(p.valor)||0), 0);
+        festasRows.push('<tr><td>' + f.titulo + '</td><td>' + (f.data ? new Date(f.data).toLocaleDateString('pt-BR') : '—') + '</td><td>' + coms.length + '</td><td>' + cris.length + '</td><td style="font-family:var(--mono);">' + money(pats.reduce((s,p) => s + (Number(p.valor)||0), 0)) + '</td></tr>');
+      }
+      document.getElementById('festas-kpi-grid').innerHTML =
+        '<div class="kpi"><div class="ico">Eventos</div><div class="num">' + festas.length + '</div><div class="lbl">cadastrados</div></div>' +
+        '<div class="kpi"><div class="ico">Comerciantes</div><div class="num">' + totalCom + '</div><div class="lbl">participantes</div></div>' +
+        '<div class="kpi"><div class="ico">Patrocínios</div><div class="num">' + moneyShort(totalPat) + '</div><div class="lbl">arrecadados</div></div>';
+      document.getElementById('festas-destaque').innerHTML = festasRows.length
+        ? festasRows.join('')
+        : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Nenhum evento cadastrado ainda.</td></tr>';
+    } catch(e) { console.warn('Festas não carregado:', e.message); }
+
+    // ---------- Plano de Governo ----------
+    try {
+      const promessas = await sbGet('promessas_campanha', 'select=id,titulo,status,secretarias(nome)');
+      const totalP = promessas.length;
+      const cumpridas = promessas.filter(p => p.status === 'cumprida').length;
+      const parciais = promessas.filter(p => p.status === 'parcialmente_cumprida').length;
+      const naoIniciadas = promessas.filter(p => p.status === 'nao_iniciada').length;
+      const pctCumprido = totalP ? Math.round(((cumpridas + parciais*0.5) / totalP) * 100) : 0;
+      document.getElementById('promessas-resumo').innerHTML =
+        '<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:0;">' +
+        '<div class="kpi"><div class="ico">Total</div><div class="num">' + totalP + '</div><div class="lbl">promessas</div></div>' +
+        '<div class="kpi"><div class="ico">Cumpridas</div><div class="num" style="color:var(--ok);">' + cumpridas + '</div><div class="lbl">' + (totalP ? Math.round(cumpridas/totalP*100) : 0) + '%</div></div>' +
+        '<div class="kpi"><div class="ico">Parciais</div><div class="num" style="color:#D97706;">' + parciais + '</div><div class="lbl">' + (totalP ? Math.round(parciais/totalP*100) : 0) + '%</div></div>' +
+        '<div class="kpi"><div class="ico">Cumprimento</div><div class="num" style="color:var(--royal);">' + pctCumprido + '%</div><div class="lbl">do plano de governo</div></div>' +
+        '</div>';
+      const bySec = {};
+      promessas.forEach(p => {
+        const sec = p.secretarias?.nome || 'Geral';
+        if(!bySec[sec]) bySec[sec] = {total:0, cumpridas:0};
+        bySec[sec].total++;
+        if(p.status === 'cumprida') bySec[sec].cumpridas++;
+        if(p.status === 'parcialmente_cumprida') bySec[sec].cumpridas += 0.5;
+      });
+      const secBars = Object.entries(bySec).sort((a,b) => (b[1].cumpridas/b[1].total) - (a[1].cumpridas/a[1].total)).slice(0,8);
+      document.getElementById('promessas-bars').innerHTML = secBars.length
+        ? secBars.map(([n,o]) => { const pct = Math.round(o.cumpridas/o.total*100); return '<div class="bar-row"><span>' + n + '</span><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:linear-gradient(90deg,var(--ok),#34D399);"></div></div><span class="val">' + pct + '%</span></div>'; }).join('')
+        : '<p style="color:var(--muted);font-size:12px;">Nenhuma promessa cadastrada.</p>';
+    } catch(e) { console.warn('Promessas não carregado:', e.message); }
+
+    // ---------- Manifestações ----------
+    try {
+      const manif = await sbGet('manifestacoes', 'select=tipo');
+      const tipoCount = {sugestao:0, elogio:0, critica:0, reclamacao:0};
+      manif.forEach(m => { if(tipoCount[m.tipo] !== undefined) tipoCount[m.tipo]++; });
+      document.getElementById('manifestacoes-kpi-grid').innerHTML =
+        '<div class="kpi"><div class="ico">Sugestões</div><div class="num">' + tipoCount.sugestao + '</div><div class="lbl">recebidas</div></div>' +
+        '<div class="kpi"><div class="ico">Elogios</div><div class="num" style="color:var(--ok);">' + tipoCount.elogio + '</div><div class="lbl">recebidos</div></div>' +
+        '<div class="kpi"><div class="ico">Críticas</div><div class="num" style="color:#D97706;">' + tipoCount.critica + '</div><div class="lbl">recebidas</div></div>' +
+        '<div class="kpi"><div class="ico">Reclamações</div><div class="num" style="color:var(--danger);">' + tipoCount.reclamacao + '</div><div class="lbl">recebidas</div></div>';
+    } catch(e) { console.warn('Manifestações não carregado:', e.message); }
+
   } catch (e) {
     alert('Não foi possível carregar os dados: ' + e.message.slice(0,200));
   }
