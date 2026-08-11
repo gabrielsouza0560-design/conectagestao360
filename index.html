@@ -273,7 +273,12 @@
   </section>
 
   <section class="view" id="view-linha">
-    <div class="section-head"><div class="eyebrow">Mandato 2025–2028</div><h2>Linha do tempo</h2><p>Principais marcos da gestão, em ordem cronológica.</p></div>
+    <div class="section-head"><div class="eyebrow">Mandato 2025–2028</div><h2>Linha do tempo</h2><p>Todas as ações da gestão, em ordem cronológica.</p></div>
+    <div class="filter-bar">
+      <div><span class="fb-label">Ano</span><select id="lt-ano" onchange="applyTimelineFilter()"><option value="">Todos</option></select></div>
+      <div><span class="fb-label">Secretaria</span><select id="lt-secretaria" onchange="applyTimelineFilter()"><option value="">Todas</option></select></div>
+      <div><span class="fb-label">Bairro</span><input id="lt-bairro" placeholder="Ex.: Centro" oninput="applyTimelineFilter()"></div>
+    </div>
     <div class="timeline" id="timeline-list"></div>
   </section>
 
@@ -440,7 +445,7 @@ async function loadData(){
   try {
     const [secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas] = await Promise.all([
       sbGet("secretarias", "select=id,nome&order=nome.asc"),
-      sbGet("acoes", "select=titulo,bairro,ano,status,valor_investido,origem_recurso,secretarias(nome),categorias(nome)&publicada_no_portal=eq.true&order=criado_em.desc"),
+      sbGet("acoes", "select=titulo,descricao,bairro,ano,data,status,valor_investido,origem_recurso,secretarias(nome),categorias(nome)&publicada_no_portal=eq.true&order=criado_em.desc"),
       sbGet("publicacoes", "select=titulo,corpo,tipo&status_aprovacao=eq.aprovado&order=publicado_em.desc"),
       sbGet("indicadores", "select=chave,valor,secretarias(nome)"),
       sbGet("mapa_pontos", "select=categoria,nome,latitude,longitude"),
@@ -474,12 +479,6 @@ const NAV = [
   {key:'home', label:'Página Inicial'}, {key:'noticias', label:'Notícias'}, {key:'secretarias', label:'Secretarias'},
   {key:'obras', label:'Obras'}, {key:'plano', label:'Plano de Governo'}, {key:'linha', label:'Linha do Tempo'}, {key:'indicadores', label:'Indicadores'},
   {key:'mapa', label:'Mapa'}, {key:'contas', label:'Prestação de Contas'}, {key:'galeria', label:'Galeria'}, {key:'downloads', label:'Downloads'},
-];
-const TIMELINE = [
-  ["2025", "Início do mandato", "Posse da nova gestão e apresentação do plano de governo."],
-  ["2025", "Lançamento do Portal da Transparência", "Primeira versão do sistema de acompanhamento público."],
-  ["2026", "Reforma de UBS concluída", "Ampliação da capacidade de atendimento na rede básica de saúde."],
-  ["2027 (previsto)", "Entrega do novo Terminal Rodoviário", "Obra estruturante para a região central da cidade."],
 ];
 const MAP_CATS = { escola:"#059669", ubs:"#DC2626", praca:"#D97706", obra:"#2563EB", estrada:"#475569", turismo:"#7C3AED", ponte:"#0891B2", iluminacao:"#CA8A04", agricultura:"#65A30D" };
 const DOWNLOADS = [["Relatório Anual de Gestão 2025", "PDF · 4,2 MB"], ["Balanço Orçamentário — 1º Trimestre 2026", "XLSX · 890 KB"], ["Livro da Gestão 2025–2028 (parcial)", "PDF · 22 MB"]];
@@ -545,7 +544,9 @@ function populate(){
   const categorias = [...new Set(acoes.map(a => a.categorias?.nome || a.categoria).filter(Boolean))].sort();
   document.getElementById('f-categoria').innerHTML = '<option value="">Todas</option>' + categorias.map(c => `<option value="${c}">${c}</option>`).join('');
 
-  document.getElementById('timeline-list').innerHTML = TIMELINE.map(t => `<div class="tl-item"><div class="tl-year">${t[0]}</div><h4>${t[1]}</h4><p>${t[2]}</p></div>`).join('');
+  document.getElementById('lt-ano').innerHTML = '<option value="">Todos</option>' + anos.map(a => `<option value="${a}">${a}</option>`).join('');
+  document.getElementById('lt-secretaria').innerHTML = '<option value="">Todas</option>' + secs.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
+  renderTimeline(acoes);
 
   const kpiVals = DATA.indicadores;
   document.getElementById('ind-kpis').innerHTML = kpiVals.length
@@ -616,6 +617,38 @@ function applyObrasFilter(){
   });
 
   document.getElementById('obras-grid').innerHTML = filtradas.map(obraCard).join('') || '<p class="dl-meta">Nenhuma obra encontrada com esses filtros.</p>';
+}
+
+const STATUS_LABEL_LINHA = { planejado:'Planejado', em_andamento:'Em andamento', concluido:'Concluído', cancelado:'Cancelado' };
+
+function renderTimeline(acoes){
+  const ordenadas = [...acoes].sort((a,b) => {
+    const da = a.data || (a.ano ? a.ano + '-01-01' : '0000-01-01');
+    const db = b.data || (b.ano ? b.ano + '-01-01' : '0000-01-01');
+    return da.localeCompare(db);
+  });
+  document.getElementById('timeline-list').innerHTML = ordenadas.length
+    ? ordenadas.map(a => {
+        const dataTxt = a.data ? new Date(a.data).toLocaleDateString('pt-BR') : (a.ano || '—');
+        const desc = [a.secretarias?.nome, a.bairro, STATUS_LABEL_LINHA[a.status] || a.status].filter(Boolean).join(' · ');
+        return `<div class="tl-item"><div class="tl-year">${dataTxt}</div><h4>${a.titulo}</h4><p>${desc}${a.descricao ? ' — ' + a.descricao : ''}</p></div>`;
+      }).join('')
+    : '<p class="dl-meta">Nenhuma ação publicada ainda.</p>';
+}
+
+function applyTimelineFilter(){
+  const ano = document.getElementById('lt-ano').value;
+  const secretaria = document.getElementById('lt-secretaria').value;
+  const bairro = document.getElementById('lt-bairro').value.trim().toLowerCase();
+
+  const filtradas = (DATA.acoes || []).filter(a => {
+    if(ano && String(a.ano) !== ano) return false;
+    if(secretaria && (a.secretarias?.nome || a.secretaria) !== secretaria) return false;
+    if(bairro && !(a.bairro || '').toLowerCase().includes(bairro)) return false;
+    return true;
+  });
+
+  renderTimeline(filtradas);
 }
 
 function selectVozTipo(el, tipo){
