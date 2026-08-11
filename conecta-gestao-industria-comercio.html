@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Indústria e Comércio · Gabriel Oliveira</title>
+<meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#2563EB">
+<style>
+:root{--royal:#2563EB;--neon:#3B82F6;--light:#60A5FA;--darkblue:#0F172A;--bg:#F8FAFC;--surface:#FFFFFF;--ink:#0F172A;--ink-soft:#475569;--line:rgba(15,23,42,.08);--ok:#059669;--danger:#DC2626;--warn:#D97706;--muted:#94A3B8;--radius:18px;--sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;--shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);}
+*{box-sizing:border-box;}body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}button{font-family:inherit;cursor:pointer;}select,input,textarea{font-family:inherit;}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
+#login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+@media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+.login-brand{background:linear-gradient(150deg,var(--darkblue) 0%,#16265A 45%,var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+.login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle,rgba(96,165,250,.25),transparent 70%);}
+.brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+.brand-name{font-size:19px;font-weight:800;}.brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+.brand-quote{position:relative;z-index:1;max-width:420px;}.brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;}.brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+.brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+.login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-form{width:100%;max-width:380px;}.login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+.field{margin-bottom:18px;}.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(37,99,235,.35);}
+.btn-primary:hover{transform:translateY(-1px);}.btn-primary:disabled{opacity:.6;pointer-events:none;}
+.login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
+header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.hd-left{display:flex;align-items:center;gap:12px;}.hd-left .name{font-size:16px;font-weight:800;}.hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+.hd-right{display:flex;align-items:center;gap:12px;font-size:12px;color:#B6C4DD;}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;}.btn-ghost:hover{border-color:var(--royal);color:var(--royal);}
+.btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 12px rgba(37,99,235,.35);}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;}.logout-btn:hover{border-color:var(--light);color:var(--light);}
+.back-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;text-decoration:none;}.back-btn:hover{border-color:var(--light);color:var(--light);}
+.app-body{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:230px;background:var(--darkblue);padding:12px 8px;overflow-y:auto;flex-shrink:0;}
+.sidebar::-webkit-scrollbar{width:4px;}.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+.nav-group-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:14px 10px 4px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:#B6C4DD;font-size:12px;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:background .15s;}
+.nav-item:hover{background:rgba(59,130,246,.12);}.nav-item.active{background:linear-gradient(90deg,rgba(37,99,235,.4),rgba(59,130,246,.15));color:#fff;font-weight:700;}
+main{flex:1;padding:28px 36px 60px;max-width:1300px;overflow-x:hidden;}
+@media(max-width:860px){.sidebar{display:none;}main{padding:20px;}}
+.view{display:none;}.view.active{display:block;}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.topbar h1{font-size:24px;margin:0 0 2px;font-weight:800;}.topbar .sub{font-size:12px;color:var(--muted);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:1000px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);transition:transform .2s;}.kpi:hover{transform:translateY(-2px);}
+.kpi .ico{font-size:10px;color:var(--royal);text-transform:uppercase;letter-spacing:.8px;font-weight:800;margin-bottom:6px;}
+.kpi .num{font-size:22px;color:var(--ink);font-weight:800;}.kpi .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.panel h3{font-size:15px;margin:0 0 4px;font-weight:800;}.panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 14px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+.field.span-2{grid-column:span 2;}.field.span-3{grid-column:span 3;}
+.form-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);font-weight:700;}
+td{padding:9px 8px;border-bottom:1px solid var(--line);}tr:last-child td{border-bottom:none;}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.status-ativa,.status-ativo,.status-atingida,.status-vigente,.status-aberta,.status-aprovada,.status-contratada,.status-contratado,.status-realizada,.status-concluida,.status-operacao{background:#D1FAE5;color:var(--ok);}
+.status-inativa,.status-inativo,.status-encerrada,.status-encerrado,.status-cancelada,.status-cancelado,.status-negada,.status-negado,.status-desistiu,.status-vencido,.status-rescindido,.status-abaixo,.status-expirada{background:#FEF2F2;color:var(--danger);}
+.status-suspensa,.status-suspenso,.status-atencao,.status-aditado,.status-em_analise,.status-em_implantacao,.status-em_andamento,.status-proposta,.status-analise,.status-negociacao,.status-aprovacao,.status-implantacao,.status-interesse,.status-simulacao,.status-em_cotacao,.status-empenhada,.status-pendente,.status-agendada,.status-prospectando,.status-em_negociacao,.status-interessado,.status-reservado{background:#FEF3C7;color:var(--warn);}
+.status-preenchida,.status-disponivel{background:#EFF6FF;color:var(--royal);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:1000px){.grid-2{grid-template-columns:1fr;}}
+.diag{padding:14px;border-radius:12px;font-size:12.5px;line-height:1.6;margin-bottom:8px;}
+.diag-ok{background:#D1FAE5;border:1px solid rgba(5,150,105,.25);color:#065F46;}
+.diag-warn{background:#FEF3C7;border:1px solid rgba(217,119,6,.25);color:#92400E;}
+.diag-danger{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
+.bars{display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:grid;grid-template-columns:160px 1fr 44px;align-items:center;gap:10px;font-size:12px;}
+.bar-track{background:#EFF6FF;border-radius:5px;height:8px;overflow:hidden;}.bar-fill{height:100%;border-radius:5px;}
+.bar-fill-royal{background:linear-gradient(90deg,var(--royal),var(--light));}
+.bar-fill-ok{background:linear-gradient(90deg,var(--ok),#34D399);}
+.bar-row .val{text-align:right;color:var(--ink-soft);font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name">Conecta Gestão<small>Indústria e Comércio</small></div></div>
+    <div class="brand-quote"><h1>Central de Desenvolvimento Econômico.</h1><p>Empresas, MEIs, empregos, crédito, capacitações, investimentos — inteligência para decisão.</p></div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap"><div class="login-form">
+    <h2>Acessar</h2><p class="sub">Entre com sua conta institucional.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div></div>
+</div>
+<div id="app" style="display:none;">
+<header>
+  <div class="hd-left"><div class="logo">CG</div><div class="name">Conecta Gestão<small>Indústria e Comércio</small></div></div>
+  <div class="hd-right"><span id="hd-role"></span><a class="back-btn" href="conecta-gestao-painel-admin.html">← Painel</a><button class="logout-btn" onclick="doLogout()">Sair</button></div>
+</header>
+<div class="app-body">
+<aside class="sidebar" id="sidebar-nav"></aside>
+<main id="main-content"></main>
+</div>
+</div>
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+let session=null;
+function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),senha=document.getElementById('login-senha').value,err=document.getElementById('login-error'),btn=document.getElementById('login-btn');
+  err.classList.remove('show');if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
+    session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    try{localStorage.setItem('cg_session',JSON.stringify(session));}catch(e){}
+    enterApp();
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+function doLogout(){session=null;try{localStorage.removeItem('cg_session');}catch(e){}document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+function tryAutoLogin(){
+  try{const s=JSON.parse(localStorage.getItem('cg_session'));if(!s||!s.access_token)return false;
+    const c=decodeJwt(s.access_token);if(!c.exp||c.exp*1000<Date.now())return false;
+    session={access_token:s.access_token,claims:c};enterApp();return true;
+  }catch(e){return false;}
+}
+function enterApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');buildNav();buildViews();navigateTo('dashboard_ic');}
+window.addEventListener('DOMContentLoaded',()=>{tryAutoLogin();});
+
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPatch(t,q,d){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbDel(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'DELETE',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());}
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';}
+function moneyShort(v){if(!v)return'R$ 0';const n=Number(v);if(n>=1e6)return'R$ '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'R$ '+(n/1e3).toFixed(0)+'k';return'R$ '+n.toFixed(0);}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function pill(s,label){return'<span class="status-pill status-'+(s||'')+'">'+(label||s||'—')+'</span>';}
+function parseMoney(v){if(!v)return null;return parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));}
+function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-000000000001';}
+
+const NAV_GROUPS=[
+  {label:'Geral',items:[['dashboard_ic','Dashboard'],['secretaria_ic','Secretaria']]},
+  {label:'Cadastros',items:[['empresas','Empresas'],['meis','MEIs'],['comercios','Comércio'],['industrias','Indústrias'],['prestadores','Prestadores de Serviços']]},
+  {label:'Trabalho',items:[['empregos','Empregos'],['trabalhadores','Trabalhadores'],['vagas','Vagas de Emprego']]},
+  {label:'Empreendedorismo',items:[['atendimentos_ic','Sala do Empreendedor'],['fomento','Fomento Paraná'],['microcredito','Microcrédito'],['capacitacoes','Capacitações'],['cursos','Cursos']]},
+  {label:'Eventos',items:[['eventos_ic','Eventos'],['feiras','Feiras'],['empreendedores','Empreendedores'],['artesaos','Artesãos'],['produtores','Produtores']]},
+  {label:'Economia',items:[['turismo','Turismo'],['compras_publicas','Compras Públicas'],['licitacoes','Licitações'],['programas_ic','Programas e Projetos']]},
+  {label:'Regulação',items:[['alvaras','Alvarás e Licenças'],['fiscalizacoes','Fiscalizações']]},
+  {label:'Desenvolvimento',items:[['investimentos','Novos Investimentos'],['areas_terrenos','Áreas e Terrenos'],['empresas_interessadas','Empresas Interessadas'],['incentivos','Benefícios e Incentivos']]},
+  {label:'Gestão',items:[['financeiro_ic','Financeiro'],['contratos_ic','Contratos'],['metas_ic','Metas'],['indicadores_ic','Indicadores']]},
+  {label:'Sistema',items:[['relatorios_ic','Relatórios'],['alertas_ic','Alertas'],['documentos_ic','Documentos'],['auditoria_ic','Auditoria'],['config_ic','Configurações']]},
+];
+let currentView='dashboard_ic';
+function buildNav(){let h='';NAV_GROUPS.forEach(g=>{h+='<div class="nav-group-label">'+g.label+'</div>';g.items.forEach(([k,l])=>{h+='<button class="nav-item'+(k==='dashboard_ic'?' active':'')+'" data-key="'+k+'" onclick="navigateTo(\''+k+'\')">'+l+'</button>';});});document.getElementById('sidebar-nav').innerHTML=h;}
+function navigateTo(key){currentView=key;document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.key===key));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+key));if(LOADERS[key])LOADERS[key]();}
+
+let caches={};
+const MODULES={
+  empresas:{table:'ic_empresas',title:'Empresas',fields:[
+    {id:'razao_social',label:'Razão social',span:2,required:true},{id:'nome_fantasia',label:'Nome fantasia'},
+    {id:'cnpj',label:'CNPJ'},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
+    {id:'telefone',label:'Telefone'},{id:'whatsapp',label:'WhatsApp'},{id:'email',label:'E-mail'},
+    {id:'responsavel',label:'Responsável'},{id:'cnae',label:'CNAE'},{id:'atividade_principal',label:'Atividade principal'},
+    {id:'porte',label:'Porte',type:'select',opts:[['mei','MEI'],['me','ME'],['epp','EPP'],['medio','Médio'],['grande','Grande']]},
+    {id:'natureza_juridica',label:'Natureza jurídica'},{id:'setor_economico',label:'Setor econômico'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa'],['suspensa','Suspensa'],['encerrada','Encerrada'],['em_implantacao','Em implantação']]},
+    {id:'data_abertura',label:'Data de abertura',type:'date'},{id:'data_encerramento',label:'Data encerramento',type:'date'},
+    {id:'numero_funcionarios',label:'Nº funcionários',type:'number'},{id:'faturamento',label:'Faturamento (R$)',type:'money'},
+    {id:'origem',label:'Origem'},{id:'observacoes',label:'Observações',span:3}
+  ],cols:['razao_social','cnpj','bairro','porte','situacao','numero_funcionarios'],colLabels:['Razão social','CNPJ','Bairro','Porte','Situação','Func.'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):c==='porte'?(r.porte||'').toUpperCase():(r[c]||'—')},
+
+  meis:{table:'ic_meis',title:'MEIs',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'cnpj',label:'CNPJ'},
+    {id:'atividade',label:'Atividade'},{id:'cnae',label:'CNAE'},{id:'setor',label:'Setor'},
+    {id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
+    {id:'telefone',label:'Telefone'},{id:'whatsapp',label:'WhatsApp'},{id:'email',label:'E-mail'},
+    {id:'data_abertura',label:'Data de abertura',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo'],['encerrado','Encerrado'],['suspenso','Suspenso']]},
+    {id:'necessidades',label:'Necessidades',span:3}
+  ],cols:['nome','cnpj','atividade','bairro','situacao'],colLabels:['Nome','CNPJ','Atividade','Bairro','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  comercios:{table:'ic_comercios',title:'Comércio',fields:[
+    {id:'segmento',label:'Segmento',required:true},{id:'atividade',label:'Atividade'},{id:'endereco',label:'Endereço'},
+    {id:'bairro',label:'Bairro'},{id:'responsavel',label:'Responsável'},{id:'telefone',label:'Telefone'},
+    {id:'whatsapp',label:'WhatsApp'},{id:'horario',label:'Horário'},{id:'numero_funcionarios',label:'Funcionários',type:'number'},
+    {id:'situacao',label:'Situação'},{id:'conecta_comercio',label:'Conecta Comércio',type:'checkbox'}
+  ],cols:['segmento','bairro','responsavel','numero_funcionarios','situacao'],colLabels:['Segmento','Bairro','Responsável','Func.','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao||'ativo'):(r[c]||'—')},
+
+  industrias:{table:'ic_industrias',title:'Indústrias',fields:[
+    {id:'atividade',label:'Atividade',required:true},{id:'cnpj',label:'CNPJ'},{id:'cnae',label:'CNAE'},
+    {id:'endereco',label:'Endereço',span:2},{id:'area',label:'Área'},
+    {id:'numero_funcionarios',label:'Funcionários',type:'number'},{id:'capacidade',label:'Capacidade'},{id:'producao',label:'Produção'},
+    {id:'situacao',label:'Situação'},{id:'necessidades',label:'Necessidades',span:2},
+    {id:'interesse_expansao',label:'Interesse em expansão',type:'checkbox'},{id:'interesse_incentivos',label:'Interesse em incentivos',type:'checkbox'},
+    {id:'area_necessaria',label:'Área necessária'},{id:'investimentos_previstos',label:'Investimentos (R$)',type:'money'}
+  ],cols:['atividade','cnpj','numero_funcionarios','situacao'],colLabels:['Atividade','CNPJ','Func.','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao||'ativa'):(r[c]||'—')},
+
+  prestadores:{table:'ic_prestadores',title:'Prestadores de Serviços',fields:[
+    {id:'atividade',label:'Atividade',required:true},{id:'cnpj',label:'CNPJ'},{id:'cnae',label:'CNAE'},
+    {id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
+    {id:'responsavel',label:'Responsável'},{id:'telefone',label:'Telefone'},{id:'numero_funcionarios',label:'Funcionários',type:'number'},
+    {id:'situacao',label:'Situação'}
+  ],cols:['atividade','bairro','responsavel','numero_funcionarios'],colLabels:['Atividade','Bairro','Responsável','Func.'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  empregos:{table:'ic_empregos',title:'Empregos',fields:[
+    {id:'setor',label:'Setor',required:true},{id:'periodo',label:'Período'},{id:'tipo_vaga',label:'Tipo de vaga'},
+    {id:'quantidade_funcionarios',label:'Funcionários',type:'number'},{id:'vagas_abertas',label:'Vagas abertas',type:'number'},
+    {id:'vagas_preenchidas',label:'Vagas preenchidas',type:'number'},{id:'admissoes',label:'Admissões',type:'number'},
+    {id:'desligamentos',label:'Desligamentos',type:'number'},{id:'faixa_salarial',label:'Faixa salarial'}
+  ],cols:['setor','vagas_abertas','admissoes','desligamentos','periodo'],colLabels:['Setor','Vagas','Admissões','Deslig.','Período'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  trabalhadores:{table:'ic_trabalhadores',title:'Trabalhadores',fields:[
+    {id:'identificacao',label:'Identificação',span:2,required:true},{id:'profissao',label:'Profissão'},
+    {id:'area_interesse',label:'Área de interesse'},{id:'qualificacao',label:'Qualificação'},{id:'experiencia',label:'Experiência'},
+    {id:'disponibilidade',label:'Disponibilidade'},
+    {id:'situacao_emprego',label:'Situação',type:'select',opts:[['desempregado','Desempregado'],['empregado','Empregado'],['autonomo','Autônomo'],['informal','Informal']]},
+    {id:'interesse_vagas',label:'Interesse em vagas',type:'checkbox',default:true}
+  ],cols:['identificacao','profissao','area_interesse','situacao_emprego'],colLabels:['Identificação','Profissão','Área','Situação'],
+  renderCol:(r,c)=>c==='situacao_emprego'?pill(r.situacao_emprego):(r[c]||'—')},
+
+  vagas:{table:'ic_vagas',title:'Vagas de Emprego',fields:[
+    {id:'cargo',label:'Cargo',span:2,required:true},{id:'quantidade',label:'Quantidade',type:'number'},
+    {id:'requisitos',label:'Requisitos',span:2},{id:'escolaridade',label:'Escolaridade'},
+    {id:'experiencia',label:'Experiência'},{id:'salario',label:'Salário (R$)',type:'money'},
+    {id:'data_abertura',label:'Abertura',type:'date'},{id:'prazo',label:'Prazo',type:'date'},
+    {id:'candidatos',label:'Candidatos',type:'number'},{id:'encaminhados',label:'Encaminhados',type:'number'},{id:'contratados',label:'Contratados',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['aberta','Aberta'],['preenchida','Preenchida'],['cancelada','Cancelada'],['expirada','Expirada']]}
+  ],cols:['cargo','quantidade','candidatos','contratados','situacao'],colLabels:['Cargo','Vagas','Candidatos','Contratados','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data_abertura.desc.nullslast'},
+
+  atendimentos_ic:{table:'ic_atendimentos',title:'Sala do Empreendedor',fields:[
+    {id:'data',label:'Data',type:'date',required:true},{id:'empreendedor',label:'Empreendedor',span:2},
+    {id:'tipo_atendimento',label:'Tipo de atendimento'},{id:'servico',label:'Serviço',type:'select',opts:[['abertura_empresa','Abertura de empresa'],['mei','MEI'],['alteracao','Alteração'],['baixa','Baixa'],['declaracao','Declaração'],['regularizacao','Regularização'],['orientacao','Orientação'],['emissao_documentos','Emissão de documentos'],['capacitacao','Capacitação'],['credito','Crédito'],['compras_publicas','Compras públicas'],['formalizacao','Formalização'],['outro','Outro']]},
+    {id:'servidor_responsavel',label:'Servidor responsável'},{id:'resultado',label:'Resultado',span:2},{id:'encaminhamento',label:'Encaminhamento'},
+    {id:'retorno_necessario',label:'Retorno necessário',type:'checkbox'}
+  ],cols:['data','empreendedor','servico','servidor_responsavel'],colLabels:['Data','Empreendedor','Serviço','Servidor'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='servico'?pill(r.servico):(r[c]||'—'),query:'order=data.desc'},
+
+  fomento:{table:'ic_fomento',title:'Fomento Paraná',fields:[
+    {id:'empreendedor',label:'Empreendedor',span:2,required:true},{id:'identificacao',label:'Identificação'},
+    {id:'atividade',label:'Atividade'},{id:'tipo_credito',label:'Tipo de crédito'},{id:'finalidade',label:'Finalidade'},
+    {id:'valor_solicitado',label:'Valor solicitado (R$)',type:'money'},{id:'valor_aprovado',label:'Valor aprovado (R$)',type:'money'},
+    {id:'valor_contratado',label:'Valor contratado (R$)',type:'money'},{id:'data',label:'Data',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['proposta','Proposta'],['analise','Análise'],['aprovada','Aprovada'],['contratada','Contratada'],['negada','Negada'],['cancelada','Cancelada']]},
+    {id:'acompanhamento',label:'Acompanhamento',span:3}
+  ],cols:['empreendedor','valor_solicitado','valor_contratado','situacao'],colLabels:['Empreendedor','Solicitado','Contratado','Situação'],
+  renderCol:(r,c)=>c==='valor_solicitado'||c==='valor_contratado'?money(r[c]):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  microcredito:{table:'ic_microcredito',title:'Microcrédito',fields:[
+    {id:'interessado',label:'Interessado',span:2,required:true},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'finalidade',label:'Finalidade',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['interessado','Interessado'],['simulacao','Simulação'],['proposta','Proposta'],['aprovado','Aprovado'],['contratado','Contratado'],['negado','Negado'],['cancelado','Cancelado']]}
+  ],cols:['interessado','valor','finalidade','situacao'],colLabels:['Interessado','Valor','Finalidade','Situação'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  capacitacoes:{table:'ic_capacitacoes',title:'Capacitações',fields:[
+    {id:'curso',label:'Curso',span:2,required:true},{id:'tema',label:'Tema'},
+    {id:'parceiro',label:'Parceiro'},{id:'instrutor',label:'Instrutor'},{id:'data',label:'Data',type:'date'},
+    {id:'horario',label:'Horário'},{id:'local',label:'Local'},{id:'publico',label:'Público'},
+    {id:'vagas',label:'Vagas',type:'number'},{id:'inscricoes',label:'Inscrições',type:'number'},{id:'presenca',label:'Presença',type:'number'},
+    {id:'conclusao',label:'Conclusão',type:'number'},{id:'custo',label:'Custo (R$)',type:'money'},{id:'certificado',label:'Certificado',type:'checkbox'}
+  ],cols:['curso','data','vagas','inscricoes','presenca','conclusao'],colLabels:['Curso','Data','Vagas','Inscr.','Presença','Concl.'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  cursos:{table:'ic_cursos',title:'Cursos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'categoria',label:'Categoria'},
+    {id:'instituicao',label:'Instituição'},{id:'carga_horaria',label:'Carga horária (h)',type:'number'},
+    {id:'vagas',label:'Vagas',type:'number'},{id:'periodo',label:'Período'},{id:'publico',label:'Público'},
+    {id:'custo',label:'Custo (R$)',type:'money'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','categoria','instituicao','vagas','carga_horaria'],colLabels:['Nome','Categoria','Instituição','Vagas','Carga h.'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  eventos_ic:{table:'ic_eventos',title:'Eventos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'data',label:'Data',type:'date'},
+    {id:'local',label:'Local'},{id:'organizacao',label:'Organização'},{id:'parceiros',label:'Parceiros'},
+    {id:'publico_alvo',label:'Público-alvo'},{id:'quantidade_participantes',label:'Participantes',type:'number'},
+    {id:'empresas_participantes',label:'Empresas',type:'number'},{id:'empreendedores',label:'Empreendedores',type:'number'},
+    {id:'custos',label:'Custos (R$)',type:'money'},{id:'receitas',label:'Receitas (R$)',type:'money'},
+    {id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','data','quantidade_participantes','empresas_participantes','custos'],colLabels:['Nome','Data','Participantes','Empresas','Custos'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custos'?money(r.custos):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  feiras:{table:'ic_feiras',title:'Feiras',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'data',label:'Data',type:'date'},{id:'local',label:'Local'},
+    {id:'edicao',label:'Edição'},{id:'expositores',label:'Expositores',type:'number'},
+    {id:'empreendedores',label:'Empreendedores',type:'number'},{id:'publico',label:'Público',type:'number'},
+    {id:'produtos',label:'Produtos',span:2},{id:'vendas_informadas',label:'Vendas informadas (R$)',type:'money'},
+    {id:'custos',label:'Custos (R$)',type:'money'},{id:'parceiros',label:'Parceiros'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','data','expositores','publico','vendas_informadas'],colLabels:['Nome','Data','Expositores','Público','Vendas'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='vendas_informadas'?money(r.vendas_informadas):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  empreendedores:{table:'ic_empreendedores',title:'Empreendedores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'empresa',label:'Empresa'},
+    {id:'atividade',label:'Atividade'},{id:'segmento',label:'Segmento'},{id:'formalizacao',label:'Formalização'}
+  ],cols:['nome','empresa','atividade','segmento','formalizacao'],colLabels:['Nome','Empresa','Atividade','Segmento','Formalização'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  artesaos:{table:'ic_artesaos',title:'Artesãos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'atividade',label:'Atividade'},{id:'produto',label:'Produto'},
+    {id:'contato',label:'Contato'},{id:'endereco',label:'Endereço'},{id:'formalizacao',label:'Formalização'}
+  ],cols:['nome','atividade','produto','contato'],colLabels:['Nome','Atividade','Produto','Contato'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  produtores:{table:'ic_produtores',title:'Produtores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'atividade',label:'Atividade'},{id:'produto',label:'Produto'},
+    {id:'localizacao',label:'Localização'},{id:'contato',label:'Contato'}
+  ],cols:['nome','atividade','produto','localizacao'],colLabels:['Nome','Atividade','Produto','Localização'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  turismo:{table:'ic_turismo',title:'Turismo e Economia Local',fields:[
+    {id:'empreendimento',label:'Empreendimento',span:2,required:true},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['atrativo','Atrativo'],['restaurante','Restaurante'],['hospedagem','Hospedagem'],['produtor','Produtor'],['artesao','Artesão'],['evento','Evento'],['atividade','Atividade'],['outro','Outro']]},
+    {id:'cadastur',label:'Cadastur'},{id:'localizacao',label:'Localização'},{id:'contato',label:'Contato'},
+    {id:'situacao',label:'Situação'}
+  ],cols:['empreendimento','tipo','localizacao','situacao'],colLabels:['Empreendimento','Tipo','Localização','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao||'ativo'):(r[c]||'—')},
+
+  compras_publicas:{table:'ic_compras_publicas',title:'Compras Públicas',fields:[
+    {id:'processo',label:'Processo'},{id:'objeto',label:'Objeto',span:2},{id:'categoria',label:'Categoria'},
+    {id:'fornecedor',label:'Fornecedor'},{id:'empresa_local',label:'Empresa local'},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'participacao',label:'Participação'},{id:'resultado',label:'Resultado'},
+    {id:'situacao',label:'Situação'}
+  ],cols:['processo','objeto','empresa_local','valor','situacao'],colLabels:['Processo','Objeto','Empresa local','Valor','Situação'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao||'aberta'):(r[c]||'—')},
+
+  licitacoes:{table:'ic_licitacoes',title:'Licitações e Oportunidades',fields:[
+    {id:'objeto',label:'Objeto',span:2,required:true},{id:'processo',label:'Processo'},{id:'orgao',label:'Órgão'},
+    {id:'prazo',label:'Prazo',type:'date'},{id:'valor_estimado',label:'Valor estimado (R$)',type:'money'},
+    {id:'categoria',label:'Categoria'},{id:'publico_interessado',label:'Público interessado'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['aberta','Aberta'],['encerrada','Encerrada'],['cancelada','Cancelada'],['suspensa','Suspensa']]}
+  ],cols:['objeto','orgao','prazo','valor_estimado','situacao'],colLabels:['Objeto','Órgão','Prazo','Valor est.','Situação'],
+  renderCol:(r,c)=>c==='prazo'?fmtDate(r.prazo):c==='valor_estimado'?money(r.valor_estimado):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=prazo.desc.nullslast'},
+
+  programas_ic:{table:'ic_programas',title:'Programas e Projetos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['programa','Programa'],['projeto','Projeto']]},
+    {id:'objetivo',label:'Objetivo',span:3},{id:'publico',label:'Público'},{id:'responsavel',label:'Responsável'},
+    {id:'periodo',label:'Período'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'parceiros',label:'Parceiros'},
+    {id:'metas',label:'Metas',span:3},{id:'resultados',label:'Resultados',span:3}
+  ],cols:['nome','tipo','responsavel','orcamento'],colLabels:['Nome','Tipo','Responsável','Orçamento'],
+  renderCol:(r,c)=>c==='orcamento'?money(r.orcamento):c==='tipo'?pill(r.tipo):(r[c]||'—')},
+
+  alvaras:{table:'ic_alvaras',title:'Alvarás e Licenças',fields:[
+    {id:'tipo',label:'Tipo',required:true},{id:'protocolo',label:'Protocolo'},{id:'data',label:'Data',type:'date'},
+    {id:'vencimento',label:'Vencimento',type:'date'},{id:'responsavel',label:'Responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['vencido','Vencido'],['cancelado','Cancelado'],['em_analise','Em análise'],['pendente','Pendente']]},
+    {id:'documento',label:'Documento'},{id:'pendencias',label:'Pendências',span:3}
+  ],cols:['tipo','protocolo','vencimento','situacao'],colLabels:['Tipo','Protocolo','Vencimento','Situação'],
+  renderCol:(r,c)=>c==='vencimento'?fmtDate(r.vencimento):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=vencimento.desc.nullslast'},
+
+  fiscalizacoes:{table:'ic_fiscalizacoes',title:'Fiscalizações',fields:[
+    {id:'data',label:'Data',type:'date',required:true},{id:'motivo',label:'Motivo',span:2},{id:'tipo',label:'Tipo'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['agendada','Agendada'],['realizada','Realizada'],['pendente','Pendente'],['concluida','Concluída']]},
+    {id:'orientacao',label:'Orientação',span:2},{id:'prazo',label:'Prazo',type:'date'},
+    {id:'regularizacao',label:'Regularização'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['data','motivo','tipo','situacao'],colLabels:['Data','Motivo','Tipo','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc'},
+
+  investimentos:{table:'ic_investimentos',title:'Novos Investimentos',fields:[
+    {id:'projeto',label:'Projeto',span:2,required:true},{id:'empresa',label:'Empresa'},
+    {id:'segmento',label:'Segmento'},{id:'valor_estimado',label:'Valor estimado (R$)',type:'money'},
+    {id:'empregos_previstos',label:'Empregos previstos',type:'number'},{id:'area_necessaria',label:'Área necessária'},
+    {id:'cronograma',label:'Cronograma'},{id:'responsavel',label:'Responsável'},
+    {id:'etapa',label:'Etapa',type:'select',opts:[['interesse','Interesse'],['analise','Análise'],['negociacao','Negociação'],['aprovacao','Aprovação'],['implantacao','Implantação'],['operacao','Operação']]}
+  ],cols:['projeto','empresa','valor_estimado','empregos_previstos','etapa'],colLabels:['Projeto','Empresa','Valor','Empregos','Etapa'],
+  renderCol:(r,c)=>c==='valor_estimado'?money(r.valor_estimado):c==='etapa'?pill(r.etapa):(r[c]||'—')},
+
+  areas_terrenos:{table:'ic_areas_terrenos',title:'Áreas e Terrenos',fields:[
+    {id:'area',label:'Área',span:2,required:true},{id:'localizacao',label:'Localização'},
+    {id:'tamanho',label:'Tamanho'},{id:'infraestrutura',label:'Infraestrutura'},{id:'finalidade',label:'Finalidade'},
+    {id:'disponibilidade',label:'Disponibilidade',type:'select',opts:[['disponivel','Disponível'],['reservado','Reservado'],['ocupado','Ocupado'],['indisponivel','Indisponível']]},
+    {id:'proprietario',label:'Proprietário'},{id:'documentacao',label:'Documentação'}
+  ],cols:['area','localizacao','tamanho','disponibilidade'],colLabels:['Área','Localização','Tamanho','Disponibilidade'],
+  renderCol:(r,c)=>c==='disponibilidade'?pill(r.disponibilidade):(r[c]||'—')},
+
+  empresas_interessadas:{table:'ic_empresas_interessadas',title:'Empresas Interessadas',fields:[
+    {id:'empresa',label:'Empresa',span:2,required:true},{id:'segmento',label:'Segmento'},
+    {id:'contato',label:'Contato'},{id:'telefone',label:'Telefone'},{id:'email',label:'E-mail'},
+    {id:'area_interesse',label:'Área de interesse'},{id:'empregos_previstos',label:'Empregos previstos',type:'number'},
+    {id:'investimento_previsto',label:'Investimento (R$)',type:'money'},{id:'necessidades',label:'Necessidades',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['prospectando','Prospectando'],['em_negociacao','Em negociação'],['aprovada','Aprovada'],['desistiu','Desistiu']]}
+  ],cols:['empresa','segmento','empregos_previstos','investimento_previsto','situacao'],colLabels:['Empresa','Segmento','Empregos','Investimento','Situação'],
+  renderCol:(r,c)=>c==='investimento_previsto'?money(r.investimento_previsto):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  incentivos:{table:'ic_incentivos',title:'Benefícios e Incentivos',fields:[
+    {id:'programa',label:'Programa',span:2},{id:'beneficio',label:'Benefício'},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'tipo',label:'Tipo'},{id:'prazo',label:'Prazo'},
+    {id:'contrapartida',label:'Contrapartida',span:2},{id:'empregos_previstos',label:'Empregos previstos',type:'number'},
+    {id:'empregos_realizados',label:'Empregos realizados',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['cancelado','Cancelado'],['em_analise','Em análise']]}
+  ],cols:['programa','beneficio','valor','empregos_realizados','situacao'],colLabels:['Programa','Benefício','Valor','Empregos','Situação'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  financeiro_ic:{table:'ic_financeiro',title:'Financeiro',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['receita','Receita'],['despesa','Despesa'],['empenho','Empenho'],['liquidacao','Liquidação'],['pagamento','Pagamento']],required:true},
+    {id:'descricao',label:'Descrição',span:2},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'programa',label:'Programa'},{id:'projeto',label:'Projeto'},{id:'fonte_recurso',label:'Fonte'},
+    {id:'fornecedor',label:'Fornecedor'},{id:'contrato',label:'Contrato'},{id:'data',label:'Data',type:'date'}
+  ],cols:['data','tipo','descricao','valor','programa'],colLabels:['Data','Tipo','Descrição','Valor','Programa'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  contratos_ic:{table:'ic_contratos',title:'Contratos',fields:[
+    {id:'numero',label:'Nº contrato'},{id:'processo',label:'Processo'},{id:'fornecedor',label:'Fornecedor',required:true},{id:'cnpj',label:'CNPJ'},
+    {id:'objeto',label:'Objeto',span:3},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data_inicio',label:'Início',type:'date'},
+    {id:'data_fim',label:'Término',type:'date'},{id:'fiscal',label:'Fiscal'},{id:'saldo',label:'Saldo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['aditado','Aditado'],['rescindido','Rescindido']]}
+  ],cols:['numero','fornecedor','valor','data_fim','situacao'],colLabels:['Nº','Fornecedor','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  metas_ic:{table:'ic_metas',title:'Metas',fields:[
+    {id:'indicador',label:'Indicador',span:2,required:true},{id:'periodo',label:'Período'},
+    {id:'meta_anual',label:'Meta anual',type:'number'},{id:'meta_mensal',label:'Meta mensal',type:'number'},{id:'meta_trimestral',label:'Meta trimestral',type:'number'},
+    {id:'responsavel',label:'Responsável'},{id:'prazo',label:'Prazo',type:'date'},
+    {id:'resultado',label:'Resultado',type:'number'},{id:'percentual',label:'% alcançado',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['atingida','Atingida'],['atencao','Atenção'],['abaixo','Abaixo da meta']]}
+  ],cols:['indicador','meta_mensal','resultado','percentual','situacao'],colLabels:['Indicador','Meta','Resultado','%','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao,{atingida:'🟢 Atingida',atencao:'🟡 Atenção',abaixo:'🔴 Abaixo'}[r.situacao]):c==='percentual'?(r.percentual||0)+'%':(r[c]||'—')},
+
+  indicadores_ic:{table:'ic_indicadores',title:'Indicadores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'descricao',label:'Descrição',span:3},
+    {id:'formula',label:'Fórmula',span:2},{id:'fonte',label:'Fonte'},
+    {id:'periodicidade',label:'Periodicidade'},{id:'meta',label:'Meta',type:'number'},{id:'unidade_medida',label:'Unidade'},
+    {id:'responsavel',label:'Responsável'}
+  ],cols:['nome','formula','periodicidade','meta','responsavel'],colLabels:['Nome','Fórmula','Period.','Meta','Responsável'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  documentos_ic:{table:'ic_documentos',title:'Documentos',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:2},
+    {id:'modulo',label:'Módulo'},{id:'url',label:'URL',span:2},{id:'data',label:'Data',type:'date'}
+  ],cols:['titulo','tipo','modulo','data'],colLabels:['Título','Tipo','Módulo','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+};
+
+const REF_TABLES={empresas:'ic_empresas',areas_terrenos:'ic_areas_terrenos'};
+const REF_LABEL_FIELD={empresas:'razao_social',areas_terrenos:'area'};
+async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await sbGet(REF_TABLES[k],'select=id,'+REF_LABEL_FIELD[k]+'&order='+REF_LABEL_FIELD[k]+'.asc');caches[k]=d;return d;}catch(e){return[];}}
+
+function buildViews(){
+  let html='';
+  // Dashboard
+  html+='<section class="view active" id="view-dashboard_ic"><div class="topbar"><div><h1>Dashboard — Indústria e Comércio</h1><div class="sub">Central de Desenvolvimento Econômico</div></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Empresas por situação</h3><div class="bars" id="dash-emp-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="grid-2"><div class="panel"><h3>Mercado de trabalho</h3><div id="dash-trabalho"></div></div><div class="panel"><h3>Crédito e empreendedorismo</h3><div id="dash-credito"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
+  // Secretaria
+  html+='<section class="view" id="view-secretaria_ic"><div class="topbar"><div><h1>Secretaria de Indústria e Comércio</h1></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="si-nome"></div><div class="field"><label>Secretário(a)</label><input id="si-secretario"></div><div class="field"><label>Telefone</label><input id="si-telefone"></div><div class="field"><label>WhatsApp</label><input id="si-whatsapp"></div><div class="field"><label>E-mail</label><input id="si-email"></div><div class="field span-3"><label>Endereço</label><input id="si-endereco"></div><div class="field"><label>Horário</label><input id="si-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="si-orcamento" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="si-meta" inputmode="decimal"></div><div class="field span-3"><label>Observações</label><textarea id="si-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSec()" id="si-btn">Salvar</button></div></div></section>';
+  // CRUD modules
+  Object.keys(MODULES).forEach(key=>{const m=MODULES[key];
+    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
+    html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
+    html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="ft-'+key+'">Novo registro</h3><div class="form-grid">';
+    m.fields.forEach(f=>{const sp=f.span?'span-'+f.span:'';
+      if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" '+(f.default?'checked':'')+' style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
+      else if(f.type==='select'){html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'">';(f.opts||[]).forEach(([v,l])=>{html+='<option value="'+v+'">'+l+'</option>';});html+='</select></div>';}
+      else if(f.type==='ref')html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'"><option value="">Selecione...</option></select></div>';
+      else{const t=f.type==='money'?'text':f.type||'text';html+='<div class="field '+sp+'"><label>'+f.label+'</label><input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+(f.type==='money'?' inputmode="decimal"':'')+'></div>';}
+    });
+    html+='</div><div class="form-actions"><button class="btn-ghost" onclick="toggleForm(\''+key+'\')">Cancelar</button><button class="btn-accent" onclick="submitCrud(\''+key+'\')" id="sb-'+key+'">Salvar</button></div></div>';
+    html+='<div class="panel"><h3>Registros</h3><p class="panel-sub" id="cnt-'+key+'"></p><div style="overflow-x:auto;"><table><thead><tr>';
+    m.colLabels.forEach(l=>{html+='<th>'+l+'</th>';});
+    html+='<th></th></tr></thead><tbody id="tbl-'+key+'"></tbody></table></div></div></section>';
+  });
+  // Relatorios
+  html+='<section class="view" id="view-relatorios_ic"><div class="topbar"><div><h1>Relatórios</h1></div></div><div class="panel"><h3>Exportar relatórios</h3><div class="form-grid">';
+  Object.keys(MODULES).forEach(k=>{html+='<div class="field"><button class="btn-ghost" style="width:100%;" onclick="exportPdf(\''+k+'\')">'+MODULES[k].title+' (PDF)</button></div>';});
+  html+='</div></div></section>';
+  // Alertas
+  html+='<section class="view" id="view-alertas_ic"><div class="topbar"><div><h1>Alertas</h1></div></div><div id="alertas-list"></div></section>';
+  // Auditoria
+  html+='<section class="view" id="view-auditoria_ic"><div class="topbar"><div><h1>Auditoria</h1></div></div><div class="panel"><h3>Registros de auditoria</h3><p class="panel-sub" id="cnt-audit"></p><div style="overflow-x:auto;"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Módulo</th></tr></thead><tbody id="tbl-audit"></tbody></table></div></div></section>';
+  // Config
+  html+='<section class="view" id="view-config_ic"><div class="topbar"><div><h1>Configurações</h1></div></div><div class="panel"><h3>Configurações do módulo</h3><p class="panel-sub">Configurações gerais em breve.</p></div></section>';
+  document.getElementById('main-content').innerHTML=html;
+}
+
+// CRUD
+let editingId={};
+function toggleForm(k){const p=document.getElementById('form-'+k);const o=p.style.display==='none';p.style.display=o?'block':'none';if(o&&!editingId[k]){clearForm(k);document.getElementById('ft-'+k).textContent='Novo registro';document.getElementById('sb-'+k).textContent='Salvar';loadRefs(k);}if(!o)editingId[k]=null;}
+function clearForm(k){MODULES[k].fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!f.default;else if(f.type==='select')el.selectedIndex=0;else el.value='';});}
+async function loadRefs(k){for(const f of MODULES[k].fields){if(f.type!=='ref')continue;const sel=document.getElementById('cf-'+k+'-'+f.id);const opts=await loadRefOptions(f.ref);const lbl=REF_LABEL_FIELD[f.ref];sel.innerHTML='<option value="">Selecione...</option>'+opts.map(o=>'<option value="'+o.id+'">'+o[lbl]+'</option>').join('');}}
+async function submitCrud(k){const m=MODULES[k],data={tenant_id:tid()};m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;let v;if(f.type==='checkbox')v=el.checked;else if(f.type==='money')v=parseMoney(el.value);else if(f.type==='number')v=el.value?Number(el.value):null;else if(f.type==='ref')v=el.value||null;else v=el.value.trim()||null;data[f.id]=v;});const btn=document.getElementById('sb-'+k);btn.disabled=true;try{if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+async function editCrud(k,id){const m=MODULES[k];try{const rows=await sbGet(m.table,'id=eq.'+id);const r=rows[0];if(!r)return;editingId[k]=id;document.getElementById('form-'+k).style.display='block';document.getElementById('ft-'+k).textContent='Editar registro';document.getElementById('sb-'+k).textContent='Salvar alterações';await loadRefs(k);m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!r[f.id];else el.value=r[f.id]||'';});}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function deleteCrud(k,id){if(!confirm('Excluir?'))return;try{await sbDel(MODULES[k].table,'id=eq.'+id);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
+
+function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)return;const n=data.length;let h='<div class="kpi"><div class="ico">Total</div><div class="num">'+n+'</div><div class="lbl">registros</div></div>';
+  if(k==='empresas'){const at=data.filter(r=>r.situacao==='ativa').length;const enc=data.filter(r=>r.situacao==='encerrada').length;const func=data.reduce((s,r)=>s+(Number(r.numero_funcionarios)||0),0);h+='<div class="kpi"><div class="ico">Ativas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">empresas</div></div><div class="kpi"><div class="ico">Encerradas</div><div class="num" style="color:var(--danger);">'+enc+'</div><div class="lbl">empresas</div></div><div class="kpi"><div class="ico">Funcionários</div><div class="num">'+func+'</div><div class="lbl">total registrado</div></div>';}
+  else if(k==='meis'){const at=data.filter(r=>r.situacao==='ativo').length;const enc=data.filter(r=>r.situacao==='encerrado').length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">MEIs</div></div><div class="kpi"><div class="ico">Encerrados</div><div class="num" style="color:var(--danger);">'+enc+'</div><div class="lbl">MEIs</div></div>';}
+  else if(k==='vagas'){const ab=data.filter(r=>r.situacao==='aberta').length;const pr=data.filter(r=>r.situacao==='preenchida').length;const tot=data.reduce((s,r)=>s+(Number(r.quantidade)||0),0);const cont=data.reduce((s,r)=>s+(Number(r.contratados)||0),0);h+='<div class="kpi"><div class="ico">Abertas</div><div class="num" style="color:var(--royal);">'+ab+'</div><div class="lbl">vagas</div></div><div class="kpi"><div class="ico">Preenchidas</div><div class="num" style="color:var(--ok);">'+pr+'</div><div class="lbl">vagas</div></div><div class="kpi"><div class="ico">Contratados</div><div class="num">'+cont+'</div><div class="lbl">pessoas</div></div>';}
+  else if(k==='atendimentos_ic'){const ret=data.filter(r=>r.retorno_necessario).length;h+='<div class="kpi"><div class="ico">Com retorno</div><div class="num" style="color:var(--warn);">'+ret+'</div><div class="lbl">pendentes</div></div>';}
+  else if(k==='fomento'){const val=data.reduce((s,r)=>s+(Number(r.valor_contratado)||0),0);const aprov=data.filter(r=>r.situacao==='contratada').length;h+='<div class="kpi"><div class="ico">Contratados</div><div class="num" style="color:var(--ok);">'+aprov+'</div><div class="lbl">operações</div></div><div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">contratado</div></div>';}
+  else if(k==='capacitacoes'){const part=data.reduce((s,r)=>s+(Number(r.presenca)||0),0);const conc=data.reduce((s,r)=>s+(Number(r.conclusao)||0),0);h+='<div class="kpi"><div class="ico">Participantes</div><div class="num">'+part+'</div><div class="lbl">total</div></div><div class="kpi"><div class="ico">Concluintes</div><div class="num" style="color:var(--ok);">'+conc+'</div><div class="lbl">total</div></div>';}
+  else if(k==='investimentos'){const val=data.reduce((s,r)=>s+(Number(r.valor_estimado)||0),0);const emp=data.reduce((s,r)=>s+(Number(r.empregos_previstos)||0),0);h+='<div class="kpi"><div class="ico">Valor total</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">estimado</div></div><div class="kpi"><div class="ico">Empregos</div><div class="num">'+emp+'</div><div class="lbl">previstos</div></div>';}
+  else if(k==='incentivos'){const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);const emp=data.reduce((s,r)=>s+(Number(r.empregos_realizados)||0),0);h+='<div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">em benefícios</div></div><div class="kpi"><div class="ico">Empregos</div><div class="num" style="color:var(--ok);">'+emp+'</div><div class="lbl">gerados</div></div>';}
+  else if(k==='metas_ic'){const at=data.filter(r=>r.situacao==='atingida').length;const ab=data.filter(r=>r.situacao==='abaixo').length;h+='<div class="kpi"><div class="ico">Atingidas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">metas</div></div><div class="kpi"><div class="ico">Abaixo</div><div class="num" style="color:var(--danger);">'+ab+'</div><div class="lbl">metas</div></div>';}
+  else if(k==='contratos_ic'){const vig=data.filter(r=>r.situacao==='vigente').length;const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);h+='<div class="kpi"><div class="ico">Vigentes</div><div class="num">'+vig+'</div><div class="lbl">contratos</div></div><div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">total</div></div>';}
+  else if(k==='trabalhadores'){const desemp=data.filter(r=>r.situacao_emprego==='desempregado').length;h+='<div class="kpi"><div class="ico">Procurando emprego</div><div class="num" style="color:var(--warn);">'+desemp+'</div><div class="lbl">pessoas</div></div>';}
+  else if(k==='empregos'){const adm=data.reduce((s,r)=>s+(Number(r.admissoes)||0),0);const des=data.reduce((s,r)=>s+(Number(r.desligamentos)||0),0);const saldo=adm-des;h+='<div class="kpi"><div class="ico">Admissões</div><div class="num" style="color:var(--ok);">'+adm+'</div><div class="lbl">total</div></div><div class="kpi"><div class="ico">Desligamentos</div><div class="num" style="color:var(--danger);">'+des+'</div><div class="lbl">total</div></div><div class="kpi"><div class="ico">Saldo</div><div class="num" style="color:'+(saldo>=0?'var(--ok)':'var(--danger)')+';">'+saldo+'</div><div class="lbl">empregos</div></div>';}
+  el.innerHTML=h;}
+
+// Dashboard
+async function loadDashboard(){try{
+  const [emp,meis,vag,atend,fom,micro,cap,ev,fe,inv,inc,met,al,trab]=await Promise.all([
+    sbGet('ic_empresas','select=id,situacao,porte,bairro,numero_funcionarios').catch(()=>[]),
+    sbGet('ic_meis','select=id,situacao').catch(()=>[]),
+    sbGet('ic_vagas','select=id,situacao,quantidade,contratados').catch(()=>[]),
+    sbGet('ic_atendimentos','select=id,servico').catch(()=>[]),
+    sbGet('ic_fomento','select=id,situacao,valor_contratado').catch(()=>[]),
+    sbGet('ic_microcredito','select=id,situacao,valor').catch(()=>[]),
+    sbGet('ic_capacitacoes','select=id,presenca,conclusao').catch(()=>[]),
+    sbGet('ic_eventos','select=id,quantidade_participantes,empresas_participantes').catch(()=>[]),
+    sbGet('ic_feiras','select=id,expositores,publico,vendas_informadas').catch(()=>[]),
+    sbGet('ic_investimentos','select=id,valor_estimado,empregos_previstos,etapa').catch(()=>[]),
+    sbGet('ic_incentivos','select=id,empregos_realizados').catch(()=>[]),
+    sbGet('ic_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
+    sbGet('ic_alertas','select=*&lido=eq.false&order=criado_em.desc&limit=10').catch(()=>[]),
+    sbGet('ic_trabalhadores','select=id,situacao_emprego').catch(()=>[]),
+  ]);
+  const empAt=emp.filter(e=>e.situacao==='ativa').length;const meisAt=meis.filter(m=>m.situacao==='ativo').length;
+  const vagAb=vag.filter(v=>v.situacao==='aberta').length;const vagTot=vag.reduce((s,v)=>s+(Number(v.quantidade)||0),0);
+  const contrat=vag.reduce((s,v)=>s+(Number(v.contratados)||0),0);
+  const fomVal=fom.reduce((s,f)=>s+(Number(f.valor_contratado)||0),0);
+  const capPart=cap.reduce((s,c)=>s+(Number(c.presenca)||0),0);
+  const invVal=inv.reduce((s,i)=>s+(Number(i.valor_estimado)||0),0);
+  const invEmp=inv.reduce((s,i)=>s+(Number(i.empregos_previstos)||0),0);
+  const incEmp=inc.reduce((s,i)=>s+(Number(i.empregos_realizados)||0),0);
+  const funcTot=emp.reduce((s,e)=>s+(Number(e.numero_funcionarios)||0),0);
+  const evPart=ev.reduce((s,e)=>s+(Number(e.quantidade_participantes)||0),0);
+  document.getElementById('dash-kpi').innerHTML=[
+    ['Empresas ativas',empAt,'de '+emp.length+' cadastradas'],['MEIs',meisAt,'ativos'],
+    ['Funcionários',funcTot,'registrados'],['Vagas abertas',vagAb,vagTot+' total'],
+    ['Contratados',contrat,'via vagas'],['Atendimentos',atend.length,'Sala do Empreendedor'],
+    ['Capacitados',capPart,'participantes'],['Crédito',moneyShort(fomVal),'Fomento contratado'],
+    ['Eventos',ev.length,evPart+' participantes'],['Feiras',fe.length,fe.reduce((s,f)=>s+(Number(f.expositores)||0),0)+' expositores'],
+    ['Investimentos',inv.length,moneyShort(invVal)+' estimado'],['Empregos previstos',invEmp+incEmp,'invest.+incentivos'],
+    ['Metas',met.filter(m=>m.situacao==='atingida').length+'/'+met.length,'atingidas'],['Alertas',al.length,'não lidos'],
+  ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
+  // Empresas bars
+  const eSit={};emp.forEach(e=>{eSit[e.situacao]=(eSit[e.situacao]||0)+1;});const maxE=Math.max(1,...Object.values(eSit));
+  const sitL={ativa:'Ativa',inativa:'Inativa',suspensa:'Suspensa',encerrada:'Encerrada',em_implantacao:'Em implantação'};
+  document.getElementById('dash-emp-bars').innerHTML=Object.entries(eSit).map(([s,v])=>'<div class="bar-row"><span>'+(sitL[s]||s)+'</span><div class="bar-track"><div class="bar-fill bar-fill-royal" style="width:'+Math.round(v/maxE*100)+'%"></div></div><span class="val">'+v+'</span></div>').join('')||'<p style="color:var(--muted);font-size:12px;">Sem dados.</p>';
+  // Metas
+  document.getElementById('dash-metas').innerHTML=met.length?met.slice(0,8).map(m=>{const ico=m.situacao==='atingida'?'🟢':m.situacao==='atencao'?'🟡':'🔴';const cor=m.situacao==='atingida'?'ok':m.situacao==='atencao'?'warn':'danger';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;"><span>'+ico+'</span><span style="flex:1;">'+m.indicador+'</span><span style="font-weight:700;color:var(--'+cor+');">'+(m.percentual||0)+'%</span></div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Sem metas cadastradas.</p>';
+  // Trabalho
+  const desemp=trab.filter(t=>t.situacao_emprego==='desempregado').length;
+  document.getElementById('dash-trabalho').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+vagAb+'</div><div style="font-size:11px;color:var(--ink-soft);">Vagas abertas</div></div>'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+contrat+'</div><div style="font-size:11px;color:var(--ink-soft);">Contratados</div></div>'+
+    '<div style="padding:10px;background:#FEF3C7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+desemp+'</div><div style="font-size:11px;color:var(--ink-soft);">Procurando emprego</div></div>'+
+    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+trab.length+'</div><div style="font-size:11px;color:var(--ink-soft);">Trabalhadores cadastrados</div></div></div>';
+  // Crédito
+  const microVal=micro.reduce((s,m)=>s+(Number(m.valor)||0),0);
+  document.getElementById('dash-credito').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--ok);">'+moneyShort(fomVal)+'</div><div style="font-size:11px;color:var(--ink-soft);">Fomento contratado</div></div>'+
+    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--royal);">'+moneyShort(microVal)+'</div><div style="font-size:11px;color:var(--ink-soft);">Microcrédito</div></div>'+
+    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+atend.length+'</div><div style="font-size:11px;color:var(--ink-soft);">Atendimentos Sala</div></div>'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+capPart+'</div><div style="font-size:11px;color:var(--ink-soft);">Capacitados</div></div></div>';
+  // Alertas
+  document.getElementById('dash-alertas').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'">'+ico+' '+a.mensagem+'</div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum alerta.</p>';
+}catch(e){document.getElementById('dash-kpi').innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,200)+'</div>';}}
+
+// Secretaria
+let secId=null;
+async function loadSec(){try{const rows=await sbGet('ic_secretaria','select=*&limit=1');if(rows.length){const s=rows[0];secId=s.id;['nome','secretario','telefone','whatsapp','email','endereco','horario'].forEach(f=>{const el=document.getElementById('si-'+f);if(el)el.value=s[f==='horario'?'horario_atendimento':f]||'';});document.getElementById('si-orcamento').value=s.orcamento_anual||'';document.getElementById('si-meta').value=s.meta_anual||'';document.getElementById('si-obs').value=s.observacoes||'';}}catch(e){}}
+async function salvarSec(){const data={tenant_id:tid(),nome:document.getElementById('si-nome').value.trim()||'Secretaria Municipal de Indústria e Comércio',secretario:document.getElementById('si-secretario').value.trim()||null,telefone:document.getElementById('si-telefone').value.trim()||null,whatsapp:document.getElementById('si-whatsapp').value.trim()||null,email:document.getElementById('si-email').value.trim()||null,endereco:document.getElementById('si-endereco').value.trim()||null,horario_atendimento:document.getElementById('si-horario').value.trim()||null,orcamento_anual:parseMoney(document.getElementById('si-orcamento').value),meta_anual:parseMoney(document.getElementById('si-meta').value),observacoes:document.getElementById('si-obs').value.trim()||null,atualizado_em:new Date().toISOString()};const btn=document.getElementById('si-btn');btn.disabled=true;try{if(secId){await sbPatch('ic_secretaria','id=eq.'+secId,data);}else{const r=await sbPost('ic_secretaria',data);secId=r[0].id;}alert('Salvo!');}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+
+// Alertas
+async function loadAlertas(){try{const al=await sbGet('ic_alertas','select=*&order=criado_em.desc');document.getElementById('alertas-list').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'" style="display:flex;justify-content:space-between;align-items:center;">'+ico+' '+a.mensagem+(a.lido?'':' <button class="btn-ghost" style="font-size:10px;padding:3px 8px;" onclick="marcarLido(\''+a.id+'\')">Lido</button>')+'</div>';}).join(''):'<div class="panel"><p style="color:var(--muted);text-align:center;padding:30px;">Nenhum alerta.</p></div>';}catch(e){}}
+async function marcarLido(id){try{await sbPatch('ic_alertas','id=eq.'+id,{lido:true});loadAlertas();}catch(e){}}
+
+// Auditoria
+async function loadAuditoria(){try{const rows=await sbGet('ic_auditoria','select=*&order=data.desc&limit=100');document.getElementById('cnt-audit').textContent=rows.length+' registro(s)';document.getElementById('tbl-audit').innerHTML=rows.length?rows.map(r=>'<tr><td>'+new Date(r.data).toLocaleString('pt-BR')+'</td><td>'+(r.usuario||'—')+'</td><td>'+(r.acao||'—')+'</td><td>'+(r.modulo||'—')+'</td></tr>').join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Sem registros.</td></tr>';}catch(e){}}
+
+// Exports
+function exportPdf(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFontSize(16);doc.text(m.title+' — Conecta Gestão IC',14,18);doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,26);const rows=data.map(r=>m.cols.map(c=>{const v=m.renderCol(r,c);return v.replace(/<[^>]+>/g,'');}));doc.autoTable({head:[m.colLabels],body:rows,startY:32,styles:{fontSize:9},headStyles:{fillColor:[37,99,235]}});doc.save(k+'_ic.pdf');}
+function exportXlsx(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const rows=data.map(r=>{const o={};m.cols.forEach((c,i)=>{o[m.colLabels[i]]=m.renderCol(r,c).replace(/<[^>]+>/g,'');});return o;});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,m.title.slice(0,31));XLSX.writeFile(wb,k+'_ic.xlsx');}
+
+const LOADERS={dashboard_ic:loadDashboard,secretaria_ic:loadSec,alertas_ic:loadAlertas,auditoria_ic:loadAuditoria};
+Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>loadData(k);});
+</script>
+<div style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>
