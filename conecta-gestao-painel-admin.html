@@ -475,17 +475,20 @@
         <h4 style="margin:26px 0 8px;">🤝 Patrocínios</h4>
         <div style="overflow-x:auto;">
           <table>
-            <thead><tr><th>Patrocinador</th><th>Tipo de apoio</th><th>Valor</th><th>Contrapartida</th><th></th></tr></thead>
+            <thead><tr><th>Patrocinador</th><th>CNPJ/CPF</th><th>Tipo de apoio</th><th>Peças</th><th>Valor</th><th>Contrapartida</th><th></th></tr></thead>
             <tbody id="tbl-dossie-patrocinios"></tbody>
           </table>
         </div>
         <div class="form-grid" style="margin-top:12px;">
           <div class="field"><label>Nome do patrocinador</label><input id="dp-nome"></div>
+          <div class="field"><label>Razão social</label><input id="dp-razao-social"></div>
+          <div class="field"><label>Nome fantasia</label><input id="dp-nome-fantasia"></div>
           <div class="field"><label>CNPJ/CPF</label><input id="dp-cnpj"></div>
           <div class="field"><label>Responsável</label><input id="dp-responsavel"></div>
           <div class="field"><label>Telefone</label><input id="dp-telefone"></div>
+          <div class="field span-2"><label>Endereço</label><input id="dp-endereco"></div>
           <div class="field"><label>Tipo de apoio</label>
-            <select id="dp-tipo">
+            <select id="dp-tipo" onchange="toggleDpQuantidadePecas()">
               <option value="financeiro">Financeiro</option>
               <option value="material">Material</option>
               <option value="servico">Serviço</option>
@@ -496,6 +499,7 @@
               <option value="outro">Outro</option>
             </select>
           </div>
+          <div class="field" id="dp-quantidade-pecas-wrap" style="display:none;"><label>Quantidade de peças</label><input id="dp-quantidade-pecas" type="number" min="0"></div>
           <div class="field"><label>Valor (R$, se houver)</label><input id="dp-valor" type="text" inputmode="decimal" placeholder="Ex.: 2.000,00"></div>
           <div class="field"><label>Forma de pagamento</label><input id="dp-forma-pagamento"></div>
           <div class="field span-2"><label>Descrição do apoio</label><input id="dp-descricao" placeholder="Ex.: Doou 40 fantasias para as crianças do desfile"></div>
@@ -504,21 +508,41 @@
         </div>
         <div class="form-actions"><button class="btn-accent" onclick="addPatrocinio()">+ Adicionar patrocínio</button></div>
 
-        <h4 style="margin:26px 0 8px;">🎈 Crianças do desfile — APAE</h4>
-        <div id="dossie-lista-criancas-apae" style="margin-bottom:10px;"></div>
+        <h4 style="margin:26px 0 8px;">🎈 Ficha da criança do desfile</h4>
         <div class="form-grid">
-          <div class="field"><label>Nome da criança</label><input id="dcr-nome-apae"></div>
-          <div class="field span-2"><label>Escola / responsável (opcional)</label><input id="dcr-escola-apae"></div>
+          <div class="field"><label>Categoria</label>
+            <select id="dcr-categoria">
+              <option value="apae">APAE</option>
+              <option value="cidade">Cidade</option>
+            </select>
+          </div>
+          <div class="field span-2"><label>Nome da criança</label><input id="dcr-nome"></div>
         </div>
-        <div class="form-actions"><button class="btn-ghost" onclick="addCriancaDesfile('apae')">+ Adicionar criança (APAE)</button></div>
+        <div class="form-grid">
+          <div class="field"><label>Data de nascimento</label><input id="dcr-nascimento" type="date"></div>
+          <div class="field"><label>Idade</label><input id="dcr-idade" type="number" min="0" max="17"></div>
+          <div class="field"><label>Escola</label><input id="dcr-escola"></div>
+          <div class="field"><label>Série</label><input id="dcr-serie"></div>
+        </div>
+        <div class="fieldset-label">Dados do responsável</div>
+        <div class="form-grid">
+          <div class="field"><label>Nome do responsável</label><input id="dcr-resp-nome"></div>
+          <div class="field"><label>Parentesco</label><input id="dcr-resp-parentesco" placeholder="Ex.: Mãe, pai, avó..."></div>
+          <div class="field"><label>WhatsApp</label><input id="dcr-resp-whatsapp" placeholder="(00) 00000-0000"></div>
+          <div class="field"><label>Endereço</label><input id="dcr-resp-endereco"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field span-3"><label>O que mais gosta de fazer</label><input id="dcr-gosta"></div>
+          <div class="field span-3"><label>Qual o sonho quando crescer</label><input id="dcr-sonho"></div>
+          <div class="field span-3"><label>Escreva um pouco sobre a criança</label><textarea id="dcr-sobre" rows="3"></textarea></div>
+        </div>
+        <div class="form-actions"><button class="btn-accent" onclick="addCriancaDesfile()">+ Adicionar criança ao desfile</button></div>
 
-        <h4 style="margin:26px 0 8px;">🎈 Crianças do desfile — Cidade</h4>
+        <h4 style="margin:26px 0 8px;">Crianças cadastradas — APAE</h4>
+        <div id="dossie-lista-criancas-apae" style="margin-bottom:10px;"></div>
+
+        <h4 style="margin:26px 0 8px;">Crianças cadastradas — Cidade</h4>
         <div id="dossie-lista-criancas-cidade" style="margin-bottom:10px;"></div>
-        <div class="form-grid">
-          <div class="field"><label>Nome da criança</label><input id="dcr-nome-cidade"></div>
-          <div class="field span-2"><label>Escola / bairro (opcional)</label><input id="dcr-escola-cidade"></div>
-        </div>
-        <div class="form-actions"><button class="btn-ghost" onclick="addCriancaDesfile('cidade')">+ Adicionar criança (cidade)</button></div>
 
         <h4 style="margin:26px 0 8px;">🥫 Competição de arrecadação de alimentos</h4>
         <p class="panel-sub" id="dossie-total-alimentos"></p>
@@ -1895,19 +1919,35 @@ function renderDossie(){
     : '<tr><td colspan="8" class="empty">Nenhum comerciante cadastrado ainda.</td></tr>';
 
   document.getElementById('tbl-dossie-patrocinios').innerHTML = dossiePatrocinios.length
-    ? dossiePatrocinios.map(p => '<tr><td>' + p.nome + '</td>' +
+    ? dossiePatrocinios.map(p => '<tr><td>' + p.nome + (p.nome_fantasia ? ' <span style="color:var(--muted);">(' + p.nome_fantasia + ')</span>' : '') + '</td>' +
+        '<td>' + (p.cnpj_cpf || '—') + '</td>' +
         '<td>' + (PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '—') + '</td>' +
+        '<td>' + (p.quantidade_pecas != null ? p.quantidade_pecas : '—') + '</td>' +
         '<td>' + money(p.valor) + '</td>' +
         '<td>' + (p.contrapartida || p.descricao_apoio || '—') + '</td>' +
         '<td><button class="btn-ghost" onclick="deleteDossieItem(\'evento_patrocinios\',\'' + p.id + '\')">remover</button></td></tr>').join('')
-    : '<tr><td colspan="5" class="empty">Nenhum patrocínio cadastrado ainda.</td></tr>';
+    : '<tr><td colspan="7" class="empty">Nenhum patrocínio cadastrado ainda.</td></tr>';
 
+  const ficaCriancaCard = (c) => {
+    const idadeTxt = c.idade != null ? c.idade + ' anos' : (c.data_nascimento ? new Date(c.data_nascimento).toLocaleDateString('pt-BR') : '');
+    const linha1 = [c.escola, c.serie ? 'série ' + c.serie : null, idadeTxt].filter(Boolean).join(' · ');
+    const linhaResp = [c.responsavel_nome, c.responsavel_parentesco, c.responsavel_whatsapp].filter(Boolean).join(' · ');
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+      '<strong>' + c.nome + '</strong>' +
+      '<button class="btn-ghost" style="padding:2px 8px;font-size:11px;" onclick="deleteDossieItem(\'evento_desfile_criancas\',\'' + c.id + '\')">remover</button></div>' +
+      (linha1 ? '<div style="color:var(--ink-soft);margin-top:2px;">' + linha1 + '</div>' : '') +
+      (linhaResp ? '<div style="color:var(--muted);font-size:12px;margin-top:2px;">Responsável: ' + linhaResp + '</div>' : '') +
+      (c.responsavel_endereco ? '<div style="color:var(--muted);font-size:12px;">' + c.responsavel_endereco + '</div>' : '') +
+      (c.gosta_de_fazer ? '<div style="color:var(--muted);font-size:12px;margin-top:2px;">Gosta de: ' + c.gosta_de_fazer + '</div>' : '') +
+      (c.sonho ? '<div style="color:var(--muted);font-size:12px;">Sonho: ' + c.sonho + '</div>' : '') +
+      (c.sobre_a_crianca ? '<div style="color:var(--muted);font-size:12px;font-style:italic;margin-top:2px;">' + c.sobre_a_crianca + '</div>' : '') +
+      '</div>';
+  };
   const listaCriancas = (categoria, elId) => {
     const itens = dossieCriancas.filter(c => c.categoria === categoria);
     document.getElementById(elId).innerHTML = itens.length
-      ? itens.map(c => '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;">' +
-          '<span><strong>' + c.nome + '</strong>' + (c.escola_responsavel ? ' — ' + c.escola_responsavel : '') + '</span>' +
-          '<button class="btn-ghost" style="padding:2px 8px;font-size:11px;" onclick="deleteDossieItem(\'evento_desfile_criancas\',\'' + c.id + '\')">remover</button></div>').join('')
+      ? itens.map(ficaCriancaCard).join('')
       : '<p style="color:var(--muted);font-size:12.5px;">Nenhuma criança cadastrada ainda.</p>';
   };
   listaCriancas('apae', 'dossie-lista-criancas-apae');
@@ -1960,6 +2000,10 @@ async function addComerciante(){
   }
 }
 
+function toggleDpQuantidadePecas(){
+  document.getElementById('dp-quantidade-pecas-wrap').style.display = document.getElementById('dp-tipo').value === 'roupas_desfile' ? 'block' : 'none';
+}
+
 async function addPatrocinio(){
   const nome = document.getElementById('dp-nome').value.trim();
   if(!nome || !dossieAcaoId) return;
@@ -1967,36 +2011,49 @@ async function addPatrocinio(){
     await sbPost('evento_patrocinios', {
       tenant_id: session.claims.tenant_id, acao_id: dossieAcaoId,
       nome: nome,
+      razao_social: document.getElementById('dp-razao-social').value.trim() || null,
+      nome_fantasia: document.getElementById('dp-nome-fantasia').value.trim() || null,
       cnpj_cpf: document.getElementById('dp-cnpj').value.trim() || null,
       responsavel: document.getElementById('dp-responsavel').value.trim() || null,
       telefone: document.getElementById('dp-telefone').value.trim() || null,
+      endereco: document.getElementById('dp-endereco').value.trim() || null,
       tipo_apoio: document.getElementById('dp-tipo').value || null,
+      quantidade_pecas: parseInt(document.getElementById('dp-quantidade-pecas').value) || null,
       valor: parseMoneyBR(document.getElementById('dp-valor').value),
       forma_pagamento: document.getElementById('dp-forma-pagamento').value.trim() || null,
       descricao_apoio: document.getElementById('dp-descricao').value.trim() || null,
       contrapartida: document.getElementById('dp-contrapartida').value.trim() || null,
       observacoes: document.getElementById('dp-observacoes').value.trim() || null,
     });
-    ['dp-nome','dp-cnpj','dp-responsavel','dp-telefone','dp-valor','dp-forma-pagamento','dp-descricao','dp-contrapartida','dp-observacoes'].forEach(id => document.getElementById(id).value = '');
+    ['dp-nome','dp-razao-social','dp-nome-fantasia','dp-cnpj','dp-responsavel','dp-telefone','dp-endereco','dp-quantidade-pecas','dp-valor','dp-forma-pagamento','dp-descricao','dp-contrapartida','dp-observacoes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('dp-quantidade-pecas-wrap').style.display = 'none';
     await carregarDossie();
   } catch (e) {
     alert('Não foi possível adicionar: ' + e.message.slice(0,200));
   }
 }
 
-async function addCriancaDesfile(categoria){
-  const nomeId = categoria === 'apae' ? 'dcr-nome-apae' : 'dcr-nome-cidade';
-  const escolaId = categoria === 'apae' ? 'dcr-escola-apae' : 'dcr-escola-cidade';
-  const nome = document.getElementById(nomeId).value.trim();
+async function addCriancaDesfile(){
+  const nome = document.getElementById('dcr-nome').value.trim();
   if(!nome || !dossieAcaoId) return;
   try {
     await sbPost('evento_desfile_criancas', {
       tenant_id: session.claims.tenant_id, acao_id: dossieAcaoId,
-      categoria: categoria, nome: nome,
-      escola_responsavel: document.getElementById(escolaId).value.trim() || null,
+      categoria: document.getElementById('dcr-categoria').value,
+      nome: nome,
+      data_nascimento: document.getElementById('dcr-nascimento').value || null,
+      idade: parseInt(document.getElementById('dcr-idade').value) || null,
+      escola: document.getElementById('dcr-escola').value.trim() || null,
+      serie: document.getElementById('dcr-serie').value.trim() || null,
+      responsavel_nome: document.getElementById('dcr-resp-nome').value.trim() || null,
+      responsavel_parentesco: document.getElementById('dcr-resp-parentesco').value.trim() || null,
+      responsavel_whatsapp: document.getElementById('dcr-resp-whatsapp').value.trim() || null,
+      responsavel_endereco: document.getElementById('dcr-resp-endereco').value.trim() || null,
+      gosta_de_fazer: document.getElementById('dcr-gosta').value.trim() || null,
+      sonho: document.getElementById('dcr-sonho').value.trim() || null,
+      sobre_a_crianca: document.getElementById('dcr-sobre').value.trim() || null,
     });
-    document.getElementById(nomeId).value = '';
-    document.getElementById(escolaId).value = '';
+    ['dcr-nome','dcr-nascimento','dcr-idade','dcr-escola','dcr-serie','dcr-resp-nome','dcr-resp-parentesco','dcr-resp-whatsapp','dcr-resp-endereco','dcr-gosta','dcr-sonho','dcr-sobre'].forEach(id => document.getElementById(id).value = '');
     await carregarDossie();
   } catch (e) {
     alert('Não foi possível adicionar: ' + e.message.slice(0,200));
@@ -2191,10 +2248,10 @@ async function baixarPdfDossie(){
     secao('Patrocínios');
     doc.autoTable({
       startY: y,
-      head: [['Patrocinador', 'Tipo de apoio', 'Valor', 'Contrapartida']],
+      head: [['Patrocinador', 'CNPJ/CPF', 'Tipo de apoio', 'Peças', 'Valor', 'Contrapartida']],
       body: dossiePatrocinios.length
-        ? dossiePatrocinios.map(p => [p.nome, PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '—', moneyR(p.valor), p.contrapartida || p.descricao_apoio || '—'])
-        : [['Nenhum patrocínio cadastrado', '', '', '']],
+        ? dossiePatrocinios.map(p => [p.nome + (p.nome_fantasia ? ' (' + p.nome_fantasia + ')' : ''), p.cnpj_cpf || '—', PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '—', p.quantidade_pecas != null ? p.quantidade_pecas : '—', moneyR(p.valor), p.contrapartida || p.descricao_apoio || '—'])
+        : [['Nenhum patrocínio cadastrado', '', '', '', '', '']],
       styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
     });
     afterTable();
@@ -2202,10 +2259,15 @@ async function baixarPdfDossie(){
     secao('Crianças do desfile');
     doc.autoTable({
       startY: y,
-      head: [['Nome', 'Categoria', 'Escola/responsável']],
+      head: [['Nome', 'Categoria', 'Idade', 'Escola/série', 'Responsável', 'WhatsApp']],
       body: dossieCriancas.length
-        ? dossieCriancas.map(c => [c.nome, c.categoria === 'apae' ? 'APAE' : 'Cidade', c.escola_responsavel || '—'])
-        : [['Nenhuma criança cadastrada', '', '']],
+        ? dossieCriancas.map(c => [
+            c.nome, c.categoria === 'apae' ? 'APAE' : 'Cidade',
+            c.idade != null ? c.idade : (c.data_nascimento ? new Date(c.data_nascimento).toLocaleDateString('pt-BR') : '—'),
+            [c.escola, c.serie].filter(Boolean).join(' / ') || '—',
+            c.responsavel_nome || '—', c.responsavel_whatsapp || '—',
+          ])
+        : [['Nenhuma criança cadastrada', '', '', '', '', '']],
       styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
     });
     afterTable();
@@ -2335,11 +2397,19 @@ async function baixarExcelDossie(){
       'Isento': c.isento ? 'Sim' : 'Não', 'Situação': c.situacao || '',
     }))), 'Comerciantes');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossiePatrocinios.map(p => ({
-      'Patrocinador': p.nome, 'CNPJ/CPF': p.cnpj_cpf || '', 'Tipo de apoio': PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '',
+      'Patrocinador': p.nome, 'Razão social': p.razao_social || '', 'Nome fantasia': p.nome_fantasia || '',
+      'CNPJ/CPF': p.cnpj_cpf || '', 'Responsável': p.responsavel || '', 'Telefone': p.telefone || '', 'Endereço': p.endereco || '',
+      'Tipo de apoio': PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '', 'Quantidade de peças': p.quantidade_pecas != null ? p.quantidade_pecas : '',
       'Valor (R$)': Number(p.valor) || 0, 'Contrapartida': p.contrapartida || '', 'Descrição': p.descricao_apoio || '',
     }))), 'Patrocínios');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieCriancas.map(c => ({
-      'Nome': c.nome, 'Categoria': c.categoria === 'apae' ? 'APAE' : 'Cidade', 'Escola/responsável': c.escola_responsavel || '',
+      'Nome': c.nome, 'Categoria': c.categoria === 'apae' ? 'APAE' : 'Cidade',
+      'Data de nascimento': c.data_nascimento || '', 'Idade': c.idade != null ? c.idade : '',
+      'Escola': c.escola || '', 'Série': c.serie || '',
+      'Responsável — Nome': c.responsavel_nome || '', 'Responsável — Parentesco': c.responsavel_parentesco || '',
+      'Responsável — WhatsApp': c.responsavel_whatsapp || '', 'Responsável — Endereço': c.responsavel_endereco || '',
+      'O que mais gosta de fazer': c.gosta_de_fazer || '', 'Sonho quando crescer': c.sonho || '',
+      'Sobre a criança': c.sobre_a_crianca || '',
     }))), 'Crianças do desfile');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieArrecadacao.map(a => ({
       'Participante': a.participante, 'Alimento': a.alimento || '', 'Quantidade (kg)': Number(a.quantidade_kg) || 0,
