@@ -959,6 +959,44 @@
         </table>
       </div>
     </section>
+
+    <section class="view" id="view-indicadores">
+      <div class="topbar">
+        <div><h1>Indicadores</h1><div class="path">Painel Administrativo / Indicadores</div></div>
+      </div>
+
+      <div class="panel">
+        <h3>Cadastrar/atualizar indicador</h3>
+        <p class="panel-sub">Esses números alimentam os cards do Dashboard do Prefeito e o Portal Público. Escolher um indicador que já existe atualiza o valor; escolher "Outro" cria um novo.</p>
+        <div class="form-grid">
+          <div class="field"><label>Indicador</label>
+            <select id="ind-chave" onchange="toggleIndicadorChaveCustom()">
+              <option value="alunos_atendidos">Alunos atendidos (Educação)</option>
+              <option value="consultas_realizadas">Consultas realizadas (Saúde)</option>
+              <option value="medicamentos_distribuidos">Medicamentos distribuídos (Saúde)</option>
+              <option value="estradas_recuperadas_km">Estradas recuperadas, em km (Infraestrutura)</option>
+              <option value="arvores_plantadas">Árvores plantadas (Meio Ambiente)</option>
+              <option value="eventos_realizados">Eventos realizados (Eventos)</option>
+              <option value="empregos_gerados">Empregos gerados (Emprego)</option>
+              <option value="empresas_abertas">Empresas abertas (Economia)</option>
+              <option value="outro">Outro (digitar chave)</option>
+            </select>
+          </div>
+          <div class="field" id="ind-chave-custom-wrap" style="display:none;"><label>Nome do indicador (sem espaços/acentos)</label><input id="ind-chave-custom" placeholder="Ex.: pacientes_vacinados"></div>
+          <div class="field"><label>Secretaria (opcional)</label><select id="ind-secretaria"><option value="">Gestão geral</option></select></div>
+          <div class="field"><label>Valor</label><input id="ind-valor" type="number" step="1" placeholder="Ex.: 14230"></div>
+        </div>
+        <div class="form-actions"><button class="btn-accent" onclick="salvarIndicador()">Salvar indicador</button></div>
+      </div>
+
+      <div class="panel">
+        <h3>Indicadores cadastrados</h3>
+        <table>
+          <thead><tr><th>Indicador</th><th>Secretaria</th><th>Valor</th><th></th></tr></thead>
+          <tbody id="tbl-indicadores"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -1029,6 +1067,7 @@ const NAV_ITEMS = {
   secretarias: { label: 'Secretarias', view: 'view-secretarias' },
   usuarios: { label: 'Usuários e Permissões', view: 'view-usuarios' },
   auditoria: { label: 'Auditoria', view: 'view-auditoria' },
+  indicadores: { label: 'Indicadores', view: 'view-indicadores' },
 };
 
 function enterApp(){
@@ -1056,6 +1095,7 @@ function enterApp(){
     (isAdmin ? '<button class="nav-item" data-key="secretarias" onclick="navigateTo(\'secretarias\')"><span>Secretarias</span></button>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="usuarios" onclick="navigateTo(\'usuarios\')"><span>Usuários e Permissões</span></button>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="auditoria" onclick="navigateTo(\'auditoria\')"><span>Auditoria</span></button>' : '') +
+    (isAdmin ? '<button class="nav-item" data-key="indicadores" onclick="navigateTo(\'indicadores\')"><span>Indicadores</span></button>' : '') +
     '</div>';
 
   if(!perfil){
@@ -1081,6 +1121,7 @@ function enterApp(){
     loadUsuarios();
     loadPermissoesMatrix();
     loadAuditoria();
+    loadIndicadores();
   }
   navigateTo('dashboard');
 }
@@ -3329,7 +3370,7 @@ async function loadPermissoesMatrix(){
 }
 
 const AUDITORIA_ACAO_LABEL = { criar:'Criou', editar:'Editou', excluir:'Excluiu', aprovar:'Aprovou', enviar:'Enviou' };
-const AUDITORIA_ENTIDADE_LABEL = { acao:'Ação', usuario:'Usuário', secretaria:'Secretaria', recurso:'Recurso', promessa:'Promessa', documento:'Documento' };
+const AUDITORIA_ENTIDADE_LABEL = { acao:'Ação', usuario:'Usuário', secretaria:'Secretaria', recurso:'Recurso', promessa:'Promessa', documento:'Documento', indicador:'Indicador' };
 
 let auditoriaCache = [];
 
@@ -3363,6 +3404,84 @@ function renderAuditoria(){
           '<td style="font-size:12px;color:var(--ink-soft);">' + (resumo || '—') + '</td></tr>';
       }).join('')
     : '<tr><td colspan="5" class="empty">Nenhum registro de auditoria ainda.</td></tr>';
+}
+
+const INDICADOR_LABEL = {
+  alunos_atendidos:'Alunos atendidos', consultas_realizadas:'Consultas realizadas',
+  medicamentos_distribuidos:'Medicamentos distribuídos', estradas_recuperadas_km:'Estradas recuperadas (km)',
+  arvores_plantadas:'Árvores plantadas', eventos_realizados:'Eventos realizados',
+  empregos_gerados:'Empregos gerados', empresas_abertas:'Empresas abertas',
+};
+
+let indicadoresCache = [];
+
+function toggleIndicadorChaveCustom(){
+  const isOutro = document.getElementById('ind-chave').value === 'outro';
+  document.getElementById('ind-chave-custom-wrap').style.display = isOutro ? 'block' : 'none';
+}
+
+async function loadIndicadores(){
+  try {
+    const secs = await sbGet('secretarias', 'select=id,nome&order=nome.asc');
+    document.getElementById('ind-secretaria').innerHTML = '<option value="">Gestão geral</option>' + secs.map(s => '<option value="' + s.id + '">' + s.nome + '</option>').join('');
+
+    indicadoresCache = await sbGet('indicadores', 'select=id,chave,valor,secretaria_id,secretarias(nome)&order=chave.asc');
+    renderIndicadores();
+  } catch (e) {
+    document.getElementById('tbl-indicadores').innerHTML = '<tr><td colspan="4" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
+function renderIndicadores(){
+  document.getElementById('tbl-indicadores').innerHTML = indicadoresCache.length
+    ? indicadoresCache.map(i => '<tr><td>' + (INDICADOR_LABEL[i.chave] || i.chave) + '</td>' +
+        '<td>' + (i.secretarias ? i.secretarias.nome : 'Gestão geral') + '</td>' +
+        '<td style="font-family:var(--mono);">' + Number(i.valor).toLocaleString('pt-BR') + '</td>' +
+        '<td><button class="btn-ghost" onclick="excluirIndicador(\'' + i.id + '\')">Excluir</button></td></tr>').join('')
+    : '<tr><td colspan="4" class="empty">Nenhum indicador cadastrado ainda.</td></tr>';
+}
+
+async function salvarIndicador(){
+  const chaveSel = document.getElementById('ind-chave').value;
+  const chave = chaveSel === 'outro' ? document.getElementById('ind-chave-custom').value.trim().toLowerCase().replace(/\s+/g,'_') : chaveSel;
+  const secretariaId = document.getElementById('ind-secretaria').value || null;
+  const valor = parseFloat(document.getElementById('ind-valor').value);
+  if(!chave || isNaN(valor)){ alert('Escolha o indicador e informe um valor válido.'); return; }
+  try {
+    const existente = indicadoresCache.find(i => i.chave === chave && (i.secretaria_id || null) === secretariaId);
+    if(existente){
+      const res = await fetch(SUPABASE_URL + '/rest/v1/indicadores?id=eq.' + existente.id, {
+        method: 'PATCH',
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Profile': 'gestao360', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor: valor }),
+      });
+      if(!res.ok) throw new Error(await res.text());
+      registrarAuditoria('indicador', existente.id, 'editar', { chave: chave, valor: valor });
+    } else {
+      const [criado] = await sbPost('indicadores', { tenant_id: session.claims.tenant_id, chave: chave, valor: valor, secretaria_id: secretariaId });
+      registrarAuditoria('indicador', criado && criado.id, 'criar', { chave: chave, valor: valor });
+    }
+    document.getElementById('ind-valor').value = '';
+    document.getElementById('ind-chave-custom').value = '';
+    await loadIndicadores();
+  } catch (e) {
+    alert('Não foi possível salvar: ' + e.message.slice(0,200));
+  }
+}
+
+async function excluirIndicador(id){
+  if(!confirm('Excluir este indicador?')) return;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/indicadores?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Profile': 'gestao360' },
+    });
+    if(!res.ok) throw new Error(await res.text());
+    registrarAuditoria('indicador', id, 'excluir', null);
+    await loadIndicadores();
+  } catch (e) {
+    alert('Não foi possível excluir: ' + e.message.slice(0,200));
+  }
 }
 
 async function submitAcao(){
