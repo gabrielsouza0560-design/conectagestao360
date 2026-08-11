@@ -292,6 +292,17 @@
     </div>
   </section>
 
+  <section class="view" id="view-recursos">
+    <div class="section-head"><div class="eyebrow">Transparência</div><h2>Captação de Recursos</h2><p>Convênios, editais e emendas que o município está buscando ou já conquistou.</p></div>
+    <div class="kpi-grid" id="rec-kpis"></div>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Programa/Edital</th><th>Órgão concedente</th><th>Esfera</th><th>Secretaria</th><th>Valor estimado</th><th>Status</th></tr></thead>
+        <tbody id="recursos-tbl"></tbody>
+      </table>
+    </div>
+  </section>
+
   <section class="view" id="view-mapa">
     <div class="section-head"><div class="eyebrow">Território</div><h2>Mapa interativo</h2><p>Escolas, UBS, praças, obras e mais, geolocalizados.</p></div>
     <div class="map-wrap">
@@ -439,11 +450,11 @@ const FALLBACK = {
 };
 
 let LIVE = false;
-let DATA = { secretarias: [], acoes: [], publicacoes: [], indicadores: [], mapa_pontos: [], promessas: [], evento_midias: [] };
+let DATA = { secretarias: [], acoes: [], publicacoes: [], indicadores: [], mapa_pontos: [], promessas: [], evento_midias: [], recursos: [] };
 
 async function loadData(){
   try {
-    const [secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas, evento_midias] = await Promise.all([
+    const [secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas, evento_midias, recursos] = await Promise.all([
       sbGet("secretarias", "select=id,nome&order=nome.asc"),
       sbGet("acoes", "select=titulo,descricao,bairro,ano,data,status,valor_investido,origem_recurso,secretarias(nome),categorias(nome)&publicada_no_portal=eq.true&order=criado_em.desc"),
       sbGet("publicacoes", "select=titulo,corpo,tipo&status_aprovacao=eq.aprovado&order=publicado_em.desc"),
@@ -451,8 +462,9 @@ async function loadData(){
       sbGet("mapa_pontos", "select=categoria,nome,latitude,longitude"),
       sbGet("promessas_campanha", "select=titulo,eixo,ano_previsto,status,secretarias(nome)&order=eixo.asc"),
       sbGet("evento_midias", "select=tipo,url,categoria,legenda,acoes(titulo)&order=criado_em.desc&limit=60"),
+      sbGet("oportunidades_recursos", "select=programa,orgao_concedente,esfera,valor_estimado,status,secretarias(nome)&order=criado_em.desc"),
     ]);
-    DATA = { secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas, evento_midias };
+    DATA = { secretarias, acoes, publicacoes, indicadores, mapa_pontos, promessas, evento_midias, recursos };
     LIVE = true;
   } catch (err) {
     console.warn("Não foi possível carregar dados ao vivo do Supabase — usando dados de demonstração.", err.message);
@@ -479,8 +491,9 @@ function updateConnBanner(){
 const NAV = [
   {key:'home', label:'Página Inicial'}, {key:'noticias', label:'Notícias'}, {key:'secretarias', label:'Secretarias'},
   {key:'obras', label:'Obras'}, {key:'plano', label:'Plano de Governo'}, {key:'linha', label:'Linha do Tempo'}, {key:'indicadores', label:'Indicadores'},
-  {key:'mapa', label:'Mapa'}, {key:'contas', label:'Prestação de Contas'}, {key:'galeria', label:'Galeria'}, {key:'downloads', label:'Downloads'},
+  {key:'recursos', label:'Captação de Recursos'}, {key:'mapa', label:'Mapa'}, {key:'contas', label:'Prestação de Contas'}, {key:'galeria', label:'Galeria'}, {key:'downloads', label:'Downloads'},
 ];
+const RECURSO_STATUS_LABEL_PUBLICO = { prospectando:'Prospectando', em_elaboracao:'Em elaboração', submetido:'Submetido', aprovado:'Aprovado', reprovado:'Reprovado', em_execucao:'Em execução', concluido:'Concluído' };
 const MAP_CATS = { escola:"#059669", ubs:"#DC2626", praca:"#D97706", obra:"#2563EB", estrada:"#475569", turismo:"#7C3AED", ponte:"#0891B2", iluminacao:"#CA8A04", agricultura:"#65A30D" };
 const DOWNLOADS = [["Relatório Anual de Gestão 2025", "PDF · 4,2 MB"], ["Balanço Orçamentário — 1º Trimestre 2026", "XLSX · 890 KB"], ["Livro da Gestão 2025–2028 (parcial)", "PDF · 22 MB"]];
 
@@ -575,6 +588,7 @@ function populate(){
     <tr><td>${a.titulo}</td><td>${a.secretarias?.nome||'—'}</td><td>${a.origem_recurso||'—'}</td><td style="font-family:var(--mono);">${money(a.valor_investido)}</td><td>${statusPill(a.status)}</td></tr>`).join('') || '<tr><td colspan="5">Nenhuma ação publicada ainda.</td></tr>';
 
   renderGaleriaPublica(DATA.evento_midias || []);
+  renderRecursosPublico(DATA.recursos || []);
   document.getElementById('downloads-list').innerHTML = DOWNLOADS.map(d => `<div class="dl-row"><div><div class="dl-name">${d[0]}</div><div class="dl-meta">${d[1]}</div></div><button class="dl-btn" onclick="toast('Download iniciado (demonstração)')">Baixar</button></div>`).join('');
 
   const VOZ_TYPES = ["Sugestão","Elogio","Crítica","Reclamação","Pedido de melhoria","Denúncia","Solicitação"];
@@ -625,6 +639,26 @@ const GALERIA_CATEGORIA_LABEL_PUBLICO = {
   comerciantes:'Comerciantes', atracoes:'Atrações', autoridades:'Autoridades', encerramento:'Encerramento',
   antes_obra:'Antes da obra', depois_obra:'Depois da obra', outro:'',
 };
+
+function recursoStatusPill(s){
+  const corMap = { aprovado:'concluido', concluido:'concluido', em_execucao:'concluido', reprovado:'cancelado', submetido:'em_andamento', em_elaboracao:'em_andamento', prospectando:'planejado' };
+  return `<span class="status-pill status-${corMap[s] || 'planejado'}">${RECURSO_STATUS_LABEL_PUBLICO[s] || s}</span>`;
+}
+
+function renderRecursosPublico(recursos){
+  const emAndamento = recursos.filter(r => !['aprovado','concluido','reprovado'].includes(r.status)).length;
+  const aprovados = recursos.filter(r => r.status === 'aprovado' || r.status === 'concluido').length;
+  const totalValor = recursos.reduce((s,r) => s + (Number(r.valor_estimado)||0), 0);
+  document.getElementById('rec-kpis').innerHTML =
+    `<div class="kpi"><div class="num">${recursos.length}</div><div class="lbl">Oportunidades acompanhadas</div></div>
+     <div class="kpi"><div class="num">${emAndamento}</div><div class="lbl">Em andamento</div></div>
+     <div class="kpi"><div class="num">${aprovados}</div><div class="lbl">Aprovadas/concluídas</div></div>
+     <div class="kpi"><div class="num">${money(totalValor)}</div><div class="lbl">Valor total estimado</div></div>`;
+
+  document.getElementById('recursos-tbl').innerHTML = recursos.length
+    ? recursos.map(r => `<tr><td>${r.programa}</td><td>${r.orgao_concedente||'—'}</td><td>${r.esfera||'—'}</td><td>${r.secretarias?.nome||'Toda a prefeitura'}</td><td style="font-family:var(--mono);">${money(r.valor_estimado)}</td><td>${recursoStatusPill(r.status)}</td></tr>`).join('')
+    : '<tr><td colspan="6">Nenhuma captação de recursos publicada ainda.</td></tr>';
+}
 
 function renderGaleriaPublica(itens){
   const grid = document.getElementById('gal-grid');
