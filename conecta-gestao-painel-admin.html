@@ -2091,6 +2091,15 @@ async function baixarPdfDossie(){
     const ensureSpace = (needed) => { if(y + needed > 280){ doc.addPage(); y = 20; } };
     const secao = (titulo) => { ensureSpace(20); doc.setFontSize(12); doc.setTextColor(0); doc.text(titulo, 14, y); y += 4; };
     const afterTable = () => { y = doc.lastAutoTable.finalY + 10; };
+    const paragrafo = (texto, tamanhoFonte) => {
+      doc.setFontSize(tamanhoFonte || 9); doc.setTextColor(60);
+      const linhas = doc.splitTextToSize(texto, 180);
+      const alturaLinha = (tamanhoFonte || 9) * 0.3528 * 1.15;
+      const alturaTotal = linhas.length * alturaLinha;
+      ensureSpace(alturaTotal + 4);
+      doc.text(linhas, 14, y);
+      y += alturaTotal + 4;
+    };
 
     // Capa
     doc.setFontSize(18); doc.setTextColor(0); doc.text('Relatório da Festa', 14, y); y += 8;
@@ -2110,16 +2119,13 @@ async function baixarPdfDossie(){
     // Apresentação e finalidade
     if(f.descricao){
       secao('Apresentação');
-      doc.setFontSize(9); doc.setTextColor(60);
-      doc.text(doc.splitTextToSize(f.descricao, 180), 14, y); y += 14;
+      paragrafo(f.descricao);
     }
     if(f.finalidade || f.objetivos || f.publico_alvo){
       secao('Finalidade e objetivos');
-      doc.setFontSize(9); doc.setTextColor(60);
-      if(f.finalidade){ doc.text(doc.splitTextToSize('Finalidade: ' + f.finalidade, 180), 14, y); y += 12; }
-      if(f.objetivos){ doc.text(doc.splitTextToSize('Objetivos: ' + f.objetivos, 180), 14, y); y += 12; }
-      if(f.publico_alvo){ doc.text('Público-alvo: ' + f.publico_alvo, 14, y); y += 6; }
-      y += 4;
+      if(f.finalidade) paragrafo('Finalidade: ' + f.finalidade);
+      if(f.objetivos) paragrafo('Objetivos: ' + f.objetivos);
+      if(f.publico_alvo) paragrafo('Público-alvo: ' + f.publico_alvo);
     }
 
     // Prestação de contas — balanço financeiro
@@ -2262,14 +2268,13 @@ async function baixarPdfDossie(){
 
     // Conclusão automática
     secao('Conclusão');
-    doc.setFontSize(9); doc.setTextColor(60);
     const partes = [];
     partes.push('A festa "' + (f.titulo || '') + '" contou com ' + dossieComerciantes.length + ' comerciante(s)/barraca(s)' + (dossieCriancas.length ? ' e ' + dossieCriancas.length + ' criança(s) no desfile' : '') + '.');
     partes.push('O investimento municipal foi de ' + moneyR(investimentoMunicipal) + ', contra ' + moneyR(totalReceitas) + ' em receitas (patrocínios + taxas de barracas), resultando em ' + (saldoFinal >= 0 ? 'saldo positivo' : 'saldo negativo') + ' de ' + moneyR(Math.abs(saldoFinal)) + '.');
     if(totalAlimentos) partes.push('A competição de arrecadação de alimentos reuniu ' + totalAlimentos.toLocaleString('pt-BR') + ' kg de doações.');
     if(mediaMorador || mediaComerciante) partes.push('A avaliação pública registrou nota média de ' + (mediaMorador || '—') + '/5 entre moradores e ' + (mediaComerciante || '—') + '/5 entre comerciantes.');
     partes.push('O evento foi ' + pctChecklist + '% preparado conforme o checklist cadastrado.');
-    doc.text(doc.splitTextToSize(partes.join(' '), 180), 14, y);
+    paragrafo(partes.join(' '));
 
     // Cabeçalho/rodapé em todas as páginas
     const totalPaginas = doc.internal.getNumberOfPages();
