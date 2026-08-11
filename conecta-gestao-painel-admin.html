@@ -211,6 +211,13 @@
       🔔 Alertas <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
     </button>
     <div class="notif-panel" id="notif-panel" style="display:none;"></div>
+    <div style="position:relative;margin:0 16px 12px;">
+      <input id="busca-global-input" type="text" placeholder="🔎 Buscar em tudo..."
+        oninput="renderBuscaGlobal()" onfocus="renderBuscaGlobal()"
+        onblur="setTimeout(function(){ document.getElementById('busca-global-resultados').style.display='none'; }, 150)"
+        style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;box-sizing:border-box;">
+      <div id="busca-global-resultados" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:4px;max-height:320px;overflow-y:auto;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.12);"></div>
+    </div>
     <nav id="nav-container"></nav>
     <div class="sb-foot">
       <button class="logout-btn" onclick="doLogout()">Sair do sistema</button>
@@ -298,15 +305,64 @@
         </div>
         <div id="evento-fields" style="display:none;">
           <div class="form-grid">
+            <div class="field"><label>Tipo de evento</label>
+              <select id="f-tipo-evento">
+                <option value="">Selecione...</option>
+                <option value="festa_popular">Festa popular</option>
+                <option value="feira">Feira</option>
+                <option value="desfile">Desfile</option>
+                <option value="show">Show</option>
+                <option value="evento_cultural">Evento cultural</option>
+                <option value="evento_esportivo">Evento esportivo</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="field"><label>Local</label><input id="f-local" placeholder="Ex.: Praça Central"></div>
+            <div class="field"><label>Endereço</label><input id="f-endereco"></div>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Data de término (se for mais de 1 dia)</label><input id="f-data-fim" type="date"></div>
+            <div class="field"><label>Horário de início</label><input id="f-hora-inicio" type="time"></div>
+            <div class="field"><label>Horário de término</label><input id="f-hora-fim" type="time"></div>
+          </div>
+          <div class="form-grid">
+            <div class="field span-3"><label>Finalidade do evento</label><input id="f-finalidade" placeholder="Ex.: Promover o comércio local, fortalecer o turismo e movimentar a economia do município"></div>
+          </div>
+          <div class="form-grid">
+            <div class="field span-2"><label>Objetivos</label><input id="f-objetivos" placeholder="Ex.: Incentivar o comércio local; atrair visitantes; promover cultura"></div>
+            <div class="field"><label>Público-alvo</label><input id="f-publico-alvo" placeholder="Ex.: Famílias, comerciantes, turistas"></div>
+          </div>
+          <div class="form-grid">
             <div class="field"><label>Público estimado</label><input id="f-publico-estimado" type="number" placeholder="Ex.: 5000"></div>
             <div class="field"><label>Comerciantes/barracas participantes</label><input id="f-comerciantes" type="number" placeholder="Ex.: 25"></div>
             <div class="field"><label>Valor de retorno estimado (R$)</label><input id="f-valor-retorno" type="number" step="0.01" placeholder="Impacto econômico estimado"></div>
           </div>
           <p class="panel-sub" style="margin:2px 0 10px;">Use o campo "Origem do recurso" acima para registrar se veio de emenda (parlamentar/federal/estadual) ou de recurso próprio.</p>
-          <div class="form-grid">
-            <div class="field span-3"><label>Fotos do evento</label><input id="f-fotos" type="file" accept="image/*" multiple></div>
-            <div class="field span-3"><label>Vídeos do evento</label><input id="f-videos" type="file" accept="video/*" multiple></div>
+        </div>
+
+        <div class="fieldset-label">Fotos e vídeos (galeria)</div>
+        <div class="form-grid">
+          <div class="field"><label>Categoria</label>
+            <select id="f-midia-categoria">
+              <option value="">Sem categoria</option>
+              <option value="divulgacao">Divulgação</option>
+              <option value="montagem">Montagem</option>
+              <option value="evento">Evento</option>
+              <option value="publico">Público</option>
+              <option value="comerciantes">Comerciantes</option>
+              <option value="atracoes">Atrações</option>
+              <option value="autoridades">Autoridades</option>
+              <option value="encerramento">Encerramento</option>
+              <option value="antes_obra">Antes da obra</option>
+              <option value="depois_obra">Depois da obra</option>
+              <option value="outro">Outro</option>
+            </select>
           </div>
+          <div class="field span-2"><label>Legenda (opcional, aplicada a todos os arquivos deste envio)</label><input id="f-midia-legenda" placeholder="Ex.: Praça montada na véspera do evento"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field span-3"><label>Fotos</label><input id="f-fotos" type="file" accept="image/*" multiple></div>
+          <div class="field span-3"><label>Vídeos</label><input id="f-videos" type="file" accept="video/*" multiple></div>
         </div>
 
         <div class="form-actions">
@@ -365,6 +421,124 @@
           <thead><tr><th>Festa</th><th>Secretaria</th><th>Data</th><th>Investimento</th><th>Público</th><th>Comerciantes</th><th>Retorno estimado</th><th>Avaliação</th><th></th></tr></thead>
           <tbody id="tbl-festas"></tbody>
         </table>
+      </div>
+
+      <div class="panel" id="dossie-panel" style="display:none;">
+        <h3>Dossiê da festa</h3>
+        <p class="panel-sub" id="dossie-festa-titulo"></p>
+        <div class="kpi-grid" id="dossie-kpi-grid" style="margin-bottom:18px;"></div>
+
+        <h4 style="margin:6px 0 8px;">🏪 Comerciantes e barracas</h4>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Nome</th><th>Empresa</th><th>Tipo</th><th>Barraca</th><th>Contato</th><th>Valor</th><th>Situação</th><th></th></tr></thead>
+            <tbody id="tbl-dossie-comerciantes"></tbody>
+          </table>
+        </div>
+        <div class="form-grid" style="margin-top:12px;">
+          <div class="field"><label>Nome do comerciante</label><input id="dc-nome"></div>
+          <div class="field"><label>Empresa</label><input id="dc-empresa"></div>
+          <div class="field"><label>CPF/CNPJ</label><input id="dc-cpf"></div>
+          <div class="field"><label>Telefone/WhatsApp</label><input id="dc-telefone"></div>
+          <div class="field"><label>Segmento</label><input id="dc-segmento" placeholder="Ex.: Alimentação, artesanato..."></div>
+          <div class="field"><label>Produto vendido</label><input id="dc-produto"></div>
+          <div class="field"><label>Tipo de participação</label>
+            <select id="dc-tipo">
+              <option value="comercio_local">Comércio local</option>
+              <option value="comercio_outro_municipio">Comércio de outro município</option>
+              <option value="produtor_rural">Produtor rural</option>
+              <option value="artesao">Artesão</option>
+              <option value="alimentacao">Alimentação</option>
+              <option value="ambulante">Ambulante</option>
+              <option value="entidade">Entidade</option>
+              <option value="associacao">Associação</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="field"><label>Nº da barraca</label><input id="dc-numero-barraca"></div>
+          <div class="field"><label>Localização da barraca</label><input id="dc-localizacao"></div>
+          <div class="field"><label>Tamanho</label><input id="dc-tamanho"></div>
+          <div class="field"><label>Valor cobrado (R$)</label><input id="dc-valor" type="number" step="0.01"></div>
+          <div class="field"><label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="checkbox" id="dc-isento" style="width:auto;margin-right:8px;vertical-align:middle;"> Isento de taxa</label></div>
+          <div class="field"><label>Forma de pagamento</label><input id="dc-forma-pagamento"></div>
+          <div class="field"><label>Situação</label>
+            <select id="dc-situacao">
+              <option value="confirmado">Confirmado</option>
+              <option value="pendente">Pendente</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+          <div class="field span-3"><label>Observações</label><input id="dc-observacoes"></div>
+        </div>
+        <div class="form-actions"><button class="btn-accent" onclick="addComerciante()">+ Adicionar comerciante/barraca</button></div>
+
+        <h4 style="margin:26px 0 8px;">🤝 Patrocínios</h4>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Patrocinador</th><th>Tipo de apoio</th><th>Valor</th><th>Contrapartida</th><th></th></tr></thead>
+            <tbody id="tbl-dossie-patrocinios"></tbody>
+          </table>
+        </div>
+        <div class="form-grid" style="margin-top:12px;">
+          <div class="field"><label>Nome do patrocinador</label><input id="dp-nome"></div>
+          <div class="field"><label>CNPJ/CPF</label><input id="dp-cnpj"></div>
+          <div class="field"><label>Responsável</label><input id="dp-responsavel"></div>
+          <div class="field"><label>Telefone</label><input id="dp-telefone"></div>
+          <div class="field"><label>Tipo de apoio</label>
+            <select id="dp-tipo">
+              <option value="financeiro">Financeiro</option>
+              <option value="material">Material</option>
+              <option value="servico">Serviço</option>
+              <option value="brinde">Brinde</option>
+              <option value="estrutura">Estrutura</option>
+              <option value="alimentacao">Alimentação</option>
+              <option value="roupas_desfile">Roupas para o desfile</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="field"><label>Valor (R$, se houver)</label><input id="dp-valor" type="number" step="0.01"></div>
+          <div class="field"><label>Forma de pagamento</label><input id="dp-forma-pagamento"></div>
+          <div class="field span-2"><label>Descrição do apoio</label><input id="dp-descricao" placeholder="Ex.: Doou 40 fantasias para as crianças do desfile"></div>
+          <div class="field"><label>Contrapartida</label><input id="dp-contrapartida" placeholder="Ex.: Logo no material de divulgação"></div>
+          <div class="field span-3"><label>Observações</label><input id="dp-observacoes"></div>
+        </div>
+        <div class="form-actions"><button class="btn-accent" onclick="addPatrocinio()">+ Adicionar patrocínio</button></div>
+
+        <h4 style="margin:26px 0 8px;">🎈 Crianças do desfile — APAE</h4>
+        <div id="dossie-lista-criancas-apae" style="margin-bottom:10px;"></div>
+        <div class="form-grid">
+          <div class="field"><label>Nome da criança</label><input id="dcr-nome-apae"></div>
+          <div class="field span-2"><label>Escola / responsável (opcional)</label><input id="dcr-escola-apae"></div>
+        </div>
+        <div class="form-actions"><button class="btn-ghost" onclick="addCriancaDesfile('apae')">+ Adicionar criança (APAE)</button></div>
+
+        <h4 style="margin:26px 0 8px;">🎈 Crianças do desfile — Cidade</h4>
+        <div id="dossie-lista-criancas-cidade" style="margin-bottom:10px;"></div>
+        <div class="form-grid">
+          <div class="field"><label>Nome da criança</label><input id="dcr-nome-cidade"></div>
+          <div class="field span-2"><label>Escola / bairro (opcional)</label><input id="dcr-escola-cidade"></div>
+        </div>
+        <div class="form-actions"><button class="btn-ghost" onclick="addCriancaDesfile('cidade')">+ Adicionar criança (cidade)</button></div>
+
+        <h4 style="margin:26px 0 8px;">🥫 Competição de arrecadação de alimentos</h4>
+        <p class="panel-sub" id="dossie-total-alimentos"></p>
+        <div id="dossie-lista-arrecadacao" style="margin-bottom:10px;"></div>
+        <div class="form-grid">
+          <div class="field"><label>Criança / grupo / escola</label><input id="dar-participante"></div>
+          <div class="field"><label>Alimento (opcional)</label><input id="dar-alimento"></div>
+          <div class="field"><label>Quantidade (kg)</label><input id="dar-quantidade" type="number" step="0.1"></div>
+        </div>
+        <div class="form-actions"><button class="btn-ghost" onclick="addArrecadacao()">+ Registrar arrecadação</button></div>
+
+        <h4 style="margin:26px 0 8px;">✅ Checklist do evento</h4>
+        <p class="panel-sub" id="dossie-checklist-percentual"></p>
+        <div id="dossie-checklist-lista" style="margin-bottom:10px;"></div>
+
+        <div class="form-actions" style="margin-top:24px;">
+          <button class="btn-ghost" onclick="fecharDossie()">Fechar dossiê</button>
+          <button class="btn-ghost" onclick="baixarPdfDossie()" id="pdf-dossie-btn">⬇ PDF do relatório</button>
+          <button class="btn-ghost" onclick="baixarExcelDossie()" id="xlsx-dossie-btn">⬇ Excel do relatório</button>
+        </div>
       </div>
     </section>
 
@@ -462,6 +636,110 @@
         </table>
       </div>
     </section>
+
+    <section class="view" id="view-documentos">
+      <div class="topbar">
+        <div><h1>Documentos</h1><div class="path">Painel Administrativo / Documentos</div></div>
+      </div>
+
+      <div class="kpi-grid" id="documentos-kpi-grid"></div>
+
+      <div class="panel">
+        <h3>Enviar documento</h3>
+        <p class="panel-sub">Ofícios, contratos, autorizações e outros documentos oficiais vinculados a uma ação/festa/obra.</p>
+        <div class="form-grid">
+          <div class="field span-2"><label>Ação vinculada</label><select id="doc-acao"></select></div>
+          <div class="field"><label>Categoria</label>
+            <select id="doc-categoria">
+              <option value="policia_militar">Polícia Militar</option>
+              <option value="conselho_tutelar">Conselho Tutelar</option>
+              <option value="bombeiros">Corpo de Bombeiros</option>
+              <option value="prefeitura">Prefeitura (ofícios, contratos, empenhos)</option>
+              <option value="fornecedores">Fornecedores (notas, comprovantes)</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="field span-2"><label>Nome do documento</label><input id="doc-nome" placeholder="Ex.: Ofício PM nº 12/2026"></div>
+          <div class="field"><label>Arquivo</label><input id="doc-arquivo" type="file"></div>
+          <div class="field span-3"><label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="checkbox" id="doc-publico" style="width:auto;margin-right:8px;vertical-align:middle;"> Visível no Portal Público</label></div>
+        </div>
+        <div class="form-actions"><button class="btn-accent" onclick="enviarDocumento()" id="doc-enviar-btn">Enviar documento</button></div>
+      </div>
+
+      <div class="panel">
+        <h3>Documentos enviados</h3>
+        <div class="form-grid" style="margin-bottom:6px;">
+          <div class="field"><label>Filtrar por ação</label><select id="doc-filtro-acao" onchange="renderDocumentos()"><option value="">Todas</option></select></div>
+          <div class="field"><label>Filtrar por categoria</label>
+            <select id="doc-filtro-categoria" onchange="renderDocumentos()">
+              <option value="">Todas</option>
+              <option value="policia_militar">Polícia Militar</option>
+              <option value="conselho_tutelar">Conselho Tutelar</option>
+              <option value="bombeiros">Corpo de Bombeiros</option>
+              <option value="prefeitura">Prefeitura</option>
+              <option value="fornecedores">Fornecedores</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Nome</th><th>Ação vinculada</th><th>Categoria</th><th>Enviado por</th><th>Data</th><th></th></tr></thead>
+          <tbody id="tbl-documentos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-galeria">
+      <div class="topbar">
+        <div><h1>Galeria</h1><div class="path">Painel Administrativo / Galeria</div></div>
+      </div>
+
+      <div class="kpi-grid" id="galeria-kpi-grid"></div>
+
+      <div class="panel">
+        <h3>Antes e depois — Obras</h3>
+        <p class="panel-sub">Fotos marcadas como "Antes da obra" e "Depois da obra" no cadastro da ação.</p>
+        <div id="galeria-antes-depois"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Todas as fotos e vídeos</h3>
+        <div class="form-grid" style="margin-bottom:6px;">
+          <div class="field"><label>Filtrar por ação</label><select id="gal-filtro-acao" onchange="renderGaleria()"><option value="">Todas</option></select></div>
+          <div class="field"><label>Filtrar por categoria</label>
+            <select id="gal-filtro-categoria" onchange="renderGaleria()">
+              <option value="">Todas</option>
+              <option value="divulgacao">Divulgação</option>
+              <option value="montagem">Montagem</option>
+              <option value="evento">Evento</option>
+              <option value="publico">Público</option>
+              <option value="comerciantes">Comerciantes</option>
+              <option value="atracoes">Atrações</option>
+              <option value="autoridades">Autoridades</option>
+              <option value="encerramento">Encerramento</option>
+              <option value="antes_obra">Antes da obra</option>
+              <option value="depois_obra">Depois da obra</option>
+              <option value="outro">Outro</option>
+              <option value="sem_categoria">Sem categoria</option>
+            </select>
+          </div>
+          <div class="field"><label>Tipo</label>
+            <select id="gal-filtro-tipo" onchange="renderGaleria()">
+              <option value="">Fotos e vídeos</option>
+              <option value="foto">Só fotos</option>
+              <option value="video">Só vídeos</option>
+            </select>
+          </div>
+        </div>
+        <div id="galeria-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;"></div>
+      </div>
+    </section>
+
+    <div id="galeria-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;padding:24px;" onclick="fecharLightbox()">
+      <div id="galeria-lightbox-conteudo" style="max-width:90vw;max-height:80vh;" onclick="event.stopPropagation()"></div>
+      <p id="galeria-lightbox-legenda" style="color:#fff;margin-top:14px;font-size:14px;text-align:center;max-width:80vw;"></p>
+      <button class="btn-ghost" style="margin-top:14px;" onclick="fecharLightbox()">Fechar</button>
+    </div>
 
     <section class="view" id="view-promessas">
       <div class="topbar">
@@ -651,6 +929,36 @@
         </table>
       </div>
     </section>
+
+    <section class="view" id="view-auditoria">
+      <div class="topbar">
+        <div><h1>Auditoria</h1><div class="path">Painel Administrativo / Auditoria</div></div>
+      </div>
+
+      <div class="kpi-grid" id="auditoria-kpi-grid"></div>
+
+      <div class="panel">
+        <h3>Log de ações</h3>
+        <p class="panel-sub">Quem fez o quê, quando — só o Admin Master enxerga essa tela.</p>
+        <div class="form-grid" style="margin-bottom:6px;">
+          <div class="field"><label>Filtrar por entidade</label>
+            <select id="aud-filtro-entidade" onchange="renderAuditoria()">
+              <option value="">Todas</option>
+              <option value="acao">Ação</option>
+              <option value="usuario">Usuário</option>
+              <option value="secretaria">Secretaria</option>
+              <option value="recurso">Recurso</option>
+              <option value="promessa">Promessa</option>
+              <option value="documento">Documento</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Data/hora</th><th>Ação</th><th>Entidade</th><th>Feito por</th><th>Detalhes</th></tr></thead>
+          <tbody id="tbl-auditoria"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -714,10 +1022,13 @@ const NAV_ITEMS = {
   obras: { label: 'Obras', view: 'view-obras' },
   festas: { label: 'Festas', view: 'view-festas' },
   recursos: { label: 'Captação de Recursos', view: 'view-recursos' },
+  documentos: { label: 'Documentos', view: 'view-documentos' },
+  galeria: { label: 'Galeria', view: 'view-galeria' },
   importar: { label: 'Importar Dados (PR)', view: 'view-importar' },
   promessas: { label: 'Plano de Governo', view: 'view-promessas' },
   secretarias: { label: 'Secretarias', view: 'view-secretarias' },
   usuarios: { label: 'Usuários e Permissões', view: 'view-usuarios' },
+  auditoria: { label: 'Auditoria', view: 'view-auditoria' },
 };
 
 function enterApp(){
@@ -737,11 +1048,14 @@ function enterApp(){
     '<button class="nav-item" data-key="obras" onclick="navigateTo(\'obras\')"><span>Obras</span></button>' +
     '<button class="nav-item" data-key="festas" onclick="navigateTo(\'festas\')"><span>Festas</span></button>' +
     '<button class="nav-item" data-key="recursos" onclick="navigateTo(\'recursos\')"><span>Captação de Recursos</span></button>' +
+    '<button class="nav-item" data-key="documentos" onclick="navigateTo(\'documentos\')"><span>Documentos</span></button>' +
+    '<button class="nav-item" data-key="galeria" onclick="navigateTo(\'galeria\')"><span>Galeria</span></button>' +
     '<button class="nav-item" data-key="importar" onclick="navigateTo(\'importar\')"><span>Importar Dados (PR)</span></button>' +
     (canManagePromessas ? '<button class="nav-item" data-key="promessas" onclick="navigateTo(\'promessas\')"><span>Plano de Governo</span></button>' : '') +
     (canSeeDashboardPrefeito ? '<a class="nav-item" href="conecta-gestao-dashboard-prefeito.html" target="_blank"><span>Dashboard do Prefeito ↗</span></a>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="secretarias" onclick="navigateTo(\'secretarias\')"><span>Secretarias</span></button>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="usuarios" onclick="navigateTo(\'usuarios\')"><span>Usuários e Permissões</span></button>' : '') +
+    (isAdmin ? '<button class="nav-item" data-key="auditoria" onclick="navigateTo(\'auditoria\')"><span>Auditoria</span></button>' : '') +
     '</div>';
 
   if(!perfil){
@@ -757,6 +1071,8 @@ function enterApp(){
   loadFestas();
   loadObras();
   loadRecursos();
+  loadDocumentos();
+  loadGaleria();
   loadNotificacoes();
   loadImportados();
   if(canManagePromessas) loadPromessas();
@@ -764,6 +1080,7 @@ function enterApp(){
     loadSecretariasAdmin();
     loadUsuarios();
     loadPermissoesMatrix();
+    loadAuditoria();
   }
   navigateTo('dashboard');
 }
@@ -854,6 +1171,15 @@ async function editarAcao(id){
     document.getElementById('f-publicar-portal').checked = !!a.publicada_no_portal;
     document.getElementById('f-eh-evento').checked = !!a.eh_evento;
     toggleEventoFields();
+    document.getElementById('f-tipo-evento').value = a.tipo_evento || '';
+    document.getElementById('f-local').value = a.local || '';
+    document.getElementById('f-endereco').value = a.endereco || '';
+    document.getElementById('f-data-fim').value = a.data_fim || '';
+    document.getElementById('f-hora-inicio').value = a.hora_inicio || '';
+    document.getElementById('f-hora-fim').value = a.hora_fim || '';
+    document.getElementById('f-finalidade').value = a.finalidade || '';
+    document.getElementById('f-objetivos').value = a.objetivos || '';
+    document.getElementById('f-publico-alvo').value = a.publico_alvo || '';
     document.getElementById('f-publico-estimado').value = a.publico_estimado || '';
     document.getElementById('f-comerciantes').value = a.comerciantes_participantes || '';
     document.getElementById('f-valor-retorno').value = a.valor_retorno_estimado || '';
@@ -885,7 +1211,7 @@ function toggleObraFields(){
   document.getElementById('obra-fields').style.display = document.getElementById('f-eh-obra').checked ? 'block' : 'none';
 }
 
-async function uploadMidiaEvento(file, tipo, acaoId){
+async function uploadMidiaEvento(file, tipo, acaoId, categoria, legenda){
   const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
   const path = session.claims.tenant_id + '/' + acaoId + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
   const res = await fetch(SUPABASE_URL + '/storage/v1/object/evento-midias/' + path, {
@@ -905,6 +1231,8 @@ async function uploadMidiaEvento(file, tipo, acaoId){
     tipo: tipo,
     storage_path: path,
     url: url,
+    categoria: categoria || null,
+    legenda: legenda || null,
   });
 }
 
@@ -951,6 +1279,49 @@ async function sbPost(table, body){
   });
   if(!res.ok) throw new Error(await res.text());
   return res.json();
+}
+
+async function registrarAuditoria(entidade, entidadeId, acao, detalhes){
+  try {
+    const corpo = Object.assign({ realizado_por: session.claims.perfil || null }, detalhes || {});
+    await sbPost('logs_auditoria', {
+      tenant_id: session.claims.tenant_id,
+      entidade: entidade,
+      entidade_id: entidadeId || null,
+      acao: acao,
+      detalhes: corpo,
+    });
+  } catch (e) { console.warn('Não foi possível registrar auditoria:', e.message); }
+}
+
+function buscaGlobalColetarItens(){
+  const itens = [];
+  (acoesCache || []).forEach(a => itens.push({
+    tipo: a.eh_evento ? 'Festa' : (a.eh_obra ? 'Obra' : 'Ação'),
+    nome: a.titulo, view: a.eh_evento ? 'festas' : (a.eh_obra ? 'obras' : 'acoes'),
+  }));
+  (promessasCache || []).forEach(p => itens.push({ tipo:'Promessa', nome: p.titulo, view:'promessas' }));
+  (usuariosCache || []).forEach(u => itens.push({ tipo:'Usuário', nome: u.nome + ' (' + u.email + ')', view:'usuarios' }));
+  (secretariasCache || []).forEach(s => itens.push({ tipo:'Secretaria', nome: s.nome, view:'secretarias' }));
+  return itens;
+}
+
+function renderBuscaGlobal(){
+  const termo = document.getElementById('busca-global-input').value.trim().toLowerCase();
+  const painel = document.getElementById('busca-global-resultados');
+  if(!termo){ painel.style.display = 'none'; painel.innerHTML = ''; return; }
+  const itens = buscaGlobalColetarItens().filter(i => i.nome.toLowerCase().includes(termo)).slice(0, 20);
+  painel.innerHTML = itens.length
+    ? itens.map(i => '<div style="padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--line);font-size:12.5px;" onmousedown="irParaResultadoBusca(\'' + i.view + '\')">' +
+        '<span style="color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;">' + i.tipo + '</span><br>' + i.nome + '</div>').join('')
+    : '<div style="padding:10px;color:var(--muted);font-size:12.5px;">Nenhum resultado.</div>';
+  painel.style.display = 'block';
+}
+
+function irParaResultadoBusca(view){
+  document.getElementById('busca-global-resultados').style.display = 'none';
+  document.getElementById('busca-global-input').value = '';
+  navigateTo(view);
 }
 
 function statusPill(s){
@@ -1323,9 +1694,12 @@ function mostrarLinkFesta(id){
   prompt('Link de avaliação pública dessa festa (Ctrl+C pra copiar):', link);
 }
 
+let festasCache = [];
+
 async function loadFestas(){
   try {
-    const festas = await sbGet('acoes', 'select=id,titulo,data,valor_investido,publico_estimado,comerciantes_participantes,valor_retorno_estimado,secretarias(nome)&eh_evento=eq.true&order=criado_em.desc');
+    const festas = await sbGet('acoes', 'select=id,titulo,data,data_fim,local,endereco,finalidade,objetivos,publico_alvo,valor_investido,publico_estimado,comerciantes_participantes,valor_retorno_estimado,secretarias(nome)&eh_evento=eq.true&order=criado_em.desc');
+    festasCache = festas;
     const eventoIds = festas.map(f => f.id);
     let avaliacoes = [];
     if(eventoIds.length){
@@ -1352,12 +1726,607 @@ async function loadFestas(){
             '<td>' + (f.comerciantes_participantes != null ? f.comerciantes_participantes : '—') + '</td>' +
             '<td style="font-family:var(--mono);">' + money(f.valor_retorno_estimado) + '</td>' +
             '<td style="font-size:12.5px;">👥 ' + media('morador') + ' · 🏪 ' + media('comerciante') + '</td>' +
-            '<td><button class="btn-ghost" onclick="mostrarLinkFesta(\'' + f.id + '\')">Link avaliação</button></td></tr>';
+            '<td><button class="btn-ghost" onclick="abrirDossie(\'' + f.id + '\')">Dossiê</button> <button class="btn-ghost" onclick="mostrarLinkFesta(\'' + f.id + '\')">Link avaliação</button></td></tr>';
         }).join('')
       : '<tr><td colspan="9" class="empty">Nenhuma festa cadastrada ainda. Clique em "+ Nova festa" pra começar.</td></tr>';
   } catch (e) {
     document.getElementById('tbl-festas').innerHTML = '<tr><td colspan="9" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
   }
+}
+
+let dossieAcaoId = null;
+let dossieComerciantes = [];
+let dossiePatrocinios = [];
+let dossieCriancas = [];
+let dossieArrecadacao = [];
+let dossieChecklist = [];
+
+const COMERCIANTE_TIPO_LABEL = {
+  comercio_local:'Comércio local', comercio_outro_municipio:'Comércio de outro município',
+  produtor_rural:'Produtor rural', artesao:'Artesão', alimentacao:'Alimentação',
+  ambulante:'Ambulante', entidade:'Entidade', associacao:'Associação', outro:'Outro',
+};
+const PATROCINIO_TIPO_LABEL = {
+  financeiro:'Financeiro', material:'Material', servico:'Serviço', brinde:'Brinde',
+  estrutura:'Estrutura', alimentacao:'Alimentação', roupas_desfile:'Roupas para o desfile', outro:'Outro',
+};
+const CHECKLIST_ITENS_PADRAO = [
+  'Local definido','Data definida','Programação definida','Atrações contratadas','Estrutura contratada',
+  'Segurança definida','Polícia Militar comunicada','Conselho Tutelar comunicado','Corpo de Bombeiros comunicado',
+  'Saúde/ambulância organizada','Banheiros definidos','Limpeza organizada','Energia definida',
+  'Comerciantes cadastrados','Patrocínios cadastrados','Divulgação realizada','Autorizações/documentação conferidas',
+];
+
+async function abrirDossie(acaoId){
+  dossieAcaoId = acaoId;
+  const f = festasCache.find(x => x.id === acaoId);
+  document.getElementById('dossie-festa-titulo').textContent = f ? f.titulo + (f.local ? ' — ' + f.local : '') : '';
+  document.getElementById('dossie-panel').style.display = 'block';
+  document.getElementById('dossie-panel').scrollIntoView({ behavior: 'smooth' });
+  await carregarDossie();
+}
+
+function fecharDossie(){
+  dossieAcaoId = null;
+  document.getElementById('dossie-panel').style.display = 'none';
+}
+
+async function carregarDossie(){
+  if(!dossieAcaoId) return;
+  try {
+    [dossieComerciantes, dossiePatrocinios, dossieCriancas, dossieArrecadacao, dossieChecklist] = await Promise.all([
+      sbGet('evento_comerciantes', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+      sbGet('evento_patrocinios', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+      sbGet('evento_desfile_criancas', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+      sbGet('evento_arrecadacao_alimentos', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+      sbGet('evento_checklist', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+    ]);
+  } catch (e) {
+    alert('Não foi possível carregar o dossiê: ' + e.message.slice(0,200));
+    return;
+  }
+  if(dossieChecklist.length === 0){
+    try {
+      await Promise.all(CHECKLIST_ITENS_PADRAO.map(item => sbPost('evento_checklist', {
+        tenant_id: session.claims.tenant_id, acao_id: dossieAcaoId, item: item, concluido: false,
+      })));
+      dossieChecklist = await sbGet('evento_checklist', 'select=*&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc');
+    } catch (e) { /* segue sem checklist se não conseguir semear */ }
+  }
+  renderDossie();
+}
+
+function renderDossie(){
+  const barracas = dossieComerciantes.filter(c => c.numero_barraca).length;
+  const locais = dossieComerciantes.filter(c => c.tipo_participacao === 'comercio_local').length;
+  const totalPatrocinios = dossiePatrocinios.reduce((s,p) => s + (Number(p.valor)||0), 0);
+  const totalAlimentos = dossieArrecadacao.reduce((s,a) => s + (Number(a.quantidade_kg)||0), 0);
+  const concluidos = dossieChecklist.filter(c => c.concluido).length;
+  const pctChecklist = dossieChecklist.length ? Math.round((concluidos / dossieChecklist.length) * 100) : 0;
+
+  document.getElementById('dossie-kpi-grid').innerHTML =
+    '<div class="kpi"><div class="num">' + dossieComerciantes.length + '</div><div class="lbl">Comerciantes</div></div>' +
+    '<div class="kpi"><div class="num">' + barracas + '</div><div class="lbl">Barracas</div></div>' +
+    '<div class="kpi"><div class="num">' + locais + '</div><div class="lbl">Comerciantes locais</div></div>' +
+    '<div class="kpi"><div class="num">' + money(totalPatrocinios) + '</div><div class="lbl">Total em patrocínios</div></div>' +
+    '<div class="kpi"><div class="num">' + dossieCriancas.length + '</div><div class="lbl">Crianças no desfile</div></div>' +
+    '<div class="kpi"><div class="num">' + totalAlimentos.toLocaleString('pt-BR') + ' kg</div><div class="lbl">Alimentos arrecadados</div></div>' +
+    '<div class="kpi"><div class="num">' + pctChecklist + '%</div><div class="lbl">Evento preparado</div></div>';
+
+  document.getElementById('tbl-dossie-comerciantes').innerHTML = dossieComerciantes.length
+    ? dossieComerciantes.map(c => '<tr><td>' + c.nome + '</td><td>' + (c.empresa || '—') + '</td>' +
+        '<td>' + (COMERCIANTE_TIPO_LABEL[c.tipo_participacao] || c.tipo_participacao || '—') + '</td>' +
+        '<td>' + (c.numero_barraca || '—') + '</td>' +
+        '<td>' + (c.telefone || c.whatsapp || '—') + '</td>' +
+        '<td>' + (c.isento ? 'Isento' : money(c.valor_cobrado)) + '</td>' +
+        '<td>' + (c.situacao || '—') + '</td>' +
+        '<td><button class="btn-ghost" onclick="deleteDossieItem(\'evento_comerciantes\',\'' + c.id + '\')">remover</button></td></tr>').join('')
+    : '<tr><td colspan="8" class="empty">Nenhum comerciante cadastrado ainda.</td></tr>';
+
+  document.getElementById('tbl-dossie-patrocinios').innerHTML = dossiePatrocinios.length
+    ? dossiePatrocinios.map(p => '<tr><td>' + p.nome + '</td>' +
+        '<td>' + (PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '—') + '</td>' +
+        '<td>' + money(p.valor) + '</td>' +
+        '<td>' + (p.contrapartida || p.descricao_apoio || '—') + '</td>' +
+        '<td><button class="btn-ghost" onclick="deleteDossieItem(\'evento_patrocinios\',\'' + p.id + '\')">remover</button></td></tr>').join('')
+    : '<tr><td colspan="5" class="empty">Nenhum patrocínio cadastrado ainda.</td></tr>';
+
+  const listaCriancas = (categoria, elId) => {
+    const itens = dossieCriancas.filter(c => c.categoria === categoria);
+    document.getElementById(elId).innerHTML = itens.length
+      ? itens.map(c => '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;">' +
+          '<span><strong>' + c.nome + '</strong>' + (c.escola_responsavel ? ' — ' + c.escola_responsavel : '') + '</span>' +
+          '<button class="btn-ghost" style="padding:2px 8px;font-size:11px;" onclick="deleteDossieItem(\'evento_desfile_criancas\',\'' + c.id + '\')">remover</button></div>').join('')
+      : '<p style="color:var(--muted);font-size:12.5px;">Nenhuma criança cadastrada ainda.</p>';
+  };
+  listaCriancas('apae', 'dossie-lista-criancas-apae');
+  listaCriancas('cidade', 'dossie-lista-criancas-cidade');
+
+  document.getElementById('dossie-total-alimentos').textContent = 'Total arrecadado: ' + totalAlimentos.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' kg';
+  const ranking = [...dossieArrecadacao].sort((a,b) => (Number(b.quantidade_kg)||0) - (Number(a.quantidade_kg)||0));
+  document.getElementById('dossie-lista-arrecadacao').innerHTML = ranking.length
+    ? ranking.map((a,i) => '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;">' +
+        '<span>' + (i===0 ? '🥇 ' : i===1 ? '🥈 ' : i===2 ? '🥉 ' : '') + '<strong>' + a.participante + '</strong>' + (a.alimento ? ' — ' + a.alimento : '') + '</span>' +
+        '<span style="display:flex;align-items:center;gap:10px;"><span style="color:var(--muted);">' + Number(a.quantidade_kg).toLocaleString('pt-BR') + ' kg</span>' +
+        '<button class="btn-ghost" style="padding:2px 8px;font-size:11px;" onclick="deleteDossieItem(\'evento_arrecadacao_alimentos\',\'' + a.id + '\')">remover</button></span></div>').join('')
+    : '<p style="color:var(--muted);font-size:12.5px;">Nenhuma arrecadação registrada ainda.</p>';
+
+  document.getElementById('dossie-checklist-percentual').textContent = 'Evento ' + pctChecklist + '% preparado (' + concluidos + ' de ' + dossieChecklist.length + ' itens)';
+  document.getElementById('dossie-checklist-lista').innerHTML = dossieChecklist.length
+    ? dossieChecklist.map(c => '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);">' +
+        '<input type="checkbox" ' + (c.concluido ? 'checked' : '') + ' onchange="toggleChecklistItem(\'' + c.id + '\', this.checked)"> ' +
+        '<span style="' + (c.concluido ? 'text-decoration:line-through;color:var(--muted);' : '') + 'font-size:13px;">' + c.item + '</span></div>').join('')
+    : '<p style="color:var(--muted);font-size:12.5px;">Sem checklist ainda.</p>';
+}
+
+async function addComerciante(){
+  const nome = document.getElementById('dc-nome').value.trim();
+  if(!nome || !dossieAcaoId) return;
+  try {
+    await sbPost('evento_comerciantes', {
+      tenant_id: session.claims.tenant_id, acao_id: dossieAcaoId,
+      nome: nome,
+      empresa: document.getElementById('dc-empresa').value.trim() || null,
+      cpf_cnpj: document.getElementById('dc-cpf').value.trim() || null,
+      telefone: document.getElementById('dc-telefone').value.trim() || null,
+      segmento: document.getElementById('dc-segmento').value.trim() || null,
+      produto: document.getElementById('dc-produto').value.trim() || null,
+      tipo_participacao: document.getElementById('dc-tipo').value || null,
+      numero_barraca: document.getElementById('dc-numero-barraca').value.trim() || null,
+      localizacao: document.getElementById('dc-localizacao').value.trim() || null,
+      tamanho: document.getElementById('dc-tamanho').value.trim() || null,
+      valor_cobrado: parseFloat(document.getElementById('dc-valor').value) || null,
+      isento: document.getElementById('dc-isento').checked,
+      forma_pagamento: document.getElementById('dc-forma-pagamento').value.trim() || null,
+      situacao: document.getElementById('dc-situacao').value || 'confirmado',
+      observacoes: document.getElementById('dc-observacoes').value.trim() || null,
+    });
+    ['dc-nome','dc-empresa','dc-cpf','dc-telefone','dc-segmento','dc-produto','dc-numero-barraca','dc-localizacao','dc-tamanho','dc-valor','dc-forma-pagamento','dc-observacoes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('dc-isento').checked = false;
+    await carregarDossie();
+  } catch (e) {
+    alert('Não foi possível adicionar: ' + e.message.slice(0,200));
+  }
+}
+
+async function addPatrocinio(){
+  const nome = document.getElementById('dp-nome').value.trim();
+  if(!nome || !dossieAcaoId) return;
+  try {
+    await sbPost('evento_patrocinios', {
+      tenant_id: session.claims.tenant_id, acao_id: dossieAcaoId,
+      nome: nome,
+      cnpj_cpf: document.getElementById('dp-cnpj').value.trim() || null,
+      responsavel: document.getElementById('dp-responsavel').value.trim() || null,
+      telefone: document.getElementById('dp-telefone').value.trim() || null,
+      tipo_apoio: document.getElementById('dp-tipo').value || null,
+      valor: parseFloat(document.getElementById('dp-valor').value) || null,
+      forma_pagamento: document.getElementById('dp-forma-pagamento').value.trim() || null,
+      descricao_apoio: document.getElementById('dp-descricao').value.trim() || null,
+      contrapartida: document.getElementById('dp-contrapartida').value.trim() || null,
+      observacoes: document.getElementById('dp-observacoes').value.trim() || null,
+    });
+    ['dp-nome','dp-cnpj','dp-responsavel','dp-telefone','dp-valor','dp-forma-pagamento','dp-descricao','dp-contrapartida','dp-observacoes'].forEach(id => document.getElementById(id).value = '');
+    await carregarDossie();
+  } catch (e) {
+    alert('Não foi possível adicionar: ' + e.message.slice(0,200));
+  }
+}
+
+async function addCriancaDesfile(categoria){
+  const nomeId = categoria === 'apae' ? 'dcr-nome-apae' : 'dcr-nome-cidade';
+  const escolaId = categoria === 'apae' ? 'dcr-escola-apae' : 'dcr-escola-cidade';
+  const nome = document.getElementById(nomeId).value.trim();
+  if(!nome || !dossieAcaoId) return;
+  try {
+    await sbPost('evento_desfile_criancas', {
+      tenant_id: session.claims.tenant_id, acao_id: dossieAcaoId,
+      categoria: categoria, nome: nome,
+      escola_responsavel: document.getElementById(escolaId).value.trim() || null,
+    });
+    document.getElementById(nomeId).value = '';
+    document.getElementById(escolaId).value = '';
+    await carregarDossie();
+  } catch (e) {
+    alert('Não foi possível adicionar: ' + e.message.slice(0,200));
+  }
+}
+
+async function addArrecadacao(){
+  const participante = document.getElementById('dar-participante').value.trim();
+  if(!participante || !dossieAcaoId) return;
+  try {
+    await sbPost('evento_arrecadacao_alimentos', {
+      tenant_id: session.claims.tenant_id, acao_id: dossieAcaoId,
+      participante: participante,
+      alimento: document.getElementById('dar-alimento').value.trim() || null,
+      quantidade_kg: parseFloat(document.getElementById('dar-quantidade').value) || 0,
+    });
+    document.getElementById('dar-participante').value = '';
+    document.getElementById('dar-alimento').value = '';
+    document.getElementById('dar-quantidade').value = '';
+    await carregarDossie();
+  } catch (e) {
+    alert('Não foi possível registrar: ' + e.message.slice(0,200));
+  }
+}
+
+async function deleteDossieItem(tabela, id){
+  if(!confirm('Remover este registro?')) return;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + tabela + '?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Profile': 'gestao360' },
+    });
+    if(!res.ok) throw new Error(await res.text());
+    await carregarDossie();
+  } catch (e) {
+    alert('Não foi possível remover: ' + e.message.slice(0,200));
+  }
+}
+
+async function toggleChecklistItem(id, concluido){
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/evento_checklist?id=eq.' + id, {
+      method: 'PATCH',
+      headers: {
+        apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token,
+        'Content-Profile': 'gestao360', 'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ concluido: concluido }),
+    });
+    if(!res.ok) throw new Error(await res.text());
+    await carregarDossie();
+  } catch (e) {
+    alert('Não foi possível atualizar o checklist: ' + e.message.slice(0,200));
+  }
+}
+
+async function baixarPdfDossie(){
+  if(!dossieAcaoId) return;
+  const btn = document.getElementById('pdf-dossie-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const f = festasCache.find(x => x.id === dossieAcaoId) || {};
+    const avaliacoes = await sbGet('evento_avaliacoes', 'select=tipo_avaliador,nota&acao_id=eq.' + dossieAcaoId);
+    const media = (tipo) => {
+      const notas = avaliacoes.filter(v => v.tipo_avaliador === tipo);
+      return notas.length ? (notas.reduce((s,v) => s + Number(v.nota), 0) / notas.length / 2).toFixed(1) : '—';
+    };
+    const totalPatrocinios = dossiePatrocinios.reduce((s,p) => s + (Number(p.valor)||0), 0);
+    const totalAlimentos = dossieArrecadacao.reduce((s,a) => s + (Number(a.quantidade_kg)||0), 0);
+    const concluidos = dossieChecklist.filter(c => c.concluido).length;
+    const pctChecklist = dossieChecklist.length ? Math.round((concluidos / dossieChecklist.length) * 100) : 0;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16); doc.text('Relatório da Festa — ' + (f.titulo || ''), 14, 18);
+    doc.setFontSize(10); doc.setTextColor(100);
+    doc.text('Secretaria de Indústria e Comércio — gerado em ' + new Date().toLocaleString('pt-BR'), 14, 25);
+    doc.text((f.local || '—') + ' · ' + (f.data ? new Date(f.data).toLocaleDateString('pt-BR') : '—'), 14, 31);
+    let y = 40;
+    if(f.finalidade){ doc.setFontSize(9); doc.setTextColor(60); doc.text(doc.splitTextToSize('Finalidade: ' + f.finalidade, 180), 14, y); y += 14; }
+
+    doc.setFontSize(12); doc.setTextColor(0); doc.text('Resumo', 14, y); y += 4;
+    doc.autoTable({
+      startY: y,
+      head: [['Comerciantes', 'Barracas', 'Patrocínios (R$)', 'Crianças no desfile', 'Alimentos arrecadados', 'Preparo']],
+      body: [[
+        dossieComerciantes.length,
+        dossieComerciantes.filter(c=>c.numero_barraca).length,
+        moneyR(totalPatrocinios),
+        dossieCriancas.length,
+        totalAlimentos.toLocaleString('pt-BR') + ' kg',
+        pctChecklist + '%',
+      ]],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    y = doc.lastAutoTable.finalY + 10;
+
+    doc.setFontSize(12); doc.text('Comerciantes e barracas', 14, y); y += 4;
+    doc.autoTable({
+      startY: y,
+      head: [['Nome', 'Empresa', 'Tipo', 'Barraca', 'Valor', 'Situação']],
+      body: dossieComerciantes.map(c => [c.nome, c.empresa || '—', COMERCIANTE_TIPO_LABEL[c.tipo_participacao] || c.tipo_participacao || '—', c.numero_barraca || '—', c.isento ? 'Isento' : moneyR(c.valor_cobrado), c.situacao || '—']),
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    y = doc.lastAutoTable.finalY + 10;
+
+    doc.setFontSize(12); doc.text('Patrocínios', 14, y); y += 4;
+    doc.autoTable({
+      startY: y,
+      head: [['Patrocinador', 'Tipo de apoio', 'Valor', 'Contrapartida']],
+      body: dossiePatrocinios.map(p => [p.nome, PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '—', moneyR(p.valor), p.contrapartida || p.descricao_apoio || '—']),
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    y = doc.lastAutoTable.finalY + 10;
+
+    doc.setFontSize(12); doc.text('Crianças do desfile', 14, y); y += 4;
+    doc.autoTable({
+      startY: y,
+      head: [['Nome', 'Categoria', 'Escola/responsável']],
+      body: dossieCriancas.map(c => [c.nome, c.categoria === 'apae' ? 'APAE' : 'Cidade', c.escola_responsavel || '—']),
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    y = doc.lastAutoTable.finalY + 10;
+
+    if(y > 230){ doc.addPage(); y = 20; }
+    doc.setFontSize(12); doc.text('Arrecadação de alimentos (' + totalAlimentos.toLocaleString('pt-BR') + ' kg no total)', 14, y); y += 4;
+    doc.autoTable({
+      startY: y,
+      head: [['Participante', 'Alimento', 'Quantidade (kg)']],
+      body: [...dossieArrecadacao].sort((a,b) => (Number(b.quantidade_kg)||0) - (Number(a.quantidade_kg)||0)).map(a => [a.participante, a.alimento || '—', Number(a.quantidade_kg).toLocaleString('pt-BR')]),
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    y = doc.lastAutoTable.finalY + 10;
+
+    if(y > 260){ doc.addPage(); y = 20; }
+    doc.setFontSize(12); doc.setTextColor(0); doc.text('Avaliação pública', 14, y); y += 8;
+    doc.setFontSize(9); doc.setTextColor(60);
+    doc.text('Moradores: ' + media('morador') + ' / 5   ·   Comerciantes: ' + media('comerciante') + ' / 5', 14, y);
+
+    await salvarRelatorioNaPlataforma(doc.output('blob'), 'Relatório da festa — ' + (f.titulo || '') + ' — ' + new Date().toLocaleDateString('pt-BR'), 'festas', 'pdf');
+    doc.save('conecta-gestao-festa-' + (f.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]+/g,'-') + '-' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch (e) {
+    alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ PDF do relatório';
+  }
+}
+
+async function baixarExcelDossie(){
+  if(!dossieAcaoId) return;
+  const btn = document.getElementById('xlsx-dossie-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const f = festasCache.find(x => x.id === dossieAcaoId) || {};
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieComerciantes.map(c => ({
+      'Nome': c.nome, 'Empresa': c.empresa || '', 'CPF/CNPJ': c.cpf_cnpj || '', 'Telefone': c.telefone || '',
+      'Segmento': c.segmento || '', 'Produto': c.produto || '', 'Tipo': COMERCIANTE_TIPO_LABEL[c.tipo_participacao] || c.tipo_participacao || '',
+      'Barraca': c.numero_barraca || '', 'Localização': c.localizacao || '', 'Valor cobrado (R$)': Number(c.valor_cobrado) || 0,
+      'Isento': c.isento ? 'Sim' : 'Não', 'Situação': c.situacao || '',
+    }))), 'Comerciantes');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossiePatrocinios.map(p => ({
+      'Patrocinador': p.nome, 'CNPJ/CPF': p.cnpj_cpf || '', 'Tipo de apoio': PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '',
+      'Valor (R$)': Number(p.valor) || 0, 'Contrapartida': p.contrapartida || '', 'Descrição': p.descricao_apoio || '',
+    }))), 'Patrocínios');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieCriancas.map(c => ({
+      'Nome': c.nome, 'Categoria': c.categoria === 'apae' ? 'APAE' : 'Cidade', 'Escola/responsável': c.escola_responsavel || '',
+    }))), 'Crianças do desfile');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieArrecadacao.map(a => ({
+      'Participante': a.participante, 'Alimento': a.alimento || '', 'Quantidade (kg)': Number(a.quantidade_kg) || 0,
+    }))), 'Arrecadação de alimentos');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieChecklist.map(c => ({
+      'Item': c.item, 'Concluído': c.concluido ? 'Sim' : 'Não',
+    }))), 'Checklist');
+    const blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    await salvarRelatorioNaPlataforma(blob, 'Relatório da festa — ' + (f.titulo || '') + ' — ' + new Date().toLocaleDateString('pt-BR'), 'festas', 'xlsx');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'conecta-gestao-festa-' + (f.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]+/g,'-') + '-' + new Date().toISOString().slice(0,10) + '.xlsx';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Não foi possível gerar o Excel: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Excel do relatório';
+  }
+}
+
+const DOCUMENTO_CATEGORIA_LABEL = {
+  policia_militar:'Polícia Militar', conselho_tutelar:'Conselho Tutelar', bombeiros:'Corpo de Bombeiros',
+  prefeitura:'Prefeitura', fornecedores:'Fornecedores', outro:'Outro',
+};
+
+let documentosCache = [];
+let acoesParaDocumentosCache = [];
+
+async function loadDocumentos(){
+  try {
+    acoesParaDocumentosCache = await sbGet('acoes', 'select=id,titulo&order=criado_em.desc&limit=200');
+    const opts = acoesParaDocumentosCache.map(a => '<option value="' + a.id + '">' + a.titulo + '</option>').join('');
+    document.getElementById('doc-acao').innerHTML = opts || '<option value="">Nenhuma ação cadastrada</option>';
+    document.getElementById('doc-filtro-acao').innerHTML = '<option value="">Todas</option>' + opts;
+
+    documentosCache = await sbGet('acao_anexos', 'select=id,nome,categoria,storage_path,enviado_por,publico,criado_em,acao_id&order=criado_em.desc');
+    renderDocumentos();
+  } catch (e) {
+    document.getElementById('tbl-documentos').innerHTML = '<tr><td colspan="6" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
+function renderDocumentos(){
+  const filtroAcao = document.getElementById('doc-filtro-acao').value;
+  const filtroCategoria = document.getElementById('doc-filtro-categoria').value;
+  const acaoTitulo = (id) => { const a = acoesParaDocumentosCache.find(x => x.id === id); return a ? a.titulo : '—'; };
+  const filtrados = documentosCache.filter(d => (!filtroAcao || d.acao_id === filtroAcao) && (!filtroCategoria || d.categoria === filtroCategoria));
+
+  document.getElementById('documentos-kpi-grid').innerHTML =
+    '<div class="kpi"><div class="num">' + documentosCache.length + '</div><div class="lbl">Documentos enviados</div></div>' +
+    '<div class="kpi"><div class="num">' + new Set(documentosCache.map(d => d.acao_id)).size + '</div><div class="lbl">Ações com documentos</div></div>';
+
+  document.getElementById('tbl-documentos').innerHTML = filtrados.length
+    ? filtrados.map(d => '<tr><td>' + d.nome + '</td><td>' + acaoTitulo(d.acao_id) + '</td>' +
+        '<td>' + (DOCUMENTO_CATEGORIA_LABEL[d.categoria] || d.categoria || '—') + '</td>' +
+        '<td>' + (d.enviado_por || '—') + '</td>' +
+        '<td>' + new Date(d.criado_em).toLocaleDateString('pt-BR') + '</td>' +
+        '<td><button class="btn-ghost" onclick="baixarDocumento(\'' + d.storage_path + '\',\'' + d.nome.replace(/'/g,"\\'") + '\', this)">Baixar</button> ' +
+        '<button class="btn-ghost" onclick="excluirDocumento(\'' + d.id + '\',\'' + (d.storage_path || '') + '\')">Excluir</button></td></tr>').join('')
+    : '<tr><td colspan="6" class="empty">Nenhum documento enviado ainda.</td></tr>';
+}
+
+async function enviarDocumento(){
+  const acaoId = document.getElementById('doc-acao').value;
+  const nome = document.getElementById('doc-nome').value.trim();
+  const fileInput = document.getElementById('doc-arquivo');
+  const file = fileInput.files[0];
+  if(!acaoId || !nome || !file){ alert('Selecione a ação, o nome do documento e o arquivo.'); return; }
+  const btn = document.getElementById('doc-enviar-btn');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+    const path = session.claims.tenant_id + '/' + acaoId + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+    const upRes = await fetch(SUPABASE_URL + '/storage/v1/object/documentos/' + path, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': file.type || 'application/octet-stream' },
+      body: file,
+    });
+    if(!upRes.ok) throw new Error(await upRes.text());
+    await sbPost('acao_anexos', {
+      tenant_id: session.claims.tenant_id, acao_id: acaoId, nome: nome,
+      url: SUPABASE_URL + '/storage/v1/object/documentos/' + path,
+      storage_path: path, categoria: document.getElementById('doc-categoria').value,
+      publico: document.getElementById('doc-publico').checked,
+      enviado_por: session.claims.perfil || null,
+    });
+    registrarAuditoria('documento', acaoId, 'enviar', { nome: nome, categoria: document.getElementById('doc-categoria').value });
+    document.getElementById('doc-nome').value = '';
+    fileInput.value = '';
+    document.getElementById('doc-publico').checked = false;
+    await loadDocumentos();
+  } catch (e) {
+    alert('Não foi possível enviar o documento: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar documento';
+  }
+}
+
+async function baixarDocumento(path, nome, btnEl){
+  const original = btnEl.textContent;
+  btnEl.textContent = 'Baixando...';
+  try {
+    const res = await fetch(SUPABASE_URL + '/storage/v1/object/documentos/' + path, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token },
+    });
+    if(!res.ok) throw new Error(await res.text());
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = nome;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Não foi possível baixar: ' + e.message.slice(0,200));
+  } finally {
+    btnEl.textContent = original;
+  }
+}
+
+async function excluirDocumento(id, path){
+  if(!confirm('Excluir este documento?')) return;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/acao_anexos?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Profile': 'gestao360' },
+    });
+    if(!res.ok) throw new Error(await res.text());
+    if(path){
+      try {
+        await fetch(SUPABASE_URL + '/storage/v1/object/documentos/' + path, {
+          method: 'DELETE',
+          headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token },
+        });
+      } catch (e) { /* segue mesmo se o arquivo já não existir no storage */ }
+    }
+    registrarAuditoria('documento', id, 'excluir', null);
+    await loadDocumentos();
+  } catch (e) {
+    alert('Não foi possível excluir: ' + e.message.slice(0,200));
+  }
+}
+
+const GALERIA_CATEGORIA_LABEL = {
+  divulgacao:'Divulgação', montagem:'Montagem', evento:'Evento', publico:'Público',
+  comerciantes:'Comerciantes', atracoes:'Atrações', autoridades:'Autoridades', encerramento:'Encerramento',
+  antes_obra:'Antes da obra', depois_obra:'Depois da obra', outro:'Outro',
+};
+
+let galeriaCache = [];
+let acoesParaGaleriaCache = [];
+
+async function loadGaleria(){
+  try {
+    acoesParaGaleriaCache = await sbGet('acoes', 'select=id,titulo,eh_obra&order=criado_em.desc&limit=200');
+    const opts = acoesParaGaleriaCache.map(a => '<option value="' + a.id + '">' + a.titulo + '</option>').join('');
+    document.getElementById('gal-filtro-acao').innerHTML = '<option value="">Todas</option>' + opts;
+
+    galeriaCache = await sbGet('evento_midias', 'select=id,tipo,url,categoria,legenda,criado_em,acao_id&order=criado_em.desc');
+    renderGaleria();
+    renderAntesDepois();
+  } catch (e) {
+    document.getElementById('galeria-grid').innerHTML = '<p class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</p>';
+  }
+}
+
+function galeriaAcaoTitulo(id){
+  const a = acoesParaGaleriaCache.find(x => x.id === id);
+  return a ? a.titulo : '—';
+}
+
+function renderGaleria(){
+  const filtroAcao = document.getElementById('gal-filtro-acao').value;
+  const filtroCategoria = document.getElementById('gal-filtro-categoria').value;
+  const filtroTipo = document.getElementById('gal-filtro-tipo').value;
+  const filtrados = galeriaCache.filter(m => {
+    if(filtroAcao && m.acao_id !== filtroAcao) return false;
+    if(filtroTipo && m.tipo !== filtroTipo) return false;
+    if(filtroCategoria === 'sem_categoria' && m.categoria) return false;
+    if(filtroCategoria && filtroCategoria !== 'sem_categoria' && m.categoria !== filtroCategoria) return false;
+    return true;
+  });
+
+  document.getElementById('galeria-kpi-grid').innerHTML =
+    '<div class="kpi"><div class="num">' + galeriaCache.length + '</div><div class="lbl">Arquivos na galeria</div></div>' +
+    '<div class="kpi"><div class="num">' + galeriaCache.filter(m => m.tipo === 'foto').length + '</div><div class="lbl">Fotos</div></div>' +
+    '<div class="kpi"><div class="num">' + galeriaCache.filter(m => m.tipo === 'video').length + '</div><div class="lbl">Vídeos</div></div>' +
+    '<div class="kpi"><div class="num">' + new Set(galeriaCache.map(m => m.acao_id)).size + '</div><div class="lbl">Ações com mídia</div></div>';
+
+  document.getElementById('galeria-grid').innerHTML = filtrados.length
+    ? filtrados.map(m => {
+        const thumb = m.tipo === 'video'
+          ? '<video src="' + m.url + '" style="width:100%;height:120px;object-fit:cover;border-radius:8px;display:block;" muted></video>'
+          : '<img src="' + m.url + '" style="width:100%;height:120px;object-fit:cover;border-radius:8px;display:block;" loading="lazy">';
+        return '<div style="cursor:pointer;" onclick="abrirLightbox(' + JSON.stringify(m.url) + ',' + JSON.stringify(m.tipo) + ',' + JSON.stringify((m.legenda || '') + (m.categoria ? ' · ' + (GALERIA_CATEGORIA_LABEL[m.categoria] || m.categoria) : '')) + ')">' +
+          thumb +
+          '<p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;">' + galeriaAcaoTitulo(m.acao_id) +
+          (m.categoria ? ' · ' + (GALERIA_CATEGORIA_LABEL[m.categoria] || m.categoria) : '') + '</p>' +
+          (m.legenda ? '<p style="font-size:11px;color:var(--muted);margin:2px 0 0;">' + m.legenda + '</p>' : '') +
+          '</div>';
+      }).join('')
+    : '<p class="empty">Nenhuma foto ou vídeo encontrado com esses filtros.</p>';
+}
+
+function renderAntesDepois(){
+  const obras = acoesParaGaleriaCache.filter(a => a.eh_obra);
+  const html = obras.map(o => {
+    const midias = galeriaCache.filter(m => m.acao_id === o.id);
+    const antes = midias.find(m => m.categoria === 'antes_obra');
+    const depois = midias.find(m => m.categoria === 'depois_obra');
+    if(!antes && !depois) return '';
+    const cel = (m, rotulo) => m
+      ? '<div style="flex:1;"><p style="font-size:11.5px;color:var(--ink-soft);margin:0 0 6px;font-weight:700;">' + rotulo + '</p>' +
+        '<img src="' + m.url + '" style="width:100%;height:160px;object-fit:cover;border-radius:8px;cursor:pointer;" onclick="abrirLightbox(' + JSON.stringify(m.url) + ',\'foto\',' + JSON.stringify(o.titulo + ' — ' + rotulo) + ')"></div>'
+      : '<div style="flex:1;"><p style="font-size:11.5px;color:var(--ink-soft);margin:0 0 6px;font-weight:700;">' + rotulo + '</p>' +
+        '<div style="width:100%;height:160px;border-radius:8px;background:var(--bg-soft,#F1F5F9);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Sem foto</div></div>';
+    return '<div style="margin-bottom:18px;"><h4 style="margin:0 0 10px;font-size:14px;">' + o.titulo + '</h4>' +
+      '<div style="display:flex;gap:14px;flex-wrap:wrap;">' + cel(antes, 'Antes') + cel(depois, 'Depois') + '</div></div>';
+  }).filter(Boolean).join('');
+  document.getElementById('galeria-antes-depois').innerHTML = html || '<p class="empty">Nenhuma obra com fotos de "antes"/"depois" cadastradas ainda.</p>';
+}
+
+function abrirLightbox(url, tipo, legenda){
+  const conteudo = tipo === 'video'
+    ? '<video src="' + url + '" controls autoplay style="max-width:90vw;max-height:75vh;border-radius:8px;"></video>'
+    : '<img src="' + url + '" style="max-width:90vw;max-height:75vh;border-radius:8px;">';
+  document.getElementById('galeria-lightbox-conteudo').innerHTML = conteudo;
+  document.getElementById('galeria-lightbox-legenda').textContent = legenda || '';
+  document.getElementById('galeria-lightbox').style.display = 'flex';
+}
+
+function fecharLightbox(){
+  document.getElementById('galeria-lightbox').style.display = 'none';
+  document.getElementById('galeria-lightbox-conteudo').innerHTML = '';
 }
 
 async function loadSecretarias(){
@@ -1664,9 +2633,11 @@ async function submitRecurso(){
         body: JSON.stringify(payload),
       });
       if(!res.ok) throw new Error(await res.text());
+      registrarAuditoria('recurso', recursoEditandoId, 'editar', { programa: programa });
     } else {
       payload.tenant_id = session.claims.tenant_id;
-      await sbPost('oportunidades_recursos', payload);
+      const [criado] = await sbPost('oportunidades_recursos', payload);
+      registrarAuditoria('recurso', criado && criado.id, 'criar', { programa: programa });
     }
     recursoEditandoId = null;
     toggleRecursoForm();
@@ -1804,9 +2775,11 @@ async function submitPromessa(){
         body: JSON.stringify(payload),
       });
       if(!res.ok) throw new Error(await res.text());
+      registrarAuditoria('promessa', promessaEditandoId, 'editar', { titulo: titulo });
     } else {
       payload.tenant_id = session.claims.tenant_id;
-      await sbPost('promessas_campanha', payload);
+      const [criada] = await sbPost('promessas_campanha', payload);
+      registrarAuditoria('promessa', criada && criada.id, 'criar', { titulo: titulo });
     }
     togglePromessaForm();
     resetPromessaForm();
@@ -1951,6 +2924,7 @@ async function submitVincular(){
     await sbRpc('admin_criar_usuario', {
       p_auth_user_id: novoAuthId, p_nome: nome, p_perfil_nome: perfil, p_secretaria_id: secretariaId,
     });
+    registrarAuditoria('usuario', novoAuthId, 'criar', { nome: nome, email: email, perfil: perfil });
 
     alert('Usuário cadastrado e ativo! Se a confirmação de e-mail estiver ligada no Supabase, a pessoa precisa confirmar o e-mail antes do primeiro login.');
     toggleVincularForm();
@@ -2024,9 +2998,11 @@ async function submitSecretaria(){
         body: JSON.stringify(payload),
       });
       if(!res.ok) throw new Error(await res.text());
+      registrarAuditoria('secretaria', secretariaEditandoId, 'editar', { nome: nome });
     } else {
       payload.tenant_id = session.claims.tenant_id;
-      await sbPost('secretarias', payload);
+      const [criada] = await sbPost('secretarias', payload);
+      registrarAuditoria('secretaria', criada && criada.id, 'criar', { nome: nome });
     }
     secretariaEditandoId = null;
     toggleSecForm();
@@ -2043,6 +3019,7 @@ async function aprovarUsuario(id){
   if(!confirm('Aprovar este usuário? Ele passa a ter acesso imediatamente.')) return;
   try {
     await sbRpc('aprovar_usuario', { p_usuario_id: id });
+    registrarAuditoria('usuario', id, 'aprovar', null);
     loadUsuarios();
   } catch (e) {
     alert('Não foi possível aprovar: ' + e.message);
@@ -2109,6 +3086,7 @@ async function submitEdicaoUsuario(){
       }),
     });
     if(!res.ok) throw new Error(await res.text());
+    registrarAuditoria('usuario', usuarioEditandoId, 'editar', { perfil: perfilNome, status: document.getElementById('ue-status').value });
     fecharEdicaoUsuario();
     loadUsuarios();
   } catch (e) {
@@ -2141,6 +3119,43 @@ async function loadPermissoesMatrix(){
   }
 }
 
+const AUDITORIA_ACAO_LABEL = { criar:'Criou', editar:'Editou', excluir:'Excluiu', aprovar:'Aprovou', enviar:'Enviou' };
+const AUDITORIA_ENTIDADE_LABEL = { acao:'Ação', usuario:'Usuário', secretaria:'Secretaria', recurso:'Recurso', promessa:'Promessa', documento:'Documento' };
+
+let auditoriaCache = [];
+
+async function loadAuditoria(){
+  try {
+    auditoriaCache = await sbGet('logs_auditoria', 'select=id,entidade,entidade_id,acao,detalhes,criado_em&order=criado_em.desc&limit=300');
+    renderAuditoria();
+  } catch (e) {
+    document.getElementById('tbl-auditoria').innerHTML = '<tr><td colspan="5" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+  }
+}
+
+function renderAuditoria(){
+  const filtro = document.getElementById('aud-filtro-entidade').value;
+  const filtrados = filtro ? auditoriaCache.filter(l => l.entidade === filtro) : auditoriaCache;
+
+  document.getElementById('auditoria-kpi-grid').innerHTML =
+    '<div class="kpi"><div class="num">' + auditoriaCache.length + '</div><div class="lbl">Ações registradas</div></div>' +
+    '<div class="kpi"><div class="num">' + auditoriaCache.filter(l => l.acao === 'criar').length + '</div><div class="lbl">Criações</div></div>' +
+    '<div class="kpi"><div class="num">' + auditoriaCache.filter(l => l.acao === 'editar').length + '</div><div class="lbl">Edições</div></div>' +
+    '<div class="kpi"><div class="num">' + auditoriaCache.filter(l => l.acao === 'excluir').length + '</div><div class="lbl">Exclusões</div></div>';
+
+  document.getElementById('tbl-auditoria').innerHTML = filtrados.length
+    ? filtrados.map(l => {
+        const d = l.detalhes || {};
+        const resumo = Object.keys(d).filter(k => k !== 'realizado_por').map(k => k + ': ' + d[k]).join(', ');
+        return '<tr><td>' + new Date(l.criado_em).toLocaleString('pt-BR') + '</td>' +
+          '<td>' + (AUDITORIA_ACAO_LABEL[l.acao] || l.acao) + '</td>' +
+          '<td>' + (AUDITORIA_ENTIDADE_LABEL[l.entidade] || l.entidade) + '</td>' +
+          '<td>' + (d.realizado_por || '—') + '</td>' +
+          '<td style="font-size:12px;color:var(--ink-soft);">' + (resumo || '—') + '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="5" class="empty">Nenhum registro de auditoria ainda.</td></tr>';
+}
+
 async function submitAcao(){
   const titulo = document.getElementById('f-titulo').value.trim();
   const secretariaId = document.getElementById('f-secretaria').value;
@@ -2165,6 +3180,15 @@ async function submitAcao(){
       quantidade_beneficiados: parseInt(document.getElementById('f-beneficiados').value) || null,
       publicada_no_portal: document.getElementById('f-publicar-portal').checked,
       eh_evento: ehEvento,
+      tipo_evento: ehEvento ? (document.getElementById('f-tipo-evento').value || null) : null,
+      local: ehEvento ? (document.getElementById('f-local').value.trim() || null) : null,
+      endereco: ehEvento ? (document.getElementById('f-endereco').value.trim() || null) : null,
+      data_fim: ehEvento ? (document.getElementById('f-data-fim').value || null) : null,
+      hora_inicio: ehEvento ? (document.getElementById('f-hora-inicio').value || null) : null,
+      hora_fim: ehEvento ? (document.getElementById('f-hora-fim').value || null) : null,
+      finalidade: ehEvento ? (document.getElementById('f-finalidade').value.trim() || null) : null,
+      objetivos: ehEvento ? (document.getElementById('f-objetivos').value.trim() || null) : null,
+      publico_alvo: ehEvento ? (document.getElementById('f-publico-alvo').value.trim() || null) : null,
       publico_estimado: ehEvento ? (parseInt(document.getElementById('f-publico-estimado').value) || null) : null,
       comerciantes_participantes: ehEvento ? (parseInt(document.getElementById('f-comerciantes').value) || null) : null,
       valor_retorno_estimado: ehEvento ? (parseFloat(document.getElementById('f-valor-retorno').value) || null) : null,
@@ -2189,21 +3213,27 @@ async function submitAcao(){
       if(!res.ok) throw new Error(await res.text());
       const rows = await res.json();
       novaAcao = rows && rows[0];
+      registrarAuditoria('acao', acaoEditandoId, 'editar', { titulo: payload.titulo });
     } else {
       payload.tenant_id = session.claims.tenant_id;
       const rows = await sbPost('acoes', payload);
       novaAcao = rows && rows[0];
+      registrarAuditoria('acao', novaAcao && novaAcao.id, 'criar', { titulo: payload.titulo });
     }
 
-    if(ehEvento && novaAcao){
-      btn.textContent = 'Enviando fotos/vídeos...';
+    if(novaAcao){
       const fotos = Array.from(document.getElementById('f-fotos').files || []);
       const videos = Array.from(document.getElementById('f-videos').files || []);
-      const falhas = [];
-      for(const f of fotos){ try { await uploadMidiaEvento(f, 'foto', novaAcao.id); } catch(e){ falhas.push(f.name); } }
-      for(const v of videos){ try { await uploadMidiaEvento(v, 'video', novaAcao.id); } catch(e){ falhas.push(v.name); } }
-      if(falhas.length) alert('Ação salva, mas não foi possível enviar: ' + falhas.join(', '));
-      mostrarLinkAvaliacao(novaAcao.id);
+      if(fotos.length || videos.length){
+        btn.textContent = 'Enviando fotos/vídeos...';
+        const categoria = document.getElementById('f-midia-categoria').value || null;
+        const legenda = document.getElementById('f-midia-legenda').value.trim() || null;
+        const falhas = [];
+        for(const f of fotos){ try { await uploadMidiaEvento(f, 'foto', novaAcao.id, categoria, legenda); } catch(e){ falhas.push(f.name); } }
+        for(const v of videos){ try { await uploadMidiaEvento(v, 'video', novaAcao.id, categoria, legenda); } catch(e){ falhas.push(v.name); } }
+        if(falhas.length) alert('Ação salva, mas não foi possível enviar: ' + falhas.join(', '));
+      }
+      if(ehEvento) mostrarLinkAvaliacao(novaAcao.id);
     }
 
     acaoEditandoId = null;
