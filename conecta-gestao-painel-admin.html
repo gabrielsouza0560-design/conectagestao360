@@ -2012,88 +2012,213 @@ async function toggleChecklistItem(id, concluido){
   }
 }
 
+const TIPO_EVENTO_LABEL = {
+  festa_popular:'Festa popular', feira:'Feira', desfile:'Desfile', show:'Show',
+  evento_cultural:'Evento cultural', evento_esportivo:'Evento esportivo', outro:'Outro',
+};
+
 async function baixarPdfDossie(){
   if(!dossieAcaoId) return;
   const btn = document.getElementById('pdf-dossie-btn');
   btn.disabled = true; btn.textContent = 'Gerando...';
   try {
-    const f = festasCache.find(x => x.id === dossieAcaoId) || {};
-    const avaliacoes = await sbGet('evento_avaliacoes', 'select=tipo_avaliador,nota&acao_id=eq.' + dossieAcaoId);
+    const rows = await sbGet('acoes', 'select=*,secretarias(nome)&id=eq.' + dossieAcaoId);
+    const f = (rows && rows[0]) || festasCache.find(x => x.id === dossieAcaoId) || {};
+    const [avaliacoes, documentos, midias] = await Promise.all([
+      sbGet('evento_avaliacoes', 'select=tipo_avaliador,nota&acao_id=eq.' + dossieAcaoId),
+      sbGet('acao_anexos', 'select=nome,categoria,enviado_por,criado_em&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+      sbGet('evento_midias', 'select=tipo,categoria,legenda,criado_em&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+    ]);
     const media = (tipo) => {
       const notas = avaliacoes.filter(v => v.tipo_avaliador === tipo);
-      return notas.length ? (notas.reduce((s,v) => s + Number(v.nota), 0) / notas.length / 2).toFixed(1) : '—';
+      return notas.length ? (notas.reduce((s,v) => s + Number(v.nota), 0) / notas.length / 2).toFixed(1) : null;
     };
     const totalPatrocinios = dossiePatrocinios.reduce((s,p) => s + (Number(p.valor)||0), 0);
     const totalAlimentos = dossieArrecadacao.reduce((s,a) => s + (Number(a.quantidade_kg)||0), 0);
     const concluidos = dossieChecklist.filter(c => c.concluido).length;
     const pctChecklist = dossieChecklist.length ? Math.round((concluidos / dossieChecklist.length) * 100) : 0;
+    const investimentoLiquido = (Number(f.valor_investido)||0) - totalPatrocinios;
+    const mediaMorador = media('morador');
+    const mediaComerciante = media('comerciante');
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(16); doc.text('Relatório da Festa — ' + (f.titulo || ''), 14, 18);
-    doc.setFontSize(10); doc.setTextColor(100);
-    doc.text('Secretaria de Indústria e Comércio — gerado em ' + new Date().toLocaleString('pt-BR'), 14, 25);
-    doc.text((f.local || '—') + ' · ' + (f.data ? new Date(f.data).toLocaleDateString('pt-BR') : '—'), 14, 31);
-    let y = 40;
-    if(f.finalidade){ doc.setFontSize(9); doc.setTextColor(60); doc.text(doc.splitTextToSize('Finalidade: ' + f.finalidade, 180), 14, y); y += 14; }
+    let y = 20;
+    const ensureSpace = (needed) => { if(y + needed > 280){ doc.addPage(); y = 20; } };
+    const secao = (titulo) => { ensureSpace(20); doc.setFontSize(12); doc.setTextColor(0); doc.text(titulo, 14, y); y += 4; };
+    const afterTable = () => { y = doc.lastAutoTable.finalY + 10; };
 
-    doc.setFontSize(12); doc.setTextColor(0); doc.text('Resumo', 14, y); y += 4;
+    // Capa
+    doc.setFontSize(18); doc.setTextColor(0); doc.text('Relatório da Festa', 14, y); y += 8;
+    doc.setFontSize(15); doc.text(f.titulo || '', 14, y); y += 8;
+    doc.setFontSize(10); doc.setTextColor(100);
+    doc.text('Prefeitura Municipal — ' + (f.secretarias ? f.secretarias.nome : 'Secretaria não informada'), 14, y); y += 6;
+    doc.text('Gerado em ' + new Date().toLocaleString('pt-BR') + ' por ' + (session.claims.perfil || '—'), 14, y); y += 8;
+
+    doc.setFontSize(9); doc.setTextColor(60);
+    const dataTxt = (f.data ? new Date(f.data).toLocaleDateString('pt-BR') : '—') + (f.data_fim ? ' a ' + new Date(f.data_fim).toLocaleDateString('pt-BR') : '');
+    const horaTxt = (f.hora_inicio || f.hora_fim) ? ((f.hora_inicio || '—') + ' às ' + (f.hora_fim || '—')) : null;
+    doc.text('Tipo: ' + (TIPO_EVENTO_LABEL[f.tipo_evento] || '—') + '   ·   Local: ' + (f.local || '—'), 14, y); y += 5;
+    doc.text('Data: ' + dataTxt + (horaTxt ? '   ·   Horário: ' + horaTxt : ''), 14, y); y += 5;
+    if(f.endereco){ doc.text('Endereço: ' + f.endereco, 14, y); y += 5; }
+    y += 4;
+
+    // Apresentação e finalidade
+    if(f.descricao){
+      secao('Apresentação');
+      doc.setFontSize(9); doc.setTextColor(60);
+      doc.text(doc.splitTextToSize(f.descricao, 180), 14, y); y += 14;
+    }
+    if(f.finalidade || f.objetivos || f.publico_alvo){
+      secao('Finalidade e objetivos');
+      doc.setFontSize(9); doc.setTextColor(60);
+      if(f.finalidade){ doc.text(doc.splitTextToSize('Finalidade: ' + f.finalidade, 180), 14, y); y += 12; }
+      if(f.objetivos){ doc.text(doc.splitTextToSize('Objetivos: ' + f.objetivos, 180), 14, y); y += 12; }
+      if(f.publico_alvo){ doc.text('Público-alvo: ' + f.publico_alvo, 14, y); y += 6; }
+      y += 4;
+    }
+
+    // Investimentos
+    secao('Investimentos');
     doc.autoTable({
       startY: y,
-      head: [['Comerciantes', 'Barracas', 'Patrocínios (R$)', 'Crianças no desfile', 'Alimentos arrecadados', 'Preparo']],
+      head: [['Categoria', 'Valor']],
+      body: [
+        ['Investimento municipal', moneyR(f.valor_investido)],
+        ['Total de patrocínios', moneyR(totalPatrocinios)],
+        ['Investimento líquido (municipal − patrocínios)', moneyR(investimentoLiquido)],
+        ['Retorno econômico estimado', moneyR(f.valor_retorno_estimado)],
+      ],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    // Resumo
+    secao('Resumo geral');
+    doc.autoTable({
+      startY: y,
+      head: [['Comerciantes', 'Barracas', 'Crianças no desfile', 'Alimentos arrecadados', 'Documentos', 'Fotos/vídeos', 'Preparo']],
       body: [[
         dossieComerciantes.length,
         dossieComerciantes.filter(c=>c.numero_barraca).length,
-        moneyR(totalPatrocinios),
         dossieCriancas.length,
         totalAlimentos.toLocaleString('pt-BR') + ' kg',
+        documentos.length,
+        midias.length,
         pctChecklist + '%',
       ]],
       styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
     });
-    y = doc.lastAutoTable.finalY + 10;
+    afterTable();
 
-    doc.setFontSize(12); doc.text('Comerciantes e barracas', 14, y); y += 4;
+    secao('Comerciantes e barracas');
     doc.autoTable({
       startY: y,
       head: [['Nome', 'Empresa', 'Tipo', 'Barraca', 'Valor', 'Situação']],
-      body: dossieComerciantes.map(c => [c.nome, c.empresa || '—', COMERCIANTE_TIPO_LABEL[c.tipo_participacao] || c.tipo_participacao || '—', c.numero_barraca || '—', c.isento ? 'Isento' : moneyR(c.valor_cobrado), c.situacao || '—']),
+      body: dossieComerciantes.length
+        ? dossieComerciantes.map(c => [c.nome, c.empresa || '—', COMERCIANTE_TIPO_LABEL[c.tipo_participacao] || c.tipo_participacao || '—', c.numero_barraca || '—', c.isento ? 'Isento' : moneyR(c.valor_cobrado), c.situacao || '—'])
+        : [['Nenhum comerciante cadastrado', '', '', '', '', '']],
       styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
     });
-    y = doc.lastAutoTable.finalY + 10;
+    afterTable();
 
-    doc.setFontSize(12); doc.text('Patrocínios', 14, y); y += 4;
+    secao('Patrocínios');
     doc.autoTable({
       startY: y,
       head: [['Patrocinador', 'Tipo de apoio', 'Valor', 'Contrapartida']],
-      body: dossiePatrocinios.map(p => [p.nome, PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '—', moneyR(p.valor), p.contrapartida || p.descricao_apoio || '—']),
+      body: dossiePatrocinios.length
+        ? dossiePatrocinios.map(p => [p.nome, PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '—', moneyR(p.valor), p.contrapartida || p.descricao_apoio || '—'])
+        : [['Nenhum patrocínio cadastrado', '', '', '']],
       styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
     });
-    y = doc.lastAutoTable.finalY + 10;
+    afterTable();
 
-    doc.setFontSize(12); doc.text('Crianças do desfile', 14, y); y += 4;
+    secao('Crianças do desfile');
     doc.autoTable({
       startY: y,
       head: [['Nome', 'Categoria', 'Escola/responsável']],
-      body: dossieCriancas.map(c => [c.nome, c.categoria === 'apae' ? 'APAE' : 'Cidade', c.escola_responsavel || '—']),
+      body: dossieCriancas.length
+        ? dossieCriancas.map(c => [c.nome, c.categoria === 'apae' ? 'APAE' : 'Cidade', c.escola_responsavel || '—'])
+        : [['Nenhuma criança cadastrada', '', '']],
       styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
     });
-    y = doc.lastAutoTable.finalY + 10;
+    afterTable();
 
-    if(y > 230){ doc.addPage(); y = 20; }
-    doc.setFontSize(12); doc.text('Arrecadação de alimentos (' + totalAlimentos.toLocaleString('pt-BR') + ' kg no total)', 14, y); y += 4;
+    secao('Arrecadação de alimentos (' + totalAlimentos.toLocaleString('pt-BR') + ' kg no total)');
     doc.autoTable({
       startY: y,
       head: [['Participante', 'Alimento', 'Quantidade (kg)']],
-      body: [...dossieArrecadacao].sort((a,b) => (Number(b.quantidade_kg)||0) - (Number(a.quantidade_kg)||0)).map(a => [a.participante, a.alimento || '—', Number(a.quantidade_kg).toLocaleString('pt-BR')]),
+      body: dossieArrecadacao.length
+        ? [...dossieArrecadacao].sort((a,b) => (Number(b.quantidade_kg)||0) - (Number(a.quantidade_kg)||0)).map(a => [a.participante, a.alimento || '—', Number(a.quantidade_kg).toLocaleString('pt-BR')])
+        : [['Nenhuma arrecadação registrada', '', '']],
       styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
     });
-    y = doc.lastAutoTable.finalY + 10;
+    afterTable();
 
-    if(y > 260){ doc.addPage(); y = 20; }
-    doc.setFontSize(12); doc.setTextColor(0); doc.text('Avaliação pública', 14, y); y += 8;
+    secao('Checklist do evento (' + pctChecklist + '% preparado)');
+    doc.autoTable({
+      startY: y,
+      head: [['Item', 'Situação']],
+      body: dossieChecklist.length
+        ? dossieChecklist.map(c => [c.item, c.concluido ? 'Concluído' : 'Pendente'])
+        : [['Sem checklist', '']],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    secao('Documentação anexada');
+    doc.autoTable({
+      startY: y,
+      head: [['Documento', 'Categoria', 'Enviado por', 'Data']],
+      body: documentos.length
+        ? documentos.map(d => [d.nome, DOCUMENTO_CATEGORIA_LABEL[d.categoria] || d.categoria || '—', d.enviado_por || '—', new Date(d.criado_em).toLocaleDateString('pt-BR')])
+        : [['Nenhum documento anexado', '', '', '']],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    secao('Galeria (fotos e vídeos)');
+    doc.autoTable({
+      startY: y,
+      head: [['Tipo', 'Categoria', 'Legenda', 'Data']],
+      body: midias.length
+        ? midias.map(m => [m.tipo === 'video' ? 'Vídeo' : 'Foto', GALERIA_CATEGORIA_LABEL[m.categoria] || m.categoria || '—', m.legenda || '—', new Date(m.criado_em).toLocaleDateString('pt-BR')])
+        : [['Nenhuma foto/vídeo anexado', '', '', '']],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    secao('Avaliação pública');
+    doc.autoTable({
+      startY: y,
+      head: [['Público', 'Nota média (0–5)', 'Respostas']],
+      body: [
+        ['Moradores', mediaMorador || '—', avaliacoes.filter(v=>v.tipo_avaliador==='morador').length],
+        ['Comerciantes', mediaComerciante || '—', avaliacoes.filter(v=>v.tipo_avaliador==='comerciante').length],
+      ],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    // Conclusão automática
+    secao('Conclusão');
     doc.setFontSize(9); doc.setTextColor(60);
-    doc.text('Moradores: ' + media('morador') + ' / 5   ·   Comerciantes: ' + media('comerciante') + ' / 5', 14, y);
+    const partes = [];
+    partes.push('A festa "' + (f.titulo || '') + '" contou com ' + dossieComerciantes.length + ' comerciante(s)/barraca(s)' + (dossieCriancas.length ? ' e ' + dossieCriancas.length + ' criança(s) no desfile' : '') + '.');
+    if(totalPatrocinios) partes.push('Foram arrecadados ' + moneyR(totalPatrocinios) + ' em patrocínios, resultando em investimento líquido de ' + moneyR(investimentoLiquido) + '.');
+    if(totalAlimentos) partes.push('A competição de arrecadação de alimentos reuniu ' + totalAlimentos.toLocaleString('pt-BR') + ' kg de doações.');
+    if(mediaMorador || mediaComerciante) partes.push('A avaliação pública registrou nota média de ' + (mediaMorador || '—') + '/5 entre moradores e ' + (mediaComerciante || '—') + '/5 entre comerciantes.');
+    partes.push('O evento foi ' + pctChecklist + '% preparado conforme o checklist cadastrado.');
+    doc.text(doc.splitTextToSize(partes.join(' '), 180), 14, y);
+
+    // Cabeçalho/rodapé em todas as páginas
+    const totalPaginas = doc.internal.getNumberOfPages();
+    for(let i = 1; i <= totalPaginas; i++){
+      doc.setPage(i);
+      doc.setFontSize(8); doc.setTextColor(150);
+      doc.text('Conecta Gestão — Relatório gerado em ' + new Date().toLocaleDateString('pt-BR'), 14, 292);
+      doc.text('Página ' + i + ' de ' + totalPaginas, 180, 292);
+    }
 
     await salvarRelatorioNaPlataforma(doc.output('blob'), 'Relatório da festa — ' + (f.titulo || '') + ' — ' + new Date().toLocaleDateString('pt-BR'), 'festas', 'pdf');
     doc.save('conecta-gestao-festa-' + (f.titulo || 'evento').toLowerCase().replace(/[^a-z0-9]+/g,'-') + '-' + new Date().toISOString().slice(0,10) + '.pdf');
@@ -2109,8 +2234,30 @@ async function baixarExcelDossie(){
   const btn = document.getElementById('xlsx-dossie-btn');
   btn.disabled = true; btn.textContent = 'Gerando...';
   try {
-    const f = festasCache.find(x => x.id === dossieAcaoId) || {};
+    const rows = await sbGet('acoes', 'select=*,secretarias(nome)&id=eq.' + dossieAcaoId);
+    const f = (rows && rows[0]) || festasCache.find(x => x.id === dossieAcaoId) || {};
+    const [avaliacoes, documentos, midias] = await Promise.all([
+      sbGet('evento_avaliacoes', 'select=tipo_avaliador,nota&acao_id=eq.' + dossieAcaoId),
+      sbGet('acao_anexos', 'select=nome,categoria,enviado_por,criado_em&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+      sbGet('evento_midias', 'select=tipo,categoria,legenda,criado_em&acao_id=eq.' + dossieAcaoId + '&order=criado_em.asc'),
+    ]);
+    const media = (tipo) => {
+      const notas = avaliacoes.filter(v => v.tipo_avaliador === tipo);
+      return notas.length ? (notas.reduce((s,v) => s + Number(v.nota), 0) / notas.length / 2).toFixed(1) : '';
+    };
+    const totalPatrocinios = dossiePatrocinios.reduce((s,p) => s + (Number(p.valor)||0), 0);
+
     const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{
+      'Nome do evento': f.titulo || '', 'Secretaria': f.secretarias ? f.secretarias.nome : '',
+      'Tipo de evento': TIPO_EVENTO_LABEL[f.tipo_evento] || '', 'Local': f.local || '', 'Endereço': f.endereco || '',
+      'Data início': f.data || '', 'Data fim': f.data_fim || '', 'Horário início': f.hora_inicio || '', 'Horário fim': f.hora_fim || '',
+      'Finalidade': f.finalidade || '', 'Objetivos': f.objetivos || '', 'Público-alvo': f.publico_alvo || '',
+      'Público estimado': f.publico_estimado || '', 'Investimento municipal (R$)': Number(f.valor_investido) || 0,
+      'Total patrocínios (R$)': totalPatrocinios, 'Investimento líquido (R$)': (Number(f.valor_investido)||0) - totalPatrocinios,
+      'Retorno estimado (R$)': Number(f.valor_retorno_estimado) || 0,
+      'Avaliação moradores (0-5)': media('morador'), 'Avaliação comerciantes (0-5)': media('comerciante'),
+    }]), 'Dados gerais');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieComerciantes.map(c => ({
       'Nome': c.nome, 'Empresa': c.empresa || '', 'CPF/CNPJ': c.cpf_cnpj || '', 'Telefone': c.telefone || '',
       'Segmento': c.segmento || '', 'Produto': c.produto || '', 'Tipo': COMERCIANTE_TIPO_LABEL[c.tipo_participacao] || c.tipo_participacao || '',
@@ -2130,6 +2277,14 @@ async function baixarExcelDossie(){
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossieChecklist.map(c => ({
       'Item': c.item, 'Concluído': c.concluido ? 'Sim' : 'Não',
     }))), 'Checklist');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documentos.map(d => ({
+      'Documento': d.nome, 'Categoria': DOCUMENTO_CATEGORIA_LABEL[d.categoria] || d.categoria || '',
+      'Enviado por': d.enviado_por || '', 'Data': new Date(d.criado_em).toLocaleDateString('pt-BR'),
+    }))), 'Documentos');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(midias.map(m => ({
+      'Tipo': m.tipo === 'video' ? 'Vídeo' : 'Foto', 'Categoria': GALERIA_CATEGORIA_LABEL[m.categoria] || m.categoria || '',
+      'Legenda': m.legenda || '', 'Data': new Date(m.criado_em).toLocaleDateString('pt-BR'),
+    }))), 'Galeria');
     const blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     await salvarRelatorioNaPlataforma(blob, 'Relatório da festa — ' + (f.titulo || '') + ' — ' + new Date().toLocaleDateString('pt-BR'), 'festas', 'xlsx');
     const url = URL.createObjectURL(blob);
