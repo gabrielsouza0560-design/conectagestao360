@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
@@ -106,6 +108,13 @@
   .status-planejado{background:#F1F5F9;color:#64748B;}
   .status-em_andamento{background:#FEF3C7;color:#B45309;}
   .status-concluido{background:#D1FAE5;color:var(--ok);}
+  .btn-import-pdf{background:linear-gradient(135deg,#7C3AED,#A78BFA);color:#fff;border:none;padding:8px 16px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,.3);display:inline-flex;align-items:center;gap:6px;}
+  .btn-import-pdf:hover{transform:translateY(-1px);}
+  .btn-import-pdf input[type=file]{display:none;}
+  .pdf-status{margin-top:10px;padding:12px 14px;border-radius:10px;font-size:12.5px;line-height:1.6;display:none;}
+  .pdf-status.loading{display:block;background:#EFF6FF;border:1px solid rgba(37,99,235,.25);color:var(--royal);}
+  .pdf-status.success{display:block;background:#D1FAE5;border:1px solid rgba(5,150,105,.25);color:#065F46;}
+  .pdf-status.error{display:block;background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
   .status-cancelado{background:#FEE2E2;color:var(--danger);}
   .status-parcialmente_cumprida{background:#DBEAFE;color:var(--royal);}
   .status-nao_iniciada{background:#F1F5F9;color:#64748B;}
@@ -247,6 +256,7 @@
         <div style="display:flex;gap:10px;">
           <button class="btn-ghost" onclick="baixarPdfAcoes()" id="pdf-acoes-btn">⬇ PDF</button>
           <button class="btn-ghost" onclick="baixarExcelAcoes()" id="xlsx-acoes-btn">⬇ Excel</button>
+          <button class="btn-import-pdf" onclick="document.getElementById('pdf-import-acoes').click()">📄 Importar PDF<input type="file" id="pdf-import-acoes" accept=".pdf" onchange="importarPdf(this,'acoes')"></button>
           <button class="btn-accent" onclick="toggleForm()">+ Nova ação</button>
         </div>
       </div>
@@ -470,7 +480,7 @@
           </div>
           <div class="field span-3"><label>Observações</label><input id="dc-observacoes"></div>
         </div>
-        <div class="form-actions"><button class="btn-accent" onclick="addComerciante()">+ Adicionar comerciante/barraca</button></div>
+        <div class="form-actions"><button class="btn-import-pdf" onclick="document.getElementById('pdf-import-comerciantes').click()">📄 Importar PDF<input type="file" id="pdf-import-comerciantes" accept=".pdf" onchange="importarPdf(this,'comerciantes')"></button><button class="btn-accent" onclick="addComerciante()">+ Adicionar comerciante/barraca</button></div>
 
         <h4 style="margin:26px 0 8px;">🤝 Patrocínios</h4>
         <div style="overflow-x:auto;">
@@ -515,7 +525,7 @@
           <div class="field"><label>Contrapartida</label><input id="dp-contrapartida" placeholder="Ex.: Logo no material de divulgação"></div>
           <div class="field span-3"><label>Observações</label><input id="dp-observacoes"></div>
         </div>
-        <div class="form-actions"><button class="btn-ghost" id="btn-cancel-patrocinio" style="display:none;" onclick="cancelarEdicaoPatrocinio()">Cancelar</button><button class="btn-accent" id="btn-add-patrocinio" onclick="addPatrocinio()">+ Adicionar patrocínio</button></div>
+        <div class="form-actions"><button class="btn-ghost" id="btn-cancel-patrocinio" style="display:none;" onclick="cancelarEdicaoPatrocinio()">Cancelar</button><button class="btn-import-pdf" onclick="document.getElementById('pdf-import-patrocinios').click()">📄 Importar PDF<input type="file" id="pdf-import-patrocinios" accept=".pdf" onchange="importarPdf(this,'patrocinios')"></button><button class="btn-accent" id="btn-add-patrocinio" onclick="addPatrocinio()">+ Adicionar patrocínio</button></div>
 
         <h4 style="margin:26px 0 8px;">🎤 Atrações</h4>
         <p class="panel-sub" id="dossie-total-atracoes"></p>
@@ -559,7 +569,7 @@
           <div class="field span-3"><label>Descrição</label><input id="da-descricao"></div>
           <div class="field span-3"><label>Observações</label><input id="da-observacoes"></div>
         </div>
-        <div class="form-actions"><button class="btn-ghost" id="btn-cancel-atracao" style="display:none;" onclick="cancelarEdicaoAtracao()">Cancelar</button><button class="btn-accent" id="btn-add-atracao" onclick="addAtracao()">+ Adicionar atração</button></div>
+        <div class="form-actions"><button class="btn-ghost" id="btn-cancel-atracao" style="display:none;" onclick="cancelarEdicaoAtracao()">Cancelar</button><button class="btn-import-pdf" onclick="document.getElementById('pdf-import-atracoes').click()">📄 Importar PDF<input type="file" id="pdf-import-atracoes" accept=".pdf" onchange="importarPdf(this,'atracoes')"></button><button class="btn-accent" id="btn-add-atracao" onclick="addAtracao()">+ Adicionar atração</button></div>
 
         <h4 style="margin:26px 0 8px;">🎈 Ficha da criança do desfile</h4>
         <div class="form-grid">
@@ -595,7 +605,7 @@
           <div class="field"><label>Doação financeira (R$)</label><input id="dcr-valor-financeiro" type="text" inputmode="decimal" value="0" placeholder="Mínimo R$250,00"></div>
           <div class="field"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:24px;"><input type="checkbox" id="dcr-autorizado" style="width:auto;margin-right:8px;vertical-align:middle;"> Responsável autorizou participação e uso de imagem</label></div>
         </div>
-        <div class="form-actions"><button class="btn-ghost" id="btn-cancel-crianca" style="display:none;" onclick="cancelarEdicaoCrianca()">Cancelar</button><button class="btn-accent" id="btn-add-crianca" onclick="addCriancaDesfile()">+ Adicionar criança ao desfile</button></div>
+        <div class="form-actions"><button class="btn-ghost" id="btn-cancel-crianca" style="display:none;" onclick="cancelarEdicaoCrianca()">Cancelar</button><button class="btn-import-pdf" onclick="document.getElementById('pdf-import-criancas').click()">📄 Importar PDF<input type="file" id="pdf-import-criancas" accept=".pdf" onchange="importarPdf(this,'criancas')"></button><button class="btn-accent" id="btn-add-crianca" onclick="addCriancaDesfile()">+ Adicionar criança ao desfile</button></div>
 
         <h4 style="margin:26px 0 8px;">Crianças cadastradas — APAE</h4>
         <div id="dossie-lista-criancas-apae" style="margin-bottom:10px;"></div>
@@ -665,6 +675,7 @@
         <div style="display:flex;gap:10px;">
           <button class="btn-ghost" onclick="baixarPdfRecursos()" id="pdf-recursos-btn">⬇ PDF</button>
           <button class="btn-ghost" onclick="baixarExcelRecursos()" id="xlsx-recursos-btn">⬇ Excel</button>
+          <button class="btn-import-pdf" onclick="document.getElementById('pdf-import-recursos').click()">📄 Importar PDF<input type="file" id="pdf-import-recursos" accept=".pdf" onchange="importarPdf(this,'recursos')"></button>
           <button class="btn-accent" onclick="toggleRecursoForm()">+ Nova oportunidade</button>
         </div>
       </div>
@@ -830,6 +841,7 @@
         <div style="display:flex;gap:10px;">
           <button class="btn-ghost" onclick="baixarPdfPromessas()" id="pdf-promessas-btn">⬇ PDF</button>
           <button class="btn-ghost" onclick="baixarExcelPromessas()" id="xlsx-promessas-btn">⬇ Excel</button>
+          <button class="btn-import-pdf" onclick="document.getElementById('pdf-import-promessas').click()">📄 Importar PDF<input type="file" id="pdf-import-promessas" accept=".pdf" onchange="importarPdf(this,'promessas')"></button>
           <button class="btn-accent" onclick="togglePromessaForm()">+ Nova promessa</button>
         </div>
       </div>
@@ -3956,6 +3968,194 @@ async function submitAcao(){
     alert('Não foi possível salvar: ' + e.message.slice(0,200));
   } finally {
     btn.disabled = false; btn.textContent = 'Salvar ação';
+  }
+}
+
+// ===================== IMPORTAR PDF =====================
+async function extrairTextoPdf(file){
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+  let texto = '';
+  for(let i = 1; i <= pdf.numPages; i++){
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    texto += content.items.map(item => item.str).join(' ') + '\n';
+  }
+  return texto;
+}
+
+function buscarCampo(texto, patterns, flags){
+  for(const p of patterns){
+    const m = texto.match(new RegExp(p, flags || 'i'));
+    if(m && m[1]) return m[1].trim();
+  }
+  return '';
+}
+
+function buscarValor(texto, patterns){
+  const raw = buscarCampo(texto, patterns);
+  if(!raw) return '';
+  return raw.replace(/[^\d.,]/g,'').replace(/\./g,'').replace(',','.');
+}
+
+function buscarData(texto, patterns){
+  const raw = buscarCampo(texto, patterns);
+  if(!raw) return '';
+  const m = raw.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
+  if(m) return m[3] + '-' + m[2] + '-' + m[1];
+  return raw;
+}
+
+function preencherCampo(id, valor){
+  const el = document.getElementById(id);
+  if(!el || !valor) return;
+  if(el.tagName === 'SELECT'){
+    const opts = Array.from(el.options);
+    const match = opts.find(o => o.value.toLowerCase() === valor.toLowerCase() || o.text.toLowerCase().includes(valor.toLowerCase()));
+    if(match) el.value = match.value;
+  } else if(el.type === 'checkbox'){
+    el.checked = valor === true || valor === 'true' || valor === 'sim' || valor === 'yes';
+  } else {
+    el.value = valor;
+  }
+}
+
+const PDF_MAPPINGS = {
+  acoes: {
+    abrir: () => { document.getElementById('form-panel').style.display = 'block'; },
+    campos: (t) => ({
+      'f-titulo': buscarCampo(t, ['t[ií]tulo[:\\s]+(.+?)(?:\\n|$)','nome da a[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)','objeto[:\\s]+(.+?)(?:\\n|$)']),
+      'f-descricao': buscarCampo(t, ['descri[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)','resumo[:\\s]+(.+?)(?:\\n|$)']),
+      'f-ano': buscarCampo(t, ['ano[:\\s]+([\\d]{4})']),
+      'f-data': buscarData(t, ['data[:\\s]+([\\d\\/\\-]+)']),
+      'f-bairro': buscarCampo(t, ['bairro[:\\s]+(.+?)(?:\\n|$)','localidade[:\\s]+(.+?)(?:\\n|$)']),
+      'f-valor': buscarCampo(t, ['valor[:\\s]*(?:investido)?[:\\s]*[R\\$]*\\s*([\\d\\.,]+)','investimento[:\\s]*[R\\$]*\\s*([\\d\\.,]+)']),
+      'f-origem': buscarCampo(t, ['origem[:\\s]+(.+?)(?:\\n|$)','fonte[:\\s]+(.+?)(?:\\n|$)']),
+      'f-beneficiados': buscarCampo(t, ['beneficiad[oa]s[:\\s]+(\\d+)','atendidos[:\\s]+(\\d+)']),
+    })
+  },
+  recursos: {
+    abrir: () => { document.getElementById('recurso-form-panel').style.display = 'block'; },
+    campos: (t) => ({
+      'rc-programa': buscarCampo(t, ['programa[:\\s]+(.+?)(?:\\n|$)','edital[:\\s]+(.+?)(?:\\n|$)','objeto[:\\s]+(.+?)(?:\\n|$)']),
+      'rc-orgao': buscarCampo(t, ['[oó]rg[ãa]o[:\\s]+(?:concedente[:\\s]+)?(.+?)(?:\\n|$)','concedente[:\\s]+(.+?)(?:\\n|$)']),
+      'rc-esfera': buscarCampo(t, ['esfera[:\\s]+(.+?)(?:\\n|$)','[âa]mbito[:\\s]+(.+?)(?:\\n|$)']),
+      'rc-valor': buscarCampo(t, ['valor[:\\s]*(?:estimado)?[:\\s]*[R\\$]*\\s*([\\d\\.,]+)']),
+      'rc-prazo': buscarData(t, ['prazo[:\\s]+([\\d\\/\\-]+)','submiss[ãa]o[:\\s]+([\\d\\/\\-]+)','data limite[:\\s]+([\\d\\/\\-]+)']),
+      'rc-numero-convenio': buscarCampo(t, ['conv[êe]nio[:\\s]*n?[°º]?\\s*(.+?)(?:\\n|$)']),
+      'rc-link': buscarCampo(t, ['(?:link|url|site)[:\\s]+(https?:\\/\\/[^\\s]+)']),
+      'rc-requisitos': buscarCampo(t, ['requisito[s]?[:\\s]+(.+?)(?:\\n|$)','documenta[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)']),
+      'rc-contrapartida': buscarCampo(t, ['contrapartida[:\\s]*[R\\$]*\\s*([\\d\\.,]+)']),
+    })
+  },
+  promessas: {
+    abrir: () => { const p = document.getElementById('promessa-form-panel'); if(p) p.style.display = 'block'; },
+    campos: (t) => ({
+      'pm-titulo': buscarCampo(t, ['t[ií]tulo[:\\s]+(.+?)(?:\\n|$)','promessa[:\\s]+(.+?)(?:\\n|$)']),
+      'pm-descricao': buscarCampo(t, ['descri[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)']),
+      'pm-eixo': buscarCampo(t, ['eixo[:\\s]+(.+?)(?:\\n|$)','[áa]rea[:\\s]+(.+?)(?:\\n|$)']),
+      'pm-ano': buscarCampo(t, ['ano[:\\s]*(?:previsto)?[:\\s]*(\\d{4})']),
+    })
+  },
+  comerciantes: {
+    abrir: () => {},
+    campos: (t) => ({
+      'dc-nome': buscarCampo(t, ['nome[:\\s]+(.+?)(?:\\n|$)','comerciante[:\\s]+(.+?)(?:\\n|$)','feirante[:\\s]+(.+?)(?:\\n|$)']),
+      'dc-empresa': buscarCampo(t, ['empresa[:\\s]+(.+?)(?:\\n|$)','raz[ãa]o social[:\\s]+(.+?)(?:\\n|$)']),
+      'dc-cpf': buscarCampo(t, ['cpf[:\\s\\/]*(?:cnpj)?[:\\s]+([\\d\\.\\-\\/]+)','cnpj[:\\s\\/]*(?:cpf)?[:\\s]+([\\d\\.\\-\\/]+)']),
+      'dc-telefone': buscarCampo(t, ['(?:telefone|whatsapp|celular|fone)[:\\s]+([\\d\\(\\)\\s\\-]+)']),
+      'dc-segmento': buscarCampo(t, ['segmento[:\\s]+(.+?)(?:\\n|$)','ramo[:\\s]+(.+?)(?:\\n|$)']),
+      'dc-produto': buscarCampo(t, ['produto[:\\s]+(.+?)(?:\\n|$)']),
+      'dc-numero-barraca': buscarCampo(t, ['(?:n[°ºo]?\\s*(?:da\\s*)?barraca|barraca\\s*n?[°ºo]?)[:\\s]*(\\w+)']),
+      'dc-localizacao': buscarCampo(t, ['localiza[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)']),
+      'dc-tamanho': buscarCampo(t, ['tamanho[:\\s]+(.+?)(?:\\n|$)','dimens[ãa]o[:\\s]+(.+?)(?:\\n|$)']),
+      'dc-valor': buscarCampo(t, ['valor[:\\s]*(?:cobrado)?[:\\s]*[R\\$]*\\s*([\\d\\.,]+)','taxa[:\\s]*[R\\$]*\\s*([\\d\\.,]+)']),
+      'dc-forma-pagamento': buscarCampo(t, ['forma de pagamento[:\\s]+(.+?)(?:\\n|$)','pagamento[:\\s]+(.+?)(?:\\n|$)']),
+      'dc-observacoes': buscarCampo(t, ['observa[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)','obs[:\\s]+(.+?)(?:\\n|$)']),
+    })
+  },
+  patrocinios: {
+    abrir: () => {},
+    campos: (t) => ({
+      'dp-nome': buscarCampo(t, ['(?:patrocinador|loja|empresa)[:\\s]+(.+?)(?:\\n|$)','nome[:\\s]+(.+?)(?:\\n|$)']),
+      'dp-cnpj': buscarCampo(t, ['cnpj[:\\s\\/]*(?:cpf)?[:\\s]+([\\d\\.\\-\\/]+)','cpf[:\\s\\/]*(?:cnpj)?[:\\s]+([\\d\\.\\-\\/]+)']),
+      'dp-responsavel': buscarCampo(t, ['respons[áa]vel[:\\s]+(.+?)(?:\\n|$)']),
+      'dp-telefone': buscarCampo(t, ['(?:telefone|fone)[:\\s]+([\\d\\(\\)\\s\\-]+)']),
+      'dp-whatsapp': buscarCampo(t, ['whatsapp[:\\s]+([\\d\\(\\)\\s\\-]+)']),
+      'dp-endereco': buscarCampo(t, ['endere[çc]o[:\\s]+(.+?)(?:\\n|$)']),
+      'dp-valor': buscarCampo(t, ['valor[:\\s]*[R\\$]*\\s*([\\d\\.,]+)']),
+      'dp-descricao': buscarCampo(t, ['descri[çc][ãa]o[:\\s]+(?:do apoio[:\\s]+)?(.+?)(?:\\n|$)']),
+      'dp-contrapartida': buscarCampo(t, ['contrapartida[:\\s]+(.+?)(?:\\n|$)']),
+      'dp-itens-emprestados': buscarCampo(t, ['itens emprestados[:\\s]+(.+?)(?:\\n|$)','pe[çc]as[:\\s]+(.+?)(?:\\n|$)']),
+      'dp-observacoes': buscarCampo(t, ['observa[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)','obs[:\\s]+(.+?)(?:\\n|$)']),
+    })
+  },
+  atracoes: {
+    abrir: () => {},
+    campos: (t) => ({
+      'da-nome': buscarCampo(t, ['(?:atra[çc][ãa]o|banda|artista|show)[:\\s]+(.+?)(?:\\n|$)','nome[:\\s]+(.+?)(?:\\n|$)']),
+      'da-data': buscarData(t, ['data[:\\s]+([\\d\\/\\-]+)']),
+      'da-horario': buscarCampo(t, ['hor[áa]rio[:\\s]+([\\d:h]+)','hora[:\\s]+([\\d:h]+)']),
+      'da-responsavel': buscarCampo(t, ['respons[áa]vel[:\\s]+(.+?)(?:\\n|$)','contato[:\\s]+(.+?)(?:\\n|$)']),
+      'da-valor': buscarCampo(t, ['valor[:\\s]*[R\\$]*\\s*([\\d\\.,]+)','cach[êe][:\\s]*[R\\$]*\\s*([\\d\\.,]+)']),
+      'da-forma-contratacao': buscarCampo(t, ['forma de contrata[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)','contrata[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)']),
+      'da-forma-pagamento': buscarCampo(t, ['forma de pagamento[:\\s]+(.+?)(?:\\n|$)','pagamento[:\\s]+(.+?)(?:\\n|$)']),
+      'da-descricao': buscarCampo(t, ['descri[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)']),
+      'da-observacoes': buscarCampo(t, ['observa[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)','obs[:\\s]+(.+?)(?:\\n|$)']),
+    })
+  },
+  criancas: {
+    abrir: () => {},
+    campos: (t) => ({
+      'dcr-nome': buscarCampo(t, ['nome da crian[çc]a[:\\s]+(.+?)(?:\\n|$)','nome completo[:\\s]+(.+?)(?:\\n|$)','nome[:\\s]+(.+?)(?:\\n|$)']),
+      'dcr-nascimento': buscarData(t, ['(?:data de )?nascimento[:\\s]+([\\d\\/\\-]+)']),
+      'dcr-idade': buscarCampo(t, ['idade[:\\s]+(\\d+)']),
+      'dcr-escola': buscarCampo(t, ['escola[:\\s]+(.+?)(?:\\n|$)','institui[çc][ãa]o[:\\s]+(.+?)(?:\\n|$)']),
+      'dcr-serie': buscarCampo(t, ['s[ée]rie[:\\s]+(.+?)(?:\\n|$)','ano escolar[:\\s]+(.+?)(?:\\n|$)']),
+      'dcr-resp-nome': buscarCampo(t, ['(?:nome do )?respons[áa]vel[:\\s]+(.+?)(?:\\n|$)','m[ãa]e[:\\s]+(.+?)(?:\\n|$)','pai[:\\s]+(.+?)(?:\\n|$)']),
+      'dcr-resp-parentesco': buscarCampo(t, ['parentesco[:\\s]+(.+?)(?:\\n|$)','grau[:\\s]+(.+?)(?:\\n|$)']),
+      'dcr-resp-whatsapp': buscarCampo(t, ['(?:whatsapp|celular|telefone)[:\\s]+([\\d\\(\\)\\s\\-]+)']),
+      'dcr-resp-endereco': buscarCampo(t, ['endere[çc]o[:\\s]+(.+?)(?:\\n|$)']),
+      'dcr-gosta': buscarCampo(t, ['(?:o que )?(?:mais )?gosta[:\\s]+(.+?)(?:\\n|$)']),
+      'dcr-sonho': buscarCampo(t, ['sonho[:\\s]+(.+?)(?:\\n|$)']),
+      'dcr-sobre': buscarCampo(t, ['sobre a crian[çc]a[:\\s]+(.+?)(?:\\n|$)']),
+      'dcr-itens-alimentos': buscarCampo(t, ['itens[:\\s]*(?:aliment[ií]cios)?[:\\s]*(\\d+)','alimentos[:\\s]*(\\d+)']),
+      'dcr-valor-financeiro': buscarCampo(t, ['doa[çc][ãa]o[:\\s]*(?:financeira)?[:\\s]*[R\\$]*\\s*([\\d\\.,]+)']),
+    })
+  }
+};
+
+async function importarPdf(input, tipo){
+  const file = input.files[0];
+  if(!file) return;
+  input.value = '';
+
+  const mapping = PDF_MAPPINGS[tipo];
+  if(!mapping){ alert('Tipo de importação não configurado.'); return; }
+
+  try {
+    mapping.abrir();
+    const texto = await extrairTextoPdf(file);
+    if(!texto.trim()){
+      alert('Não foi possível extrair texto deste PDF. Verifique se não é um documento escaneado (imagem).');
+      return;
+    }
+    const campos = mapping.campos(texto);
+    let preenchidos = 0;
+    for(const [id, valor] of Object.entries(campos)){
+      if(valor){
+        preencherCampo(id, valor);
+        preenchidos++;
+      }
+    }
+
+    if(preenchidos > 0){
+      alert('✅ PDF importado! ' + preenchidos + ' campo(s) preenchido(s) automaticamente.\n\nConfira os dados antes de salvar.');
+    } else {
+      alert('⚠️ PDF lido, mas nenhum campo foi identificado automaticamente.\n\nO texto extraído foi:\n\n' + texto.slice(0,500) + '...\n\nVocê pode preencher manualmente.');
+    }
+  } catch(e){
+    alert('Erro ao processar o PDF: ' + e.message);
   }
 }
 </script>
