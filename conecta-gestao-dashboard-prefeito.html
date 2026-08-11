@@ -31,6 +31,33 @@
 
   .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
 
+  #login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+  @media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+  .login-brand{background:linear-gradient(150deg,var(--darkblue) 0%, #16265A 45%, var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+  .login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle, rgba(96,165,250,.25), transparent 70%);}
+  .brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+  .brand-name{font-size:19px;font-weight:800;}
+  .brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+  .brand-quote{position:relative;z-index:1;max-width:420px;}
+  .brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;letter-spacing:-.02em;}
+  .brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+  .brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+  .login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+  .login-form{width:100%;max-width:380px;}
+  .login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}
+  .login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+  .field input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+  .field input:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(37,99,235,.35);transition:transform .15s;}
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-primary:disabled{opacity:.6;pointer-events:none;}
+  .login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}
+  .login-error.show{display:block;}
+  .logout-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;margin-left:10px;}
+  .logout-btn:hover{border-color:var(--light);color:var(--light);}
+
   header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:16px 40px;display:flex;justify-content:space-between;align-items:center;}
   @media(max-width:700px){header{padding:16px 20px;}}
   .hd-left{display:flex;align-items:center;gap:12px;}
@@ -109,12 +136,37 @@
 </head>
 <body>
 
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top">
+      <div class="logo">CG</div>
+      <div class="brand-name">Conecta Gestão<small>Dashboard do Prefeito</small></div>
+    </div>
+    <div class="brand-quote">
+      <h1>Visão executiva de toda a gestão municipal.</h1>
+      <p>Indicadores em tempo real, conectados ao Supabase. Acesso restrito a Prefeito, Vice-Prefeito, Controladoria e Admin Master.</p>
+    </div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap">
+    <div class="login-form">
+      <h2>Acessar dashboard</h2>
+      <p class="sub">Entre com sua conta institucional.</p>
+      <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+      <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+      <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+      <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+</div>
+
+<div id="app-wrap" style="display:none;">
 <header>
   <div class="hd-left">
     <div class="logo">CG</div>
     <div class="name">Conecta Gestão<small>Dashboard do Prefeito</small></div>
   </div>
-  <div class="hd-role">Prefeito · Regina Salgado</div>
+  <div class="hd-role" id="hd-role">— <button class="logout-btn" onclick="doLogout()">Sair</button></div>
 </header>
 
 <main>
@@ -181,6 +233,7 @@
     </table>
   </div>
 </main>
+</div>
 
 <script>
 const SUPABASE_URL = "https://kfvkembarvsbtveksiag.supabase.co";
@@ -202,19 +255,52 @@ function decodeJwt(token){
   } catch (e) { return {}; }
 }
 
-async function ensureSession(){
-  const email = prompt('Este dashboard é restrito. Informe seu e-mail:');
-  if(!email) return null;
-  const senha = prompt('Senha:');
-  if(!senha) return null;
-  const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-    method: 'POST',
-    headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password: senha }),
-  });
-  if(!res.ok){ alert('Login inválido.'); return null; }
-  const data = await res.json();
-  return { access_token: data.access_token, claims: decodeJwt(data.access_token) };
+async function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const errBox = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  errBox.classList.remove('show');
+  if(!email || !senha){ errBox.textContent = 'Preencha e-mail e senha.'; errBox.classList.add('show'); return; }
+
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha }),
+    });
+    const data = await res.json();
+    if(!res.ok){
+      errBox.textContent = data.error_description || data.msg || 'E-mail ou senha inválidos.';
+      errBox.classList.add('show');
+      return;
+    }
+    const claims = decodeJwt(data.access_token);
+    if(['admin_master','prefeito','vice_prefeito','controladoria'].indexOf(claims.perfil) === -1){
+      errBox.textContent = 'Seu perfil não tem acesso a este dashboard.';
+      errBox.classList.add('show');
+      return;
+    }
+    session = { access_token: data.access_token, claims };
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-wrap').style.display = 'block';
+    document.getElementById('hd-role').innerHTML = (claims.perfil || '').replace('_',' ') + ' <button class="logout-btn" onclick="doLogout()">Sair</button>';
+    await populate();
+  } catch (e) {
+    errBox.textContent = 'Não foi possível conectar ao servidor de autenticação.';
+    errBox.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+function doLogout(){
+  session = null;
+  document.getElementById('app-wrap').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'grid';
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-senha').value = '';
 }
 
 async function sbGet(table, query){
@@ -243,14 +329,6 @@ function statusPillDash(s){
 }
 
 async function populate(){
-  session = await ensureSession();
-  if(!session) return;
-  const perfil = session.claims.perfil;
-  if(['admin_master','prefeito','vice_prefeito','controladoria'].indexOf(perfil) === -1){
-    alert('Seu perfil não tem acesso a este dashboard.');
-    return;
-  }
-
   document.getElementById('filtro-secretaria').innerHTML += SECRETARIAS_LABELS.map(s => `<option>${s}</option>`).join('');
 
   try {
@@ -367,7 +445,6 @@ async function populate(){
     alert('Não foi possível carregar os dados: ' + e.message.slice(0,200));
   }
 }
-populate();
 </script>
 <div id="cg-dev-credit" style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
 </body>
