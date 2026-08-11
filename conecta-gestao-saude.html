@@ -157,11 +157,11 @@ function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-0000000
 // ============ NAV ============
 const NAV_GROUPS=[
   {label:'Geral',items:[['dashboard_saude','Dashboard da Saúde'],['secretaria_saude','Secretaria']]},
-  {label:'Atendimento',items:[['unidades','Unidades de Saúde'],['profissionais','Profissionais'],['pacientes','População/Cadastros'],['consultas','Consultas'],['atendimentos','Atendimentos'],['exames','Exames'],['odontologia','Odontologia']]},
-  {label:'Saúde Pública',items:[['vacinacao','Vacinação'],['farmacia','Farmácia'],['medicamentos','Medicamentos'],['visitas','Visitas Domiciliares'],['encaminhamentos','Encaminhamentos'],['regulacao','Regulação']]},
-  {label:'Logística',items:[['transporte','Transporte'],['frota','Frota'],['estoque','Estoque'],['compras','Compras'],['contratos','Contratos']]},
+  {label:'Atendimento',items:[['unidades','Unidades de Saúde'],['equipes','Equipes'],['profissionais','Profissionais'],['pacientes','População/Cadastros'],['consultas','Consultas'],['atendimentos','Atendimentos'],['exames','Exames'],['odontologia','Odontologia']]},
+  {label:'Saúde Pública',items:[['vacinacao','Vacinação'],['vacinas','Catálogo de Vacinas'],['vacina_estoque','Estoque de Vacinas'],['farmacia','Farmácia'],['medicamentos','Medicamentos'],['visitas','Visitas Domiciliares'],['encaminhamentos','Encaminhamentos'],['regulacao','Regulação']]},
+  {label:'Logística',items:[['transporte','Transporte'],['frota','Frota'],['frota_abastecimentos','Abastecimentos'],['frota_manutencoes','Manutenções'],['estoque','Estoque'],['estoque_mov','Movimentações'],['compras','Compras'],['contratos','Contratos']]},
   {label:'Gestão',items:[['programas','Programas de Saúde'],['campanhas','Campanhas'],['metas','Metas'],['indicadores','Indicadores'],['financeiro_saude','Financeiro']]},
-  {label:'Sistema',items:[['relatorios_saude','Relatórios'],['alertas_saude','Alertas'],['config_saude','Configurações']]},
+  {label:'Sistema',items:[['relatorios_saude','Relatórios'],['alertas_saude','Alertas'],['alertas_config','Config. Alertas'],['config_saude','Configurações']]},
 ];
 
 let currentView='dashboard_saude';
@@ -378,11 +378,60 @@ const MODULES={
     {id:'meta',label:'Meta',type:'number'},{id:'unidade_medida',label:'Unidade de medida'},{id:'responsavel',label:'Responsável'}
   ],cols:['nome','formula','periodicidade','meta','responsavel'],colLabels:['Nome','Fórmula','Period.','Meta','Responsável'],
   renderCol:(r,c)=>(r[c]||'—')},
+
+  equipes:{table:'saude_equipes',title:'Equipes',fields:[
+    {id:'nome',label:'Nome da equipe',span:2,required:true},{id:'tipo',label:'Tipo (ESF, NASF, etc.)'},
+    {id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},{id:'responsavel',label:'Responsável'}
+  ],cols:['nome','tipo','responsavel'],colLabels:['Equipe','Tipo','Responsável'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  vacinas:{table:'saude_vacinas',title:'Catálogo de Vacinas',fields:[
+    {id:'nome',label:'Nome da vacina',span:2,required:true},{id:'fabricante',label:'Fabricante'},
+    {id:'doses_esquema',label:'Doses no esquema',type:'number'},{id:'publico_alvo',label:'Público-alvo',span:2}
+  ],cols:['nome','fabricante','doses_esquema','publico_alvo'],colLabels:['Vacina','Fabricante','Doses','Público-alvo'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  vacina_estoque:{table:'saude_vacina_estoque',title:'Estoque de Vacinas',fields:[
+    {id:'vacina_id',label:'Vacina',type:'ref',ref:'vacinas',required:true},{id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades'},
+    {id:'lote',label:'Lote'},{id:'validade',label:'Validade',type:'date'},
+    {id:'quantidade_recebida',label:'Qtd recebida',type:'number'},{id:'quantidade_aplicada',label:'Qtd aplicada',type:'number'},
+    {id:'quantidade_perdida',label:'Qtd perdida',type:'number'}
+  ],cols:['lote','validade','quantidade_recebida','quantidade_aplicada','quantidade_perdida'],colLabels:['Lote','Validade','Recebidas','Aplicadas','Perdas'],
+  renderCol:(r,c)=>c==='validade'?fmtDate(r.validade):(r[c]||'0')},
+
+  estoque_mov:{table:'saude_estoque_mov',title:'Movimentações de Estoque',fields:[
+    {id:'estoque_id',label:'Material',type:'ref',ref:'estoque',required:true},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['entrada','Entrada'],['saida','Saída'],['ajuste','Ajuste'],['perda','Perda']]},
+    {id:'quantidade',label:'Quantidade',type:'number',required:true},{id:'lote',label:'Lote'},{id:'validade',label:'Validade',type:'date'},
+    {id:'data',label:'Data',type:'date',required:true},{id:'observacoes',label:'Observações',span:3}
+  ],cols:['data','tipo','quantidade','lote'],colLabels:['Data','Tipo','Qtd','Lote'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc'},
+
+  frota_abastecimentos:{table:'saude_frota_abastecimentos',title:'Abastecimentos',fields:[
+    {id:'veiculo_id',label:'Veículo',type:'ref',ref:'frota',required:true},{id:'data',label:'Data',type:'date',required:true},
+    {id:'km',label:'Km',type:'number'},{id:'litros',label:'Litros',type:'number'},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'posto',label:'Posto'}
+  ],cols:['data','km','litros','valor','posto'],colLabels:['Data','Km','Litros','Valor','Posto'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):(r[c]||'—'),query:'order=data.desc'},
+
+  frota_manutencoes:{table:'saude_frota_manutencoes',title:'Manutenções',fields:[
+    {id:'veiculo_id',label:'Veículo',type:'ref',ref:'frota',required:true},{id:'data',label:'Data',type:'date',required:true},
+    {id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:2},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'oficina',label:'Oficina'},{id:'km',label:'Km',type:'number'}
+  ],cols:['data','tipo','descricao','valor','oficina'],colLabels:['Data','Tipo','Descrição','Valor','Oficina'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):(r[c]||'—'),query:'order=data.desc'},
+
+  alertas_config:{table:'saude_alertas_config',title:'Config. de Alertas',fields:[
+    {id:'nome',label:'Nome do alerta',span:2,required:true},{id:'descricao',label:'Descrição',span:3},
+    {id:'condicao',label:'Condição',span:2},{id:'severidade',label:'Severidade',type:'select',opts:[['info','Info'],['atencao','Atenção'],['critico','Crítico']]},
+    {id:'ativo',label:'Ativo',type:'checkbox',default:true}
+  ],cols:['nome','condicao','severidade','ativo'],colLabels:['Nome','Condição','Severidade','Ativo'],
+  renderCol:(r,c)=>c==='severidade'?pill(r.severidade):c==='ativo'?pill(r.ativo?'ativo':'inativo',r.ativo?'Ativo':'Inativo'):(r[c]||'—')},
 };
 
 // Ref name→label map
-const REF_TABLES={unidades:'saude_unidades',profissionais:'saude_profissionais',pacientes:'saude_pacientes',medicamentos:'saude_medicamentos',frota:'saude_frota',vacinas:'saude_vacinas'};
-const REF_LABEL_FIELD={unidades:'nome',profissionais:'nome',pacientes:'nome',medicamentos:'nome',frota:'veiculo',vacinas:'nome'};
+const REF_TABLES={unidades:'saude_unidades',equipes:'saude_equipes',profissionais:'saude_profissionais',pacientes:'saude_pacientes',medicamentos:'saude_medicamentos',frota:'saude_frota',vacinas:'saude_vacinas',estoque:'saude_estoque'};
+const REF_LABEL_FIELD={unidades:'nome',equipes:'nome',profissionais:'nome',pacientes:'nome',medicamentos:'nome',frota:'veiculo',vacinas:'nome',estoque:'material'};
 
 async function loadRefOptions(refKey){
   if(caches[refKey])return caches[refKey];
@@ -392,7 +441,7 @@ async function loadRefOptions(refKey){
 function buildViews(){
   let html='';
   // Dashboard
-  html+='<section class="view active" id="view-dashboard_saude"><div class="topbar"><div><h1>Dashboard da Saúde</h1><div class="sub">Visão geral em tempo real</div></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Consultas por situação</h3><div class="bars" id="dash-consultas-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
+  html+='<section class="view active" id="view-dashboard_saude"><div class="topbar"><div><h1>Dashboard da Saúde</h1><div class="sub">Visão geral em tempo real</div></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Consultas por situação</h3><div class="bars" id="dash-consultas-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="grid-2"><div class="panel"><h3>Infraestrutura</h3><div id="dash-infra"></div></div><div class="panel"><h3>Logística e Frota</h3><div id="dash-logistica"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
   // Secretaria
   html+='<section class="view" id="view-secretaria_saude"><div class="topbar"><div><h1>Secretaria de Saúde</h1><div class="sub">Dados cadastrais da secretaria</div></div></div><div class="panel" id="sec-saude-panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="ss-nome"></div><div class="field"><label>CNPJ</label><input id="ss-cnpj"></div><div class="field"><label>Secretário(a)</label><input id="ss-secretario"></div><div class="field"><label>Adjunto(a)</label><input id="ss-adjunto"></div><div class="field"><label>Telefone</label><input id="ss-telefone"></div><div class="field"><label>WhatsApp</label><input id="ss-whatsapp"></div><div class="field"><label>E-mail</label><input id="ss-email"></div><div class="field span-3"><label>Endereço</label><input id="ss-endereco"></div><div class="field span-2"><label>Horário de atendimento</label><input id="ss-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="ss-orcamento" type="text" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="ss-meta" type="text" inputmode="decimal"></div><div class="field span-3"><label>Observações</label><textarea id="ss-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSecretaria()" id="ss-btn">Salvar</button></div></div></section>';
 
@@ -577,6 +626,73 @@ function buildKpis(key,data){
     const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);
     kpis+='<div class="kpi"><div class="ico">Vigentes</div><div class="num">'+vig+'</div><div class="lbl">contratos</div></div>';
     kpis+='<div class="kpi"><div class="ico">Valor total</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">em contratos</div></div>';
+  }else if(key==='profissionais'){
+    const at=data.filter(r=>r.situacao==='ativo').length;
+    const af=data.filter(r=>r.situacao==='afastado'||r.situacao==='ferias').length;
+    kpis+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">em serviço</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Afastados/Férias</div><div class="num" style="color:var(--warn);">'+af+'</div><div class="lbl">fora de serviço</div></div>';
+  }else if(key==='pacientes'){
+    const at=data.filter(r=>r.situacao==='ativo').length;
+    kpis+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">cadastros ativos</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Cobertura</div><div class="num">'+Math.round(at/Math.max(1,n)*100)+'%</div><div class="lbl">ativos/total</div></div>';
+  }else if(key==='unidades'){
+    const ativas=data.filter(r=>r.ativa).length;
+    const cap=data.reduce((s,r)=>s+(Number(r.capacidade_atendimento)||0),0);
+    kpis+='<div class="kpi"><div class="ico">Ativas</div><div class="num" style="color:var(--ok);">'+ativas+'</div><div class="lbl">unidades</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Capacidade</div><div class="num">'+cap+'</div><div class="lbl">atendimentos/dia</div></div>';
+  }else if(key==='farmacia'){
+    const ent=data.filter(r=>r.tipo==='entrada').reduce((s,r)=>s+(Number(r.quantidade)||0),0);
+    const disp=data.filter(r=>r.tipo==='dispensacao').reduce((s,r)=>s+(Number(r.quantidade)||0),0);
+    const perda=data.filter(r=>r.tipo==='perda').reduce((s,r)=>s+(Number(r.quantidade)||0),0);
+    kpis+='<div class="kpi"><div class="ico">Entradas</div><div class="num" style="color:var(--ok);">'+ent+'</div><div class="lbl">unidades</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Dispensações</div><div class="num">'+disp+'</div><div class="lbl">unidades</div></div>';
+    if(perda>0)kpis+='<div class="kpi"><div class="ico">Perdas</div><div class="num" style="color:var(--danger);">'+perda+'</div><div class="lbl">unidades</div></div>';
+  }else if(key==='visitas'){
+    const retorno=data.filter(r=>r.retorno_necessario).length;
+    kpis+='<div class="kpi"><div class="ico">Com retorno</div><div class="num" style="color:var(--warn);">'+retorno+'</div><div class="lbl">retorno necessário</div></div>';
+  }else if(key==='transporte'){
+    const custo=data.reduce((s,r)=>s+(Number(r.custo)||0),0);
+    const pass=data.reduce((s,r)=>s+(Number(r.passageiros)||0),0);
+    kpis+='<div class="kpi"><div class="ico">Passageiros</div><div class="num">'+pass+'</div><div class="lbl">transportados</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Custo total</div><div class="num">'+moneyShort(custo)+'</div><div class="lbl">em transporte</div></div>';
+  }else if(key==='frota'){
+    const at=data.filter(r=>r.situacao==='ativo').length;
+    const man=data.filter(r=>r.situacao==='em_manutencao').length;
+    kpis+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">veículos</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Em manutenção</div><div class="num" style="color:var(--warn);">'+man+'</div><div class="lbl">veículos</div></div>';
+  }else if(key==='vacinacao'){
+    kpis+='<div class="kpi"><div class="ico">Doses aplicadas</div><div class="num" style="color:var(--ok);">'+n+'</div><div class="lbl">total</div></div>';
+  }else if(key==='odontologia'){
+    const real=data.filter(r=>r.situacao==='realizado').length;
+    const faltas=data.filter(r=>r.situacao==='faltou').length;
+    kpis+='<div class="kpi"><div class="ico">Realizados</div><div class="num" style="color:var(--ok);">'+real+'</div><div class="lbl">atendimentos</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Faltas</div><div class="num" style="color:var(--danger);">'+faltas+'</div><div class="lbl">pacientes</div></div>';
+  }else if(key==='compras'){
+    const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);
+    const pend=data.filter(r=>r.situacao==='solicitada'||r.situacao==='em_cotacao').length;
+    kpis+='<div class="kpi"><div class="ico">Valor total</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">em compras</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Pendentes</div><div class="num" style="color:var(--warn);">'+pend+'</div><div class="lbl">aguardando</div></div>';
+  }else if(key==='campanhas'){
+    const totalAtend=data.reduce((s,r)=>s+(Number(r.atendimentos)||0),0);
+    const totalMeta=data.reduce((s,r)=>s+(Number(r.meta)||0),0);
+    const pct=totalMeta>0?Math.round(totalAtend/totalMeta*100):0;
+    kpis+='<div class="kpi"><div class="ico">Atendimentos</div><div class="num">'+totalAtend+'</div><div class="lbl">realizados</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Atingimento</div><div class="num">'+pct+'%</div><div class="lbl">da meta total</div></div>';
+  }else if(key==='frota_abastecimentos'){
+    const litros=data.reduce((s,r)=>s+(Number(r.litros)||0),0);
+    const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);
+    kpis+='<div class="kpi"><div class="ico">Litros</div><div class="num">'+Math.round(litros)+'</div><div class="lbl">abastecidos</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Custo total</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">em combustível</div></div>';
+  }else if(key==='frota_manutencoes'){
+    const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);
+    kpis+='<div class="kpi"><div class="ico">Custo total</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">em manutenções</div></div>';
+  }else if(key==='vacina_estoque'){
+    const rec=data.reduce((s,r)=>s+(Number(r.quantidade_recebida)||0),0);
+    const apl=data.reduce((s,r)=>s+(Number(r.quantidade_aplicada)||0),0);
+    const perd=data.reduce((s,r)=>s+(Number(r.quantidade_perdida)||0),0);
+    const saldo=rec-apl-perd;
+    kpis+='<div class="kpi"><div class="ico">Recebidas</div><div class="num">'+rec+'</div><div class="lbl">doses</div></div>';
+    kpis+='<div class="kpi"><div class="ico">Saldo</div><div class="num" style="color:'+(saldo>0?'var(--ok)':'var(--danger)')+';">'+saldo+'</div><div class="lbl">doses em estoque</div></div>';
   }
   el.innerHTML=kpis;
 }
@@ -584,7 +700,7 @@ function buildKpis(key,data){
 // ============ DASHBOARD ============
 async function loadDashboard(){
   try{
-    const [consultas,atend,exames,vac,odonto,med,transp,visitas,encam,reg,metas,alertas]=await Promise.all([
+    const [consultas,atend,exames,vac,odonto,med,transp,visitas,encam,reg,metas,alertas,unids,profs,equips,frota,abast,manut,pacients]=await Promise.all([
       sbGet('saude_consultas','select=id,situacao').catch(()=>[]),
       sbGet('saude_atendimentos','select=id').catch(()=>[]),
       sbGet('saude_exames','select=id,situacao').catch(()=>[]),
@@ -597,6 +713,13 @@ async function loadDashboard(){
       sbGet('saude_regulacao','select=id,situacao').catch(()=>[]),
       sbGet('saude_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
       sbGet('saude_alertas','select=*&lido=eq.false&order=criado_em.desc&limit=10').catch(()=>[]),
+      sbGet('saude_unidades','select=id,ativa,tipo').catch(()=>[]),
+      sbGet('saude_profissionais','select=id,situacao').catch(()=>[]),
+      sbGet('saude_equipes','select=id').catch(()=>[]),
+      sbGet('saude_frota','select=id,situacao').catch(()=>[]),
+      sbGet('saude_frota_abastecimentos','select=id,valor,litros').catch(()=>[]),
+      sbGet('saude_frota_manutencoes','select=id,valor').catch(()=>[]),
+      sbGet('saude_pacientes','select=id,situacao').catch(()=>[]),
     ]);
     const examPend=exames.filter(e=>e.situacao==='pendente'||e.situacao==='solicitado').length;
     const regAguard=reg.filter(r=>r.situacao==='aguardando').length;
@@ -625,6 +748,32 @@ async function loadDashboard(){
       const ico=m.situacao==='atingida'?'🟢':m.situacao==='atencao'?'🟡':'🔴';
       return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;"><span>'+ico+'</span><span style="flex:1;">'+m.indicador+'</span><span style="font-weight:700;color:var(--'+cor+');">'+(m.percentual||0)+'%</span></div>';
     }).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhuma meta cadastrada.</p>';
+
+    // Infraestrutura
+    const unidsAtivas=unids.filter(u=>u.ativa).length;
+    const profsAtivos=profs.filter(p=>p.situacao==='ativo').length;
+    const profsAfast=profs.filter(p=>p.situacao==='afastado'||p.situacao==='ferias').length;
+    const pacAtivos=pacients.filter(p=>p.situacao==='ativo').length;
+    document.getElementById('dash-infra').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+      '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+unidsAtivas+'</div><div style="font-size:11px;color:var(--ink-soft);">Unidades ativas</div></div>'+
+      '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+profsAtivos+'</div><div style="font-size:11px;color:var(--ink-soft);">Profissionais ativos</div></div>'+
+      '<div style="padding:10px;background:#FEF3C7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+profsAfast+'</div><div style="font-size:11px;color:var(--ink-soft);">Afastados/Férias</div></div>'+
+      '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+pacAtivos+'</div><div style="font-size:11px;color:var(--ink-soft);">Pacientes ativos</div></div>'+
+      '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+equips.length+'</div><div style="font-size:11px;color:var(--ink-soft);">Equipes</div></div>'+
+      '</div>';
+
+    // Logística
+    const frotaAt=frota.filter(f=>f.situacao==='ativo').length;
+    const frotaMan=frota.filter(f=>f.situacao==='em_manutencao').length;
+    const custAbast=abast.reduce((s,a)=>s+(Number(a.valor)||0),0);
+    const custManut=manut.reduce((s,m)=>s+(Number(m.valor)||0),0);
+    const litrosTotal=abast.reduce((s,a)=>s+(Number(a.litros)||0),0);
+    document.getElementById('dash-logistica').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+      '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+frotaAt+'</div><div style="font-size:11px;color:var(--ink-soft);">Veículos ativos</div></div>'+
+      '<div style="padding:10px;background:#FEF3C7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+frotaMan+'</div><div style="font-size:11px;color:var(--ink-soft);">Em manutenção</div></div>'+
+      '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--royal);">'+moneyShort(custAbast)+'</div><div style="font-size:11px;color:var(--ink-soft);">Combustível ('+Math.round(litrosTotal)+'L)</div></div>'+
+      '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--royal);">'+moneyShort(custManut)+'</div><div style="font-size:11px;color:var(--ink-soft);">Manutenções</div></div>'+
+      '</div>';
 
     // Alertas
     document.getElementById('dash-alertas').innerHTML=alertas.length?alertas.map(a=>{
