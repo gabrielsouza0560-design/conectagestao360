@@ -238,7 +238,7 @@
     <p class="panel-sub">Funil de oportunidades — convênios, emendas e financiamentos</p>
     <div class="kpi-grid" id="recursos-kpi-grid" style="margin-bottom:18px;"></div>
     <table>
-      <thead><tr><th>Oportunidade</th><th>Fonte</th><th>Valor</th><th>Etapa</th><th>Prazo</th></tr></thead>
+      <thead><tr><th>Programa</th><th>Órgão Concedente</th><th>Valor</th><th>Etapa</th><th>Prazo</th></tr></thead>
       <tbody id="recursos-destaque"></tbody>
     </table>
   </div>
@@ -478,22 +478,22 @@ async function populate(){
 
     // ---------- Captação de Recursos ----------
     try {
-      const recursos = await sbGet('captacao_recursos', 'select=id,titulo,fonte,valor_estimado,etapa,prazo_submissao,secretarias(nome)&order=criado_em.desc');
+      const recursos = await sbGet('oportunidades_recursos', 'select=id,programa,orgao_concedente,esfera,valor_estimado,status,prazo_submissao,secretarias(nome)&order=criado_em.desc');
       const ETAPA_LABEL = {prospectando:'Prospectando',em_elaboracao:'Em elaboração',submetido:'Submetido',aprovado:'Aprovado',reprovado:'Reprovado',em_execucao:'Em execução',concluido:'Concluído'};
       const ETAPA_PILL = {prospectando:'status-planejado',em_elaboracao:'status-em_andamento',submetido:'status-em_andamento',aprovado:'status-concluido',reprovado:'status-cancelado',em_execucao:'status-em_andamento',concluido:'status-concluido'};
       const totalRec = recursos.length;
-      const aprovados = recursos.filter(r => r.etapa === 'aprovado' || r.etapa === 'em_execucao' || r.etapa === 'concluido');
+      const aprovados = recursos.filter(r => r.status === 'aprovado' || r.status === 'em_execucao' || r.status === 'concluido');
       const valorAprov = aprovados.reduce((s,r) => s + (Number(r.valor_estimado)||0), 0);
-      const emAndamento = recursos.filter(r => r.etapa === 'em_elaboracao' || r.etapa === 'submetido');
+      const emAndamento = recursos.filter(r => r.status === 'em_elaboracao' || r.status === 'submetido');
       const valorPipeline = emAndamento.reduce((s,r) => s + (Number(r.valor_estimado)||0), 0);
       document.getElementById('recursos-kpi-grid').innerHTML =
         '<div class="kpi"><div class="ico">Total</div><div class="num">' + totalRec + '</div><div class="lbl">oportunidades cadastradas</div></div>' +
         '<div class="kpi"><div class="ico">Aprovados</div><div class="num">' + moneyShort(valorAprov) + '</div><div class="lbl">' + aprovados.length + ' recursos aprovados</div></div>' +
         '<div class="kpi"><div class="ico">Pipeline</div><div class="num">' + moneyShort(valorPipeline) + '</div><div class="lbl">' + emAndamento.length + ' em tramitação</div></div>' +
-        '<div class="kpi"><div class="ico">Prospectando</div><div class="num">' + recursos.filter(r => r.etapa === 'prospectando').length + '</div><div class="lbl">novas oportunidades</div></div>';
+        '<div class="kpi"><div class="ico">Prospectando</div><div class="num">' + recursos.filter(r => r.status === 'prospectando').length + '</div><div class="lbl">novas oportunidades</div></div>';
       const topRec = recursos.slice(0,8);
       document.getElementById('recursos-destaque').innerHTML = topRec.length
-        ? topRec.map(r => '<tr><td>' + r.titulo + '</td><td>' + (r.fonte||'—') + '</td><td style="font-family:var(--mono);">' + money(r.valor_estimado) + '</td><td><span class="status-pill ' + (ETAPA_PILL[r.etapa]||'') + '">' + (ETAPA_LABEL[r.etapa]||r.etapa) + '</span></td><td>' + (r.prazo_submissao ? new Date(r.prazo_submissao).toLocaleDateString('pt-BR') : '—') + '</td></tr>').join('')
+        ? topRec.map(r => '<tr><td>' + r.programa + '</td><td>' + (r.orgao_concedente||'—') + '</td><td style="font-family:var(--mono);">' + money(r.valor_estimado) + '</td><td><span class="status-pill ' + (ETAPA_PILL[r.status]||'') + '">' + (ETAPA_LABEL[r.status]||r.status) + '</span></td><td>' + (r.prazo_submissao ? new Date(r.prazo_submissao).toLocaleDateString('pt-BR') : '—') + '</td></tr>').join('')
         : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Nenhum recurso cadastrado ainda.</td></tr>';
     } catch(e) { console.warn('Recursos não carregado:', e.message); }
 
