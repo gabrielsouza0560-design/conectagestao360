@@ -475,7 +475,7 @@
         <h4 style="margin:26px 0 8px;">🤝 Patrocínios</h4>
         <div style="overflow-x:auto;">
           <table>
-            <thead><tr><th>Patrocinador</th><th>CNPJ/CPF</th><th>Tipo de apoio</th><th>Peças</th><th>Valor</th><th>Contrapartida</th><th></th></tr></thead>
+            <thead><tr><th>Patrocinador</th><th>CNPJ/CPF</th><th>Tipo de apoio</th><th>Peças</th><th>Empréstimo</th><th>Valor</th><th>Contrapartida</th><th></th></tr></thead>
             <tbody id="tbl-dossie-patrocinios"></tbody>
           </table>
         </div>
@@ -486,6 +486,7 @@
           <div class="field"><label>CNPJ/CPF</label><input id="dp-cnpj"></div>
           <div class="field"><label>Responsável</label><input id="dp-responsavel"></div>
           <div class="field"><label>Telefone</label><input id="dp-telefone"></div>
+          <div class="field"><label>WhatsApp</label><input id="dp-whatsapp" placeholder="(00) 00000-0000"></div>
           <div class="field span-2"><label>Endereço</label><input id="dp-endereco"></div>
           <div class="field"><label>Tipo de apoio</label>
             <select id="dp-tipo" onchange="toggleDpQuantidadePecas()">
@@ -500,6 +501,14 @@
             </select>
           </div>
           <div class="field" id="dp-quantidade-pecas-wrap" style="display:none;"><label>Quantidade de peças</label><input id="dp-quantidade-pecas" type="number" min="0"></div>
+          <div class="field" id="dp-itens-emprestados-wrap" style="display:none;"><label>Itens emprestados</label><input id="dp-itens-emprestados" placeholder="Ex.: 5 vestidos, 3 ternos, 10 sapatos"></div>
+          <div class="field" id="dp-situacao-emprestimo-wrap" style="display:none;"><label>Situação do empréstimo</label>
+            <select id="dp-situacao-emprestimo">
+              <option value="pendente">Pendente</option>
+              <option value="retirado">Retirado</option>
+              <option value="devolvido">Devolvido</option>
+            </select>
+          </div>
           <div class="field"><label>Valor (R$, se houver)</label><input id="dp-valor" type="text" inputmode="decimal" placeholder="Ex.: 2.000,00"></div>
           <div class="field"><label>Forma de pagamento</label><input id="dp-forma-pagamento"></div>
           <div class="field span-2"><label>Descrição do apoio</label><input id="dp-descricao" placeholder="Ex.: Doou 40 fantasias para as crianças do desfile"></div>
@@ -1926,6 +1935,9 @@ const CHECKLIST_ITENS_PADRAO = [
   'Segurança definida','Polícia Militar comunicada','Conselho Tutelar comunicado','Corpo de Bombeiros comunicado',
   'Saúde/ambulância organizada','Banheiros definidos','Limpeza organizada','Energia definida',
   'Comerciantes cadastrados','Patrocínios cadastrados','Divulgação realizada','Autorizações/documentação conferidas',
+  'Crianças do desfile inscritas','Fichas de inscrição conferidas','Autorizações dos responsáveis coletadas',
+  'Lojas de roupas confirmadas','Roupas/acessórios retirados nas lojas','Roupas/acessórios devolvidos após evento',
+  'Arrecadação de alimentos coletada','Alimentos entregues à APAE','Prazo de entrega comunicado (01/09 às 17h)',
 ];
 
 async function abrirDossie(acaoId){
@@ -1997,15 +2009,23 @@ function renderDossie(){
         '<td><button class="btn-ghost" onclick="deleteDossieItem(\'evento_comerciantes\',\'' + c.id + '\')">remover</button></td></tr>').join('')
     : '<tr><td colspan="8" class="empty">Nenhum comerciante cadastrado ainda.</td></tr>';
 
+  const EMPRESTIMO_LABEL = {pendente:'Pendente',retirado:'Retirado',devolvido:'Devolvido'};
+  const EMPRESTIMO_PILL = {pendente:'status-em_andamento',retirado:'status-planejado',devolvido:'status-concluido'};
   document.getElementById('tbl-dossie-patrocinios').innerHTML = dossiePatrocinios.length
-    ? dossiePatrocinios.map(p => '<tr><td>' + p.nome + (p.nome_fantasia ? ' <span style="color:var(--muted);">(' + p.nome_fantasia + ')</span>' : '') + '</td>' +
+    ? dossiePatrocinios.map(p => {
+        const empTxt = p.tipo_apoio === 'roupas_desfile'
+          ? '<span class="status-pill ' + (EMPRESTIMO_PILL[p.situacao_emprestimo]||'') + '">' + (EMPRESTIMO_LABEL[p.situacao_emprestimo]||'—') + '</span>' + (p.itens_emprestados ? '<br><span style="font-size:11px;color:var(--muted);">' + p.itens_emprestados + '</span>' : '')
+          : '—';
+        return '<tr><td>' + p.nome + (p.nome_fantasia ? ' <span style="color:var(--muted);">(' + p.nome_fantasia + ')</span>' : '') + (p.whatsapp ? '<br><span style="font-size:11px;color:var(--muted);">' + p.whatsapp + '</span>' : '') + '</td>' +
         '<td>' + (p.cnpj_cpf || '—') + '</td>' +
         '<td>' + (PATROCINIO_TIPO_LABEL[p.tipo_apoio] || p.tipo_apoio || '—') + '</td>' +
         '<td>' + (p.quantidade_pecas != null ? p.quantidade_pecas : '—') + '</td>' +
+        '<td>' + empTxt + '</td>' +
         '<td>' + money(p.valor) + '</td>' +
         '<td>' + (p.contrapartida || p.descricao_apoio || '—') + '</td>' +
-        '<td><button class="btn-ghost" onclick="editarPatrocinio(\'' + p.id + '\')">editar</button> <button class="btn-ghost" style="color:var(--danger);" onclick="deleteDossieItem(\'evento_patrocinios\',\'' + p.id + '\')">remover</button></td></tr>').join('')
-    : '<tr><td colspan="7" class="empty">Nenhum patrocínio cadastrado ainda.</td></tr>';
+        '<td><button class="btn-ghost" onclick="editarPatrocinio(\'' + p.id + '\')">editar</button> <button class="btn-ghost" style="color:var(--danger);" onclick="deleteDossieItem(\'evento_patrocinios\',\'' + p.id + '\')">remover</button></td></tr>';
+      }).join('')
+    : '<tr><td colspan="8" class="empty">Nenhum patrocínio cadastrado ainda.</td></tr>';
 
   const totalAtracoes = dossieAtracoes.reduce((s,a) => s + (Number(a.valor)||0), 0);
   document.getElementById('dossie-total-atracoes').textContent = dossieAtracoes.length ? 'Total em atrações: ' + money(totalAtracoes) : '';
@@ -2108,7 +2128,10 @@ async function addComerciante(){
 }
 
 function toggleDpQuantidadePecas(){
-  document.getElementById('dp-quantidade-pecas-wrap').style.display = document.getElementById('dp-tipo').value === 'roupas_desfile' ? 'block' : 'none';
+  const isRoupas = document.getElementById('dp-tipo').value === 'roupas_desfile';
+  document.getElementById('dp-quantidade-pecas-wrap').style.display = isRoupas ? 'block' : 'none';
+  document.getElementById('dp-itens-emprestados-wrap').style.display = isRoupas ? 'block' : 'none';
+  document.getElementById('dp-situacao-emprestimo-wrap').style.display = isRoupas ? 'block' : 'none';
 }
 
 function editarPatrocinio(id){
@@ -2121,10 +2144,13 @@ function editarPatrocinio(id){
   document.getElementById('dp-cnpj').value = p.cnpj_cpf || '';
   document.getElementById('dp-responsavel').value = p.responsavel || '';
   document.getElementById('dp-telefone').value = p.telefone || '';
+  document.getElementById('dp-whatsapp').value = p.whatsapp || '';
   document.getElementById('dp-endereco').value = p.endereco || '';
   document.getElementById('dp-tipo').value = p.tipo_apoio || 'financeiro';
   toggleDpQuantidadePecas();
   document.getElementById('dp-quantidade-pecas').value = p.quantidade_pecas != null ? p.quantidade_pecas : '';
+  document.getElementById('dp-itens-emprestados').value = p.itens_emprestados || '';
+  document.getElementById('dp-situacao-emprestimo').value = p.situacao_emprestimo || 'pendente';
   document.getElementById('dp-valor').value = p.valor ? Number(p.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '';
   document.getElementById('dp-forma-pagamento').value = p.forma_pagamento || '';
   document.getElementById('dp-descricao').value = p.descricao_apoio || '';
@@ -2136,14 +2162,17 @@ function editarPatrocinio(id){
 }
 function cancelarEdicaoPatrocinio(){
   editandoPatrocinioId = null;
-  ['dp-nome','dp-razao-social','dp-nome-fantasia','dp-cnpj','dp-responsavel','dp-telefone','dp-endereco','dp-quantidade-pecas','dp-valor','dp-forma-pagamento','dp-descricao','dp-contrapartida','dp-observacoes'].forEach(id => document.getElementById(id).value = '');
+  ['dp-nome','dp-razao-social','dp-nome-fantasia','dp-cnpj','dp-responsavel','dp-telefone','dp-whatsapp','dp-endereco','dp-quantidade-pecas','dp-itens-emprestados','dp-valor','dp-forma-pagamento','dp-descricao','dp-contrapartida','dp-observacoes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('dp-quantidade-pecas-wrap').style.display = 'none';
+  document.getElementById('dp-itens-emprestados-wrap').style.display = 'none';
+  document.getElementById('dp-situacao-emprestimo-wrap').style.display = 'none';
   document.getElementById('btn-add-patrocinio').textContent = '+ Adicionar patrocínio';
   document.getElementById('btn-cancel-patrocinio').style.display = 'none';
 }
 async function addPatrocinio(){
   const nome = document.getElementById('dp-nome').value.trim();
   if(!nome || !dossieAcaoId) return;
+  const tipoApoio = document.getElementById('dp-tipo').value;
   const dados = {
     nome: nome,
     razao_social: document.getElementById('dp-razao-social').value.trim() || null,
@@ -2151,9 +2180,12 @@ async function addPatrocinio(){
     cnpj_cpf: document.getElementById('dp-cnpj').value.trim() || null,
     responsavel: document.getElementById('dp-responsavel').value.trim() || null,
     telefone: document.getElementById('dp-telefone').value.trim() || null,
+    whatsapp: document.getElementById('dp-whatsapp').value.trim() || null,
     endereco: document.getElementById('dp-endereco').value.trim() || null,
-    tipo_apoio: document.getElementById('dp-tipo').value || null,
+    tipo_apoio: tipoApoio || null,
     quantidade_pecas: parseInt(document.getElementById('dp-quantidade-pecas').value) || null,
+    itens_emprestados: tipoApoio === 'roupas_desfile' ? (document.getElementById('dp-itens-emprestados').value.trim() || null) : null,
+    situacao_emprestimo: tipoApoio === 'roupas_desfile' ? document.getElementById('dp-situacao-emprestimo').value : 'pendente',
     valor: parseMoneyBR(document.getElementById('dp-valor').value),
     forma_pagamento: document.getElementById('dp-forma-pagamento').value.trim() || null,
     descricao_apoio: document.getElementById('dp-descricao').value.trim() || null,
