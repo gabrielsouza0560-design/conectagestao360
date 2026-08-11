@@ -2138,6 +2138,7 @@ async function addComerciante(){
     });
     ['dc-nome','dc-empresa','dc-cpf','dc-telefone','dc-segmento','dc-produto','dc-numero-barraca','dc-localizacao','dc-tamanho','dc-valor','dc-forma-pagamento','dc-observacoes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('dc-isento').checked = false;
+    await anexarPdfPendente('comerciantes', dossieAcaoId, 'PDF importado — comerciante ' + nome);
     await carregarDossie();
   } catch (e) {
     alert('Não foi possível adicionar: ' + e.message.slice(0,200));
@@ -2216,6 +2217,7 @@ async function addPatrocinio(){
       dados.tenant_id = session.claims.tenant_id;
       dados.acao_id = dossieAcaoId;
       await sbPost('evento_patrocinios', dados);
+      await anexarPdfPendente('patrocinios', dossieAcaoId, 'PDF importado — patrocínio ' + nome);
     }
     cancelarEdicaoPatrocinio();
     await carregarDossie();
@@ -2272,6 +2274,7 @@ async function addAtracao(){
       dados.tenant_id = session.claims.tenant_id;
       dados.acao_id = dossieAcaoId;
       await sbPost('evento_atracoes', dados);
+      await anexarPdfPendente('atracoes', dossieAcaoId, 'PDF importado — atração ' + nome);
     }
     cancelarEdicaoAtracao();
     await carregarDossie();
@@ -2345,6 +2348,7 @@ async function addCriancaDesfile(){
       dados.tenant_id = session.claims.tenant_id;
       dados.acao_id = dossieAcaoId;
       await sbPost('evento_desfile_criancas', dados);
+      await anexarPdfPendente('criancas', dossieAcaoId, 'PDF importado — criança ' + nome);
     }
     cancelarEdicaoCrianca();
     await carregarDossie();
@@ -3961,6 +3965,7 @@ async function submitAcao(){
         for(const v of videos){ try { await uploadMidiaEvento(v, 'video', novaAcao.id, categoria, legenda); } catch(e){ falhas.push(v.name); } }
         if(falhas.length) alert('Ação salva, mas não foi possível enviar: ' + falhas.join(', '));
       }
+      await anexarPdfPendente('acoes', novaAcao.id, 'PDF importado — ' + (payload.titulo || novaAcao.titulo));
       if(ehEvento) mostrarLinkAvaliacao(novaAcao.id);
     }
 
@@ -4130,6 +4135,30 @@ const PDF_MAPPINGS = {
   }
 };
 
+let pdfPendentes = {};
+
+async function anexarPdfPendente(tipo, acaoId, nomeDocumento){
+  const file = pdfPendentes[tipo];
+  if(!file || !acaoId) return;
+  try {
+    const path = session.claims.tenant_id + '/' + acaoId + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.pdf';
+    const res = await fetch(SUPABASE_URL + '/storage/v1/object/documentos/' + path, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/pdf' },
+      body: file,
+    });
+    if(!res.ok) throw new Error(await res.text());
+    await sbPost('acao_anexos', {
+      tenant_id: session.claims.tenant_id, acao_id: acaoId, nome: nomeDocumento,
+      url: SUPABASE_URL + '/storage/v1/object/documentos/' + path,
+      storage_path: path, categoria: 'outro', publico: false, enviado_por: session.claims.perfil || null,
+    });
+    delete pdfPendentes[tipo];
+  } catch (e) {
+    console.warn('Não foi possível anexar o PDF original aos Documentos: ' + e.message);
+  }
+}
+
 async function importarPdf(input, tipo){
   const file = input.files[0];
   if(!file) return;
@@ -4153,11 +4182,12 @@ async function importarPdf(input, tipo){
         preenchidos++;
       }
     }
+    pdfPendentes[tipo] = file;
 
     if(preenchidos > 0){
-      alert('✅ PDF importado! ' + preenchidos + ' campo(s) preenchido(s) automaticamente.\n\nConfira os dados antes de salvar.');
+      alert('✅ PDF importado! ' + preenchidos + ' campo(s) preenchido(s) automaticamente.\n\nConfira os dados antes de salvar — o PDF original é anexado automaticamente aos Documentos ao salvar.');
     } else {
-      alert('⚠️ PDF lido, mas nenhum campo foi identificado automaticamente.\n\nO texto extraído foi:\n\n' + texto.slice(0,500) + '...\n\nVocê pode preencher manualmente.');
+      alert('⚠️ PDF lido, mas nenhum campo foi identificado automaticamente.\n\nO texto extraído foi:\n\n' + texto.slice(0,500) + '...\n\nVocê pode preencher manualmente — o PDF original ainda será anexado aos Documentos ao salvar.');
     }
   } catch(e){
     alert('Erro ao processar o PDF: ' + e.message);
