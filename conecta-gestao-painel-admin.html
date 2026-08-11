@@ -265,7 +265,7 @@
         <div class="fieldset-label">Localização e financeiro</div>
         <div class="form-grid">
           <div class="field"><label>Bairro</label><input id="f-bairro"></div>
-          <div class="field"><label>Valor investido</label><input id="f-valor" type="number" step="0.01"></div>
+          <div class="field"><label>Valor investido</label><input id="f-valor" type="text" inputmode="decimal" placeholder="Ex.: 3.000,00"></div>
           <div class="field"><label>Origem do recurso</label><input id="f-origem"></div>
         </div>
         <div class="fieldset-label">Status</div>
@@ -291,7 +291,7 @@
           <div class="form-grid">
             <div class="field span-2"><label>Empresa contratada</label><input id="f-contratada" placeholder="Ex.: Construtora ABC Ltda."></div>
             <div class="field"><label>Nº do contrato</label><input id="f-numero-contrato"></div>
-            <div class="field"><label>Valor executado até agora (R$)</label><input id="f-valor-executado" type="number" step="0.01"></div>
+            <div class="field"><label>Valor executado até agora (R$)</label><input id="f-valor-executado" type="text" inputmode="decimal" placeholder="Ex.: 3.000,00"></div>
             <div class="field"><label>Percentual de execução (%)</label><input id="f-percentual-execucao" type="number" min="0" max="100"></div>
             <div class="field"><label>Prazo de conclusão</label><input id="f-prazo-conclusao" type="date"></div>
           </div>
@@ -335,7 +335,7 @@
           <div class="form-grid">
             <div class="field"><label>Público estimado</label><input id="f-publico-estimado" type="number" placeholder="Ex.: 5000"></div>
             <div class="field"><label>Comerciantes/barracas participantes</label><input id="f-comerciantes" type="number" placeholder="Ex.: 25"></div>
-            <div class="field"><label>Valor de retorno estimado (R$)</label><input id="f-valor-retorno" type="number" step="0.01" placeholder="Impacto econômico estimado"></div>
+            <div class="field"><label>Valor de retorno estimado (R$)</label><input id="f-valor-retorno" type="text" inputmode="decimal" placeholder="Ex.: 30.000,00"></div>
           </div>
           <p class="panel-sub" style="margin:2px 0 10px;">Use o campo "Origem do recurso" acima para registrar se veio de emenda (parlamentar/federal/estadual) ou de recurso próprio.</p>
         </div>
@@ -400,7 +400,7 @@
         <h3>Obras cadastradas</h3>
         <p class="panel-sub">Cada obra é uma ação com contratada, percentual de execução e prazo de conclusão.</p>
         <table>
-          <thead><tr><th>Obra</th><th>Secretaria</th><th>Contratada</th><th>Investimento</th><th>Executado</th><th>Execução</th><th>Prazo</th><th>Status</th></tr></thead>
+          <thead><tr><th>Obra</th><th>Secretaria</th><th>Contratada</th><th>Investimento</th><th>Executado</th><th>Execução</th><th>Prazo</th><th>Status</th><th></th></tr></thead>
           <tbody id="tbl-obras"></tbody>
         </table>
       </div>
@@ -458,7 +458,7 @@
           <div class="field"><label>Nº da barraca</label><input id="dc-numero-barraca"></div>
           <div class="field"><label>Localização da barraca</label><input id="dc-localizacao"></div>
           <div class="field"><label>Tamanho</label><input id="dc-tamanho"></div>
-          <div class="field"><label>Valor cobrado (R$)</label><input id="dc-valor" type="number" step="0.01"></div>
+          <div class="field"><label>Valor cobrado (R$)</label><input id="dc-valor" type="text" inputmode="decimal" placeholder="Ex.: 150,00"></div>
           <div class="field"><label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="checkbox" id="dc-isento" style="width:auto;margin-right:8px;vertical-align:middle;"> Isento de taxa</label></div>
           <div class="field"><label>Forma de pagamento</label><input id="dc-forma-pagamento"></div>
           <div class="field"><label>Situação</label>
@@ -496,7 +496,7 @@
               <option value="outro">Outro</option>
             </select>
           </div>
-          <div class="field"><label>Valor (R$, se houver)</label><input id="dp-valor" type="number" step="0.01"></div>
+          <div class="field"><label>Valor (R$, se houver)</label><input id="dp-valor" type="text" inputmode="decimal" placeholder="Ex.: 2.000,00"></div>
           <div class="field"><label>Forma de pagamento</label><input id="dp-forma-pagamento"></div>
           <div class="field span-2"><label>Descrição do apoio</label><input id="dp-descricao" placeholder="Ex.: Doou 40 fantasias para as crianças do desfile"></div>
           <div class="field"><label>Contrapartida</label><input id="dp-contrapartida" placeholder="Ex.: Logo no material de divulgação"></div>
@@ -598,7 +598,7 @@
             <select id="rc-esfera"><option>Federal</option><option>Estadual</option><option>Municipal</option><option>Privado/ONG</option></select>
           </div>
           <div class="field"><label>Secretaria responsável</label><select id="rc-secretaria"></select></div>
-          <div class="field"><label>Valor estimado</label><input id="rc-valor" type="number" step="0.01"></div>
+          <div class="field"><label>Valor estimado</label><input id="rc-valor" type="text" inputmode="decimal" placeholder="Ex.: 500.000,00"></div>
           <div class="field"><label>Prazo de submissão</label><input id="rc-prazo" type="date"></div>
           <div class="field"><label>Status</label>
             <select id="rc-status">
@@ -619,7 +619,7 @@
           <div class="field"><label>Nº do convênio</label><input id="rc-numero-convenio" placeholder="Ex.: 123/2026"></div>
           <div class="field"><label>Início da vigência</label><input id="rc-vigencia-inicio" type="date"></div>
           <div class="field"><label>Fim da vigência</label><input id="rc-vigencia-fim" type="date"></div>
-          <div class="field"><label>Contrapartida municipal (R$)</label><input id="rc-contrapartida" type="number" step="0.01"></div>
+          <div class="field"><label>Contrapartida municipal (R$)</label><input id="rc-contrapartida" type="text" inputmode="decimal" placeholder="Ex.: 50.000,00"></div>
         </div>
         <div class="form-actions">
           <button class="btn-ghost" onclick="toggleRecursoForm()">Cancelar</button>
@@ -1164,7 +1164,7 @@ async function editarAcao(id){
     document.getElementById('f-data').value = a.data || '';
     document.getElementById('f-secretaria').value = a.secretaria_id || '';
     document.getElementById('f-bairro').value = a.bairro || '';
-    document.getElementById('f-valor').value = a.valor_investido || '';
+    document.getElementById('f-valor').value = formatMoneyInput(a.valor_investido);
     document.getElementById('f-origem').value = a.origem_recurso || '';
     document.getElementById('f-status').value = a.status;
     document.getElementById('f-beneficiados').value = a.quantidade_beneficiados || '';
@@ -1182,12 +1182,12 @@ async function editarAcao(id){
     document.getElementById('f-publico-alvo').value = a.publico_alvo || '';
     document.getElementById('f-publico-estimado').value = a.publico_estimado || '';
     document.getElementById('f-comerciantes').value = a.comerciantes_participantes || '';
-    document.getElementById('f-valor-retorno').value = a.valor_retorno_estimado || '';
+    document.getElementById('f-valor-retorno').value = formatMoneyInput(a.valor_retorno_estimado);
     document.getElementById('f-eh-obra').checked = !!a.eh_obra;
     toggleObraFields();
     document.getElementById('f-contratada').value = a.contratada || '';
     document.getElementById('f-numero-contrato').value = a.numero_contrato || '';
-    document.getElementById('f-valor-executado').value = a.valor_executado || '';
+    document.getElementById('f-valor-executado').value = formatMoneyInput(a.valor_executado);
     document.getElementById('f-percentual-execucao').value = a.percentual_execucao || '';
     document.getElementById('f-prazo-conclusao').value = a.prazo_conclusao || '';
 
@@ -1196,6 +1196,23 @@ async function editarAcao(id){
     document.getElementById('form-panel').scrollIntoView({ behavior: 'smooth' });
   } catch (e) {
     alert('Não foi possível carregar essa ação: ' + e.message.slice(0,200));
+  }
+}
+
+async function excluirAcao(id){
+  if(!confirm('Excluir isso? Remove também tudo vinculado (comerciantes, patrocínios, documentos, fotos, avaliações...) e não pode ser desfeito.')) return;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/acoes?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Profile': 'gestao360' },
+    });
+    if(!res.ok) throw new Error(await res.text());
+    registrarAuditoria('acao', id, 'excluir', null);
+    loadAcoes();
+    loadFestas();
+    loadObras();
+  } catch (e) {
+    alert('Não foi possível excluir: ' + e.message.slice(0,200));
   }
 }
 
@@ -1329,6 +1346,18 @@ function statusPill(s){
   return '<span class="status-pill status-' + s + '">' + (map[s] || s) + '</span>';
 }
 function money(v){ return v ? 'R$ ' + Number(v).toLocaleString('pt-BR') : '—'; }
+
+function parseMoneyBR(str){
+  if(str == null) return null;
+  const s = String(str).trim();
+  if(!s) return null;
+  const n = parseFloat(s.replace(/\./g, '').replace(',', '.'));
+  return isNaN(n) ? null : n;
+}
+
+function formatMoneyInput(v){
+  return (v == null || v === '') ? '' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 async function salvarRelatorioNaPlataforma(blob, titulo, tipo, formato){
   try {
@@ -1681,11 +1710,12 @@ async function loadObras(){
             '<td style="font-family:var(--mono);">' + money(o.valor_executado) + '</td>' +
             '<td style="min-width:110px;">' + barra + '</td>' +
             '<td>' + (o.prazo_conclusao ? new Date(o.prazo_conclusao).toLocaleDateString('pt-BR') : '—') + '</td>' +
-            '<td>' + statusPill(o.status) + '</td></tr>';
+            '<td>' + statusPill(o.status) + '</td>' +
+            '<td><button class="btn-ghost" onclick="editarAcao(\'' + o.id + '\')">Editar</button> <button class="btn-ghost" onclick="excluirAcao(\'' + o.id + '\')">Excluir</button></td></tr>';
         }).join('')
-      : '<tr><td colspan="8" class="empty">Nenhuma obra cadastrada ainda. Clique em "+ Nova obra" pra começar.</td></tr>';
+      : '<tr><td colspan="9" class="empty">Nenhuma obra cadastrada ainda. Clique em "+ Nova obra" pra começar.</td></tr>';
   } catch (e) {
-    document.getElementById('tbl-obras').innerHTML = '<tr><td colspan="8" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
+    document.getElementById('tbl-obras').innerHTML = '<tr><td colspan="9" class="empty">Não foi possível carregar (' + e.message.slice(0,120) + ')</td></tr>';
   }
 }
 
@@ -1726,7 +1756,7 @@ async function loadFestas(){
             '<td>' + (f.comerciantes_participantes != null ? f.comerciantes_participantes : '—') + '</td>' +
             '<td style="font-family:var(--mono);">' + money(f.valor_retorno_estimado) + '</td>' +
             '<td style="font-size:12.5px;">👥 ' + media('morador') + ' · 🏪 ' + media('comerciante') + '</td>' +
-            '<td><button class="btn-ghost" onclick="abrirDossie(\'' + f.id + '\')">Dossiê</button> <button class="btn-ghost" onclick="mostrarLinkFesta(\'' + f.id + '\')">Link avaliação</button></td></tr>';
+            '<td><button class="btn-ghost" onclick="abrirDossie(\'' + f.id + '\')">Dossiê</button> <button class="btn-ghost" onclick="editarAcao(\'' + f.id + '\')">Editar</button> <button class="btn-ghost" onclick="mostrarLinkFesta(\'' + f.id + '\')">Link avaliação</button> <button class="btn-ghost" onclick="excluirAcao(\'' + f.id + '\')">Excluir</button></td></tr>';
         }).join('')
       : '<tr><td colspan="9" class="empty">Nenhuma festa cadastrada ainda. Clique em "+ Nova festa" pra começar.</td></tr>';
   } catch (e) {
@@ -1875,7 +1905,7 @@ async function addComerciante(){
       numero_barraca: document.getElementById('dc-numero-barraca').value.trim() || null,
       localizacao: document.getElementById('dc-localizacao').value.trim() || null,
       tamanho: document.getElementById('dc-tamanho').value.trim() || null,
-      valor_cobrado: parseFloat(document.getElementById('dc-valor').value) || null,
+      valor_cobrado: parseMoneyBR(document.getElementById('dc-valor').value),
       isento: document.getElementById('dc-isento').checked,
       forma_pagamento: document.getElementById('dc-forma-pagamento').value.trim() || null,
       situacao: document.getElementById('dc-situacao').value || 'confirmado',
@@ -1900,7 +1930,7 @@ async function addPatrocinio(){
       responsavel: document.getElementById('dp-responsavel').value.trim() || null,
       telefone: document.getElementById('dp-telefone').value.trim() || null,
       tipo_apoio: document.getElementById('dp-tipo').value || null,
-      valor: parseFloat(document.getElementById('dp-valor').value) || null,
+      valor: parseMoneyBR(document.getElementById('dp-valor').value),
       forma_pagamento: document.getElementById('dp-forma-pagamento').value.trim() || null,
       descricao_apoio: document.getElementById('dp-descricao').value.trim() || null,
       contrapartida: document.getElementById('dp-contrapartida').value.trim() || null,
@@ -2383,7 +2413,7 @@ function renderAcoes(acoes, avaliacoesEvento){
           };
           eventoCell = '<span title="Avaliação da população (0–5)">👥 ' + media('morador') + '</span> · <span title="Avaliação dos comerciantes/barracas (0–5)">🏪 ' + media('comerciante') + '</span>';
         }
-        return '<tr><td>' + a.titulo + '</td><td>' + (a.secretarias ? a.secretarias.nome : '—') + '</td><td>' + (a.bairro||'—') + '</td><td>' + statusPill(a.status) + '</td><td style="font-family:var(--mono);">' + money(a.valor_investido) + '</td><td style="font-size:12.5px;">' + eventoCell + '</td><td><button class="btn-ghost" onclick="editarAcao(\'' + a.id + '\')">Editar</button></td></tr>';
+        return '<tr><td>' + a.titulo + '</td><td>' + (a.secretarias ? a.secretarias.nome : '—') + '</td><td>' + (a.bairro||'—') + '</td><td>' + statusPill(a.status) + '</td><td style="font-family:var(--mono);">' + money(a.valor_investido) + '</td><td style="font-size:12.5px;">' + eventoCell + '</td><td><button class="btn-ghost" onclick="editarAcao(\'' + a.id + '\')">Editar</button> <button class="btn-ghost" onclick="excluirAcao(\'' + a.id + '\')">Excluir</button></td></tr>';
       }).join('')
     : '<tr><td colspan="7" class="empty">Nenhuma ação encontrada para o seu escopo de acesso.</td></tr>';
 }
@@ -2531,7 +2561,7 @@ async function editarRecurso(id){
     document.getElementById('rc-orgao').value = r.orgao_concedente || '';
     document.getElementById('rc-esfera').value = r.esfera || 'Federal';
     document.getElementById('rc-secretaria').value = r.secretaria_id || '';
-    document.getElementById('rc-valor').value = r.valor_estimado || '';
+    document.getElementById('rc-valor').value = formatMoneyInput(r.valor_estimado);
     document.getElementById('rc-prazo').value = r.prazo_submissao || '';
     document.getElementById('rc-status').value = r.status;
     document.getElementById('rc-requisitos').value = r.requisitos || '';
@@ -2539,7 +2569,7 @@ async function editarRecurso(id){
     document.getElementById('rc-numero-convenio').value = r.numero_convenio || '';
     document.getElementById('rc-vigencia-inicio').value = r.vigencia_inicio || '';
     document.getElementById('rc-vigencia-fim').value = r.vigencia_fim || '';
-    document.getElementById('rc-contrapartida').value = r.contrapartida || '';
+    document.getElementById('rc-contrapartida').value = formatMoneyInput(r.contrapartida);
     document.getElementById('recurso-form-panel').style.display = 'block';
     document.getElementById('recurso-form-panel').scrollIntoView({ behavior: 'smooth' });
   } catch (e) {
@@ -2613,7 +2643,7 @@ async function submitRecurso(){
       programa: programa,
       orgao_concedente: document.getElementById('rc-orgao').value.trim() || null,
       esfera: document.getElementById('rc-esfera').value,
-      valor_estimado: parseFloat(document.getElementById('rc-valor').value) || null,
+      valor_estimado: parseMoneyBR(document.getElementById('rc-valor').value),
       prazo_submissao: document.getElementById('rc-prazo').value || null,
       status: document.getElementById('rc-status').value,
       requisitos: document.getElementById('rc-requisitos').value.trim() || null,
@@ -2621,7 +2651,7 @@ async function submitRecurso(){
       numero_convenio: document.getElementById('rc-numero-convenio').value.trim() || null,
       vigencia_inicio: document.getElementById('rc-vigencia-inicio').value || null,
       vigencia_fim: document.getElementById('rc-vigencia-fim').value || null,
-      contrapartida: parseFloat(document.getElementById('rc-contrapartida').value) || null,
+      contrapartida: parseMoneyBR(document.getElementById('rc-contrapartida').value),
     };
     if(recursoEditandoId){
       const res = await fetch(SUPABASE_URL + '/rest/v1/oportunidades_recursos?id=eq.' + recursoEditandoId, {
@@ -3174,7 +3204,7 @@ async function submitAcao(){
       ano: ano,
       data: document.getElementById('f-data').value || null,
       bairro: document.getElementById('f-bairro').value.trim() || null,
-      valor_investido: parseFloat(document.getElementById('f-valor').value) || 0,
+      valor_investido: parseMoneyBR(document.getElementById('f-valor').value) || 0,
       origem_recurso: document.getElementById('f-origem').value.trim() || null,
       status: document.getElementById('f-status').value,
       quantidade_beneficiados: parseInt(document.getElementById('f-beneficiados').value) || null,
@@ -3191,11 +3221,11 @@ async function submitAcao(){
       publico_alvo: ehEvento ? (document.getElementById('f-publico-alvo').value.trim() || null) : null,
       publico_estimado: ehEvento ? (parseInt(document.getElementById('f-publico-estimado').value) || null) : null,
       comerciantes_participantes: ehEvento ? (parseInt(document.getElementById('f-comerciantes').value) || null) : null,
-      valor_retorno_estimado: ehEvento ? (parseFloat(document.getElementById('f-valor-retorno').value) || null) : null,
+      valor_retorno_estimado: ehEvento ? parseMoneyBR(document.getElementById('f-valor-retorno').value) : null,
       eh_obra: ehObra,
       contratada: ehObra ? (document.getElementById('f-contratada').value.trim() || null) : null,
       numero_contrato: ehObra ? (document.getElementById('f-numero-contrato').value.trim() || null) : null,
-      valor_executado: ehObra ? (parseFloat(document.getElementById('f-valor-executado').value) || null) : null,
+      valor_executado: ehObra ? parseMoneyBR(document.getElementById('f-valor-executado').value) : null,
       percentual_execucao: ehObra ? (parseInt(document.getElementById('f-percentual-execucao').value) || null) : null,
       prazo_conclusao: ehObra ? (document.getElementById('f-prazo-conclusao').value || null) : null,
     };
