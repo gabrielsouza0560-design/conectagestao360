@@ -1194,7 +1194,7 @@ function enterApp(){
   document.getElementById('role-display').textContent = perfil ? perfil.replace('_',' ') : 'perfil não definido';
 
   const isAdmin = ['admin_master','prefeito','chefe_de_gabinete'].indexOf(perfil) !== -1;
-  const canManagePromessas = ['admin_master','prefeito','chefe_de_gabinete'].indexOf(perfil) !== -1;
+  const canManagePromessas = ['admin_master','prefeito','chefe_de_gabinete','vice_prefeito'].indexOf(perfil) !== -1;
   const canSeeDashboardPrefeito = ['admin_master','prefeito','chefe_de_gabinete','vice_prefeito','controladoria'].indexOf(perfil) !== -1;
   const nav = document.getElementById('nav-container');
   nav.innerHTML = '<div class="nav-group"><div class="nav-group-label">Menu</div>' +
@@ -1262,7 +1262,7 @@ const MODULOS_SECRETARIA = [
 async function carregarModulosSecretaria(perfil){
   const slot = document.getElementById('nav-modulos-secretaria');
   if(!slot) return;
-  const gestaoTotal = ['admin_master','prefeito','chefe_de_gabinete'].indexOf(perfil) !== -1;
+  const gestaoTotal = ['admin_master','prefeito','chefe_de_gabinete','vice_prefeito'].indexOf(perfil) !== -1;
   let minhaSecretariaNome = '';
   if(!gestaoTotal && session.claims.secretaria_id){
     try {
