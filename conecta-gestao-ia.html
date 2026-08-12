@@ -17,19 +17,28 @@
 <script src="/pwa-register.js" defer></script>
 <style>
   :root{
-    --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0F172A;
+    --azul-escuro:#0B2A5B; --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0B2A5B;
+    --verde:#16A34A; --verde-escuro:#0F7A38; --verde-claro:#4ADE80;
+    --amarelo:#F5B400; --amarelo-escuro:#B45309;
     --bg:#F8FAFC; --surface:#FFFFFF; --ink:#0F172A; --ink-soft:#475569; --line:rgba(15,23,42,.08);
-    --ok:#059669; --danger:#DC2626; --muted:#94A3B8; --radius:18px;
+    --ok:#059669; --danger:#DC2626; --muted:#94A3B8; --radius:18px; --radius-lg:24px;
     --sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
     --shadow-sm:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+    --shadow-md:0 4px 14px rgba(15,23,42,.07), 0 1px 3px rgba(15,23,42,.05);
+    --ease:cubic-bezier(.22,1,.36,1);
   }
   *{box-sizing:border-box;}
   body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}
   button{font-family:inherit;cursor:pointer;}
   select,input,textarea{font-family:inherit;}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
 
-  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--verde));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
+  .brand-conecta{color:var(--light);}
+  .brand-gestao{color:var(--verde-claro);}
+  .brand-conecta-dark{color:var(--royal);}
+  .brand-gestao-dark{color:var(--verde);}
 
   #login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
   @media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
@@ -44,7 +53,8 @@
   .login-form .field{margin-bottom:18px;}.login-form .field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
   .login-form .field input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
   .login-form .field input:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
-  .btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(37,99,235,.35);}
+  .btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(37,99,235,.35);transition:transform .18s var(--ease),box-shadow .18s var(--ease);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(37,99,235,.32);}
   .btn-primary:disabled{opacity:.6;pointer-events:none;}
   .login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
   .logout-btn{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 12px;border-radius:8px;font-size:11.5px;margin-left:10px;}
@@ -76,7 +86,7 @@
   .work-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
   @media(max-width:960px){.work-grid{grid-template-columns:1fr;}}
 
-  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-sm);}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-sm);transition:box-shadow .2s var(--ease);}
   .panel h3{font-size:16px;margin:0 0 4px;font-weight:800;}
   .panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 18px;}
 
@@ -126,7 +136,7 @@
 
 <div id="login-screen">
   <div class="login-brand">
-    <div class="brand-top"><div class="logo">CG</div><div class="brand-name">Conecta Gestão<small>Inteligência Artificial</small></div></div>
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name"><span class="brand-conecta">Conecta</span> <span class="brand-gestao">Gestão</span><small>Inteligência Artificial</small></div></div>
     <div class="brand-quote"><h1>Conteúdo gerado a partir dos dados reais da gestão.</h1><p>Notícias, redes sociais, discursos e relatórios montados com as ações e indicadores já cadastrados — sempre revisados por um humano antes de publicar.</p></div>
     <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
   </div>
@@ -143,7 +153,7 @@
 <header>
   <div class="hd-left">
     <div class="logo">CG</div>
-    <div class="name">Conecta Gestão<small>Inteligência Artificial</small></div>
+    <div class="name"><span class="brand-conecta-dark">Conecta</span> <span class="brand-gestao-dark">Gestão</span><small>Inteligência Artificial</small></div>
   </div>
   <div class="hd-role" id="hd-role">— <button class="logout-btn" onclick="doLogout()">Sair</button></div>
 </header>
