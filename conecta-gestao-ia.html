@@ -31,6 +31,24 @@
 
   .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
 
+  #login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+  @media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+  .login-brand{background:linear-gradient(150deg,var(--darkblue) 0%,#16265A 45%,var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+  .login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle,rgba(96,165,250,.25),transparent 70%);}
+  .brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+  .brand-name{font-size:19px;font-weight:800;}.brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+  .brand-quote{position:relative;z-index:1;max-width:420px;}.brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;}.brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+  .brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+  .login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+  .login-form{width:100%;max-width:380px;}.login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+  .login-form .field{margin-bottom:18px;}.login-form .field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+  .login-form .field input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+  .login-form .field input:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(37,99,235,.35);}
+  .btn-primary:disabled{opacity:.6;pointer-events:none;}
+  .login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
+  .logout-btn{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 12px;border-radius:8px;font-size:11.5px;margin-left:10px;}
+
   header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:16px 40px;display:flex;justify-content:space-between;align-items:center;}
   @media(max-width:700px){header{padding:16px 20px;}}
   .hd-left{display:flex;align-items:center;gap:12px;}
@@ -71,6 +89,9 @@
   .btn-accent:hover{transform:translateY(-1px);}
   .btn-accent:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   .btn-ghost{background:#fff;border:1px solid var(--line);padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--ink);}
+  .btn-mini{background:#fff;border:1px solid var(--line);padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;margin-right:5px;}
+  .btn-mini.ok{color:var(--ok);border-color:rgba(5,150,105,.3);}
+  .btn-mini.no{color:var(--danger);border-color:rgba(220,38,38,.3);}
 
   .gen-status{display:none;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-soft);margin-top:14px;}
   .gen-status.show{display:flex;}
@@ -103,12 +124,28 @@
 </head>
 <body>
 
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name">Conecta Gestão<small>Inteligência Artificial</small></div></div>
+    <div class="brand-quote"><h1>Conteúdo gerado a partir dos dados reais da gestão.</h1><p>Notícias, redes sociais, discursos e relatórios montados com as ações e indicadores já cadastrados — sempre revisados por um humano antes de publicar.</p></div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap"><div class="login-form">
+    <h2>Acessar</h2><p class="sub">Entre com sua conta institucional.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div></div>
+</div>
+
+<div id="app-wrap" style="display:none;">
 <header>
   <div class="hd-left">
     <div class="logo">CG</div>
     <div class="name">Conecta Gestão<small>Inteligência Artificial</small></div>
   </div>
-  <div class="hd-role">Comunicação · Priscila Nogueira</div>
+  <div class="hd-role" id="hd-role">— <button class="logout-btn" onclick="doLogout()">Sair</button></div>
 </header>
 
 <main>
@@ -126,15 +163,9 @@
       <h3>Configurar geração</h3>
       <p class="panel-sub" id="config-sub">Selecione um tipo de conteúdo acima para começar</p>
 
-      <div class="field">
+      <div class="field" id="ref-acao-field">
         <label>Ação de referência</label>
-        <select id="ref-acao">
-          <option>Reforma da UBS Vila Nova</option>
-          <option>Pavimentação da Av. Brasil</option>
-          <option>Plantio de mudas nativas</option>
-          <option>Matrículas — Escola Municipal Sul</option>
-          <option>Campanha de vacinação (indicadores do mês)</option>
-        </select>
+        <select id="ref-acao"><option value="">Carregando ações...</option></select>
       </div>
       <div class="field">
         <label>Tom de voz</label>
@@ -147,11 +178,11 @@
       </div>
       <div class="field">
         <label>Instruções adicionais (opcional)</label>
-        <textarea rows="3" placeholder="Ex.: mencionar o prazo de conclusão e o bairro atendido"></textarea>
+        <textarea id="ref-instrucoes" rows="3" placeholder="Ex.: mencionar o prazo de conclusão e o bairro atendido"></textarea>
       </div>
 
       <button class="btn-accent" id="gen-btn" onclick="gerar()" disabled>Selecione um tipo de conteúdo</button>
-      <div class="gen-status" id="gen-status"><span class="dot-pulse"></span> Gerando conteúdo com IA...</div>
+      <div class="gen-status" id="gen-status"><span class="dot-pulse"></span> Gerando conteúdo com dados reais...</div>
     </div>
 
     <div class="panel">
@@ -159,11 +190,11 @@
       <p class="panel-sub">Revise antes de enviar para aprovação</p>
       <div class="output-box empty" id="output-box">O conteúdo gerado aparecerá aqui</div>
       <div class="output-meta" id="output-meta" style="display:none;">
-        <span class="badge-ia">✦ Gerado por IA</span>
-        <span style="font-size:11.5px;color:var(--muted);">Rastreado em Logs de IA</span>
+        <span class="badge-ia">✦ Gerado com dados reais</span>
+        <span style="font-size:11.5px;color:var(--muted);">Rastreado na fila de aprovação</span>
       </div>
       <div class="output-actions" id="output-actions" style="display:none;">
-        <button class="btn-accent" onclick="enviarAprovacao()">Enviar para aprovação</button>
+        <button class="btn-accent" id="enviar-btn" onclick="enviarAprovacao()">Enviar para aprovação</button>
         <button class="btn-ghost" onclick="gerar()">Gerar novamente</button>
       </div>
     </div>
@@ -171,122 +202,243 @@
 
   <div class="panel queue-panel">
     <h3>Fila de aprovação de conteúdo IA</h3>
-    <p class="panel-sub">Conteúdos gerados aguardando ou já revisados pela Comunicação</p>
+    <p class="panel-sub">Conteúdos gerados aguardando ou já revisados — dados reais de gestao360.ia_conteudos</p>
     <table>
       <thead><tr><th>Conteúdo</th><th>Tipo</th><th>Ação de referência</th><th>Gerado</th><th>Status</th></tr></thead>
-      <tbody id="fila-tbl"></tbody>
+      <tbody id="fila-tbl"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Carregando...</td></tr></tbody>
     </table>
   </div>
 
   <div class="book-card">
     <div>
       <h3>Livro da Gestão</h3>
-      <p>Ao final do mandato, a IA consolida automaticamente todas as ações, fotos, gráficos, indicadores e a linha do tempo completa em um único documento.</p>
+      <p>O relatório consolidado com todas as ações, obras, festas e promessas do mandato é gerado no Painel Administrativo, com dados 100% reais.</p>
     </div>
-    <button onclick="gerarLivro()">Gerar prévia do Livro da Gestão</button>
+    <button onclick="window.open('conecta-gestao-painel-admin.html','_blank')">Abrir Livro da Gestão ↗</button>
   </div>
 </main>
+</div>
 
 <script>
-const TYPES = [
-  ["📰","Notícia"], ["📘","Facebook"], ["📸","Instagram"], ["💬","WhatsApp"],
-  ["🎙️","Discurso"], ["💰","Prestação de contas"], ["📊","Relatório mensal"], ["📈","Relatório anual"],
-  ["📝","Resumo automático"], ["📌","Indicadores"],
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+let session=null;
+function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),senha=document.getElementById('login-senha').value,err=document.getElementById('login-error'),btn=document.getElementById('login-btn');
+  err.classList.remove('show');if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
+    session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    try{localStorage.setItem('cg_session_ia',JSON.stringify(session));}catch(e){}
+    enterApp();
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+function doLogout(){session=null;try{localStorage.removeItem('cg_session_ia');}catch(e){}document.getElementById('app-wrap').style.display='none';document.getElementById('login-screen').style.display='grid';}
+function tryAutoLogin(){
+  try{const s=JSON.parse(localStorage.getItem('cg_session_ia'));if(!s||!s.access_token)return false;
+    const c=decodeJwt(s.access_token);if(!c.exp||c.exp*1000<Date.now())return false;
+    session={access_token:s.access_token,claims:c};enterApp();return true;
+  }catch(e){return false;}
+}
+window.addEventListener('DOMContentLoaded',()=>{tryAutoLogin();});
+
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPatch(t,q,d){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'R$ 0,00';}
+function fmtDate(d){if(!d)return'data não informada';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-000000000001';}
+const STATUS_LABEL={planejado:'planejada',em_andamento:'em andamento',concluido:'concluída',cancelado:'cancelada'};
+
+async function enterApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-wrap').style.display='block';
+  let nome=(session.claims.perfil||'').replace('_',' ');
+  try{
+    const usuarios=await sbGet('usuarios','select=nome&auth_user_id=eq.'+session.claims.sub);
+    if(usuarios[0]) nome=usuarios[0].nome+' · '+(session.claims.perfil||'').replace('_',' ');
+  }catch(e){}
+  document.getElementById('hd-role').innerHTML=nome+' <button class="logout-btn" onclick="doLogout()">Sair</button>';
+  buildTypes();
+  await carregarAcoes();
+  await loadFila();
+}
+
+let acoesCache=[];
+async function carregarAcoes(){
+  const sel=document.getElementById('ref-acao');
+  try{
+    const acoes=await sbGet('acoes','select=id,titulo,bairro,valor_investido,status,data,quantidade_beneficiados,secretarias(nome)&order=criado_em.desc&limit=300');
+    acoesCache=acoes;
+    sel.innerHTML=acoes.length?acoes.map(a=>'<option value="'+a.id+'">'+a.titulo+'</option>').join(''):'<option value="">Nenhuma ação cadastrada ainda</option>';
+  }catch(e){
+    sel.innerHTML='<option value="">Não foi possível carregar as ações</option>';
+  }
+}
+
+let tipoSelecionado=null;
+const TYPES=[
+  ["📰","Notícia"],["📘","Facebook"],["📸","Instagram"],["💬","WhatsApp"],
+  ["🎙️","Discurso"],["💰","Prestação de contas"],["📊","Relatório mensal"],["📈","Relatório anual"],
+  ["📝","Resumo automático"],["📌","Indicadores"],
 ];
-
-const TEMPLATES = {
-  "Notícia": (acao,tom) => `Prefeitura entrega ${acao}\n\nA administração municipal concluiu mais uma etapa do seu plano de investimentos com a entrega de "${acao}". A ação faz parte do compromisso da gestão em ampliar a qualidade dos serviços públicos oferecidos à população.\n\nCom tom ${tom.toLowerCase()}, a comunicação destaca os benefícios diretos para os moradores da região e reforça o cronograma das próximas etapas previstas para o ano.\n\n[Texto gerado a partir dos dados cadastrados da ação — pronto para revisão da Comunicação antes da publicação.]`,
-  "Facebook": (acao) => `📢 Mais uma entrega para a nossa cidade!\n\n${acao} já é realidade. Um passo a mais rumo a uma gestão mais próxima de você. 💙\n\n#Prefeitura #GestãoQueEntrega`,
-  "Instagram": (acao) => `${acao} ✅\n\nMais uma ação da nossa gestão que sai do papel e chega até você. Continue acompanhando tudo o que estamos construindo juntos.\n\n#Transparência #ConectaGestão`,
-  "WhatsApp": (acao) => `📍 *${acao}*\n\nOlá! Passando para avisar que essa ação já está disponível para a população. Acesse o Portal da Transparência para ver fotos, valores investidos e todos os detalhes.`,
-  "Discurso": (acao) => `Prezados munícipes,\n\nÉ com grande satisfação que apresento à população mais um resultado do nosso trabalho: ${acao}.\n\nCada ação como esta representa o compromisso desta gestão com uma administração transparente, eficiente e voltada às reais necessidades da nossa cidade. Seguimos trabalhando, lado a lado com cada secretaria, para transformar planejamento em resultado concreto.\n\n[Rascunho gerado por IA — revisar antes do uso oficial.]`,
-  "Prestação de contas": (acao) => `Prestação de contas — ${acao}\n\nValor investido, origem do recurso, empresa executora e status de execução foram compilados automaticamente a partir do cadastro da ação, seguindo o padrão de transparência exigido pela Lei de Acesso à Informação.`,
-  "Relatório mensal": () => `Relatório mensal consolidado\n\nResumo automático das ações cadastradas no mês, agrupadas por secretaria, com totais de investimento, obras concluídas e indicadores atualizados. Documento pronto para exportação em PDF, Excel ou Word.`,
-  "Relatório anual": () => `Relatório anual consolidado\n\nCompilação de todas as ações do ano corrente, indicadores por secretaria, linha do tempo e prestação de contas. Base para o Relatório Final de Gestão.`,
-  "Resumo automático": (acao) => `Resumo: ${acao} foi cadastrada com todos os dados de localização, investimento e mídia necessários para publicação no Portal da Transparência.`,
-  "Indicadores": () => `Indicadores atualizados automaticamente a partir das ações cadastradas no período selecionado, prontos para exibição no Dashboard Executivo.`,
-};
-
-const FILA_INICIAL = [
-  ["Prefeitura entrega Reforma da UBS Vila Nova", "Notícia", "Reforma da UBS Vila Nova", "há 2h", "aprovado"],
-  ["Mais uma entrega para a nossa cidade!", "Facebook", "Pavimentação da Av. Brasil", "há 5h", "pendente"],
-  ["Relatório mensal consolidado — Julho", "Relatório mensal", "—", "ontem", "aprovado"],
-  ["Discurso — Inauguração do CRAS Sul", "Discurso", "Ampliação do CRAS Sul", "ontem", "reprovado"],
-];
-
-let tipoSelecionado = null;
+const PRECISA_ACAO={"Relatório mensal":false,"Relatório anual":false,"Indicadores":false};
 
 function buildTypes(){
-  document.getElementById('type-grid').innerHTML = TYPES.map(([ico,name]) => `
-    <div class="type-card" onclick="selecionarTipo(this,'${name}')">
-      <div class="ti">${ico}</div><div class="tn">${name}</div>
-    </div>`).join('');
+  document.getElementById('type-grid').innerHTML=TYPES.map(([ico,name])=>'<div class="type-card" onclick="selecionarTipo(this,\''+name+'\')"><div class="ti">'+ico+'</div><div class="tn">'+name+'</div></div>').join('');
 }
 
-function selecionarTipo(el, tipo){
-  document.querySelectorAll('.type-card').forEach(e => e.classList.remove('sel'));
+function selecionarTipo(el,tipo){
+  document.querySelectorAll('.type-card').forEach(e=>e.classList.remove('sel'));
   el.classList.add('sel');
-  tipoSelecionado = tipo;
-  document.getElementById('config-sub').textContent = `Gerando: ${tipo}`;
-  const btn = document.getElementById('gen-btn');
-  btn.disabled = false;
-  btn.textContent = `Gerar ${tipo.toLowerCase()} com IA`;
+  tipoSelecionado=tipo;
+  document.getElementById('config-sub').textContent='Gerando: '+tipo;
+  document.getElementById('ref-acao-field').style.display=PRECISA_ACAO[tipo]===false?'none':'block';
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=false;
+  btn.textContent='Gerar '+tipo.toLowerCase()+' com dados reais';
 }
 
-function gerar(){
+function acaoTexto(a){
+  const secretaria=(a.secretarias&&a.secretarias.nome)||'a secretaria responsável';
+  return {
+    titulo:a.titulo,
+    secretaria,
+    bairro:a.bairro||'não informado',
+    valor:money(a.valor_investido),
+    status:STATUS_LABEL[a.status]||a.status,
+    data:fmtDate(a.data),
+    beneficiados:a.quantidade_beneficiados?a.quantidade_beneficiados.toLocaleString('pt-BR')+' pessoas beneficiadas':null,
+  };
+}
+
+const TEMPLATES={
+  "Notícia":(a,tom,inst)=>{const t=acaoTexto(a);return 'Prefeitura entrega '+t.titulo+'\n\nA administração municipal, através da '+t.secretaria+', concluiu mais uma etapa do seu plano de investimentos com a ação "'+t.titulo+'", no bairro '+t.bairro+'. O investimento total registrado foi de '+t.valor+' e a ação está atualmente '+t.status+'.'+(t.beneficiados?'\n\nA estimativa é de '+t.beneficiados+' com essa ação.':'')+'\n\nCom tom '+tom.toLowerCase()+', a comunicação destaca os benefícios diretos para a população da região.'+(inst?'\n\nObservação da equipe: '+inst:'')+'\n\n[Texto gerado a partir dos dados cadastrados da ação — pronto para revisão da Comunicação antes da publicação.]';},
+  "Facebook":(a)=>{const t=acaoTexto(a);return '📢 Mais uma entrega para a nossa cidade!\n\n'+t.titulo+' já é realidade no bairro '+t.bairro+', com investimento de '+t.valor+'. Um passo a mais rumo a uma gestão mais próxima de você. 💙\n\n#Prefeitura #GestãoQueEntrega';},
+  "Instagram":(a)=>{const t=acaoTexto(a);return t.titulo+' ✅\n\nMais uma ação da '+t.secretaria+' que sai do papel e chega até você. Situação atual: '+t.status+'.\n\n#Transparência #ConectaGestão';},
+  "WhatsApp":(a)=>{const t=acaoTexto(a);return '📍 *'+t.titulo+'*\n\nOlá! Passando para avisar que essa ação da '+t.secretaria+' já está disponível para a população em '+t.bairro+'. Acesse o Portal da Transparência para ver fotos, valores investidos ('+t.valor+') e todos os detalhes.';},
+  "Discurso":(a,tom,inst)=>{const t=acaoTexto(a);return 'Prezados munícipes,\n\nÉ com grande satisfação que apresento à população mais um resultado do nosso trabalho, conduzido pela '+t.secretaria+': '+t.titulo+', em '+t.bairro+'.\n\nCada ação como esta, com investimento de '+t.valor+', representa o compromisso desta gestão com uma administração transparente, eficiente e voltada às reais necessidades da nossa cidade.'+(inst?' '+inst:'')+'\n\n[Rascunho gerado por IA a partir de dados reais — revisar antes do uso oficial.]';},
+  "Prestação de contas":(a)=>{const t=acaoTexto(a);return 'Prestação de contas — '+t.titulo+'\n\nSecretaria responsável: '+t.secretaria+'\nValor investido: '+t.valor+'\nBairro: '+t.bairro+'\nSituação: '+t.status+'\nData: '+t.data+'\n\nDados compilados automaticamente a partir do cadastro da ação, seguindo o padrão de transparência exigido pela Lei de Acesso à Informação.';},
+  "Resumo automático":(a)=>{const t=acaoTexto(a);return 'Resumo: "'+t.titulo+'" ('+t.secretaria+') está '+t.status+', com investimento de '+t.valor+' no bairro '+t.bairro+'.';},
+};
+
+async function gerarRelatorioAgregado(tipo){
+  const hoje=new Date();
+  const inicio=tipo==='Relatório mensal'?new Date(hoje.getFullYear(),hoje.getMonth(),1).toISOString().slice(0,10):new Date(hoje.getFullYear(),0,1).toISOString().slice(0,10);
+  const acoes=await sbGet('acoes','select=id,valor_investido,status,secretarias(nome)&criado_em=gte.'+inicio);
+  const total=acoes.reduce((s,a)=>s+(Number(a.valor_investido)||0),0);
+  const concluidas=acoes.filter(a=>a.status==='concluido').length;
+  const porSecretaria={};
+  acoes.forEach(a=>{const n=(a.secretarias&&a.secretarias.nome)||'Sem secretaria';porSecretaria[n]=(porSecretaria[n]||0)+1;});
+  const linhas=Object.entries(porSecretaria).sort((x,y)=>y[1]-x[1]).slice(0,8).map(([n,c])=>'  • '+n+': '+c+' ação(ões)').join('\n');
+  const periodo=tipo==='Relatório mensal'?'do mês corrente':'do ano corrente';
+  return (tipo==='Relatório mensal'?'Relatório mensal consolidado':'Relatório anual consolidado')+'\n\nPeríodo: '+periodo+'\nAções cadastradas: '+acoes.length+'\nAções concluídas: '+concluidas+'\nInvestimento total: '+money(total)+'\n\nPor secretaria:\n'+(linhas||'  Dados insuficientes para cálculo.')+'\n\n[Gerado automaticamente a partir de gestao360.acoes.]';
+}
+
+async function gerarIndicadores(){
+  const ind=await sbGet('indicadores','select=chave,valor,secretarias(nome)&order=chave.asc');
+  if(!ind.length) return 'Indicadores\n\nDados insuficientes para cálculo — nenhum indicador cadastrado ainda em Indicadores no Painel Administrativo.';
+  const linhas=ind.map(i=>'  • '+i.chave+': '+Number(i.valor).toLocaleString('pt-BR')+(i.secretarias&&i.secretarias.nome?' ('+i.secretarias.nome+')':'')).join('\n');
+  return 'Indicadores atualizados\n\n'+linhas+'\n\n[Dados reais de gestao360.indicadores, prontos para exibição no Dashboard Executivo.]';
+}
+
+async function gerar(){
   if(!tipoSelecionado) return;
-  const status = document.getElementById('gen-status');
-  const outputBox = document.getElementById('output-box');
-  const meta = document.getElementById('output-meta');
-  const actions = document.getElementById('output-actions');
+  const status=document.getElementById('gen-status');
+  const outputBox=document.getElementById('output-box');
+  const meta=document.getElementById('output-meta');
+  const actions=document.getElementById('output-actions');
+  const genBtn=document.getElementById('gen-btn');
   status.classList.add('show');
-  meta.style.display = 'none';
-  actions.style.display = 'none';
+  meta.style.display='none';
+  actions.style.display='none';
   outputBox.classList.remove('empty');
-  outputBox.textContent = '';
+  outputBox.textContent='';
+  genBtn.disabled=true;
 
-  const acao = document.getElementById('ref-acao').value;
-  const tom = document.getElementById('ref-tom').value;
+  const tom=document.getElementById('ref-tom').value;
+  const inst=document.getElementById('ref-instrucoes').value.trim();
+  const acaoId=document.getElementById('ref-acao').value;
+  const acao=acoesCache.find(a=>a.id===acaoId);
 
-  setTimeout(() => {
+  try{
+    let conteudo;
+    if(tipoSelecionado==='Relatório mensal'||tipoSelecionado==='Relatório anual'){
+      conteudo=await gerarRelatorioAgregado(tipoSelecionado);
+    }else if(tipoSelecionado==='Indicadores'){
+      conteudo=await gerarIndicadores();
+    }else if(acao){
+      conteudo=(TEMPLATES[tipoSelecionado]||(()=>'Conteúdo gerado.'))(acao,tom,inst);
+    }else{
+      conteudo='Selecione uma ação de referência cadastrada para gerar esse conteúdo.';
+    }
+    outputBox.textContent=conteudo;
+    outputBox.dataset.acaoId=acao?acao.id:'';
+    meta.style.display='flex';
+    actions.style.display='flex';
+  }catch(e){
+    outputBox.textContent='Não foi possível gerar o conteúdo: '+e.message.slice(0,200);
+  }finally{
     status.classList.remove('show');
-    const templateFn = TEMPLATES[tipoSelecionado] || (() => 'Conteúdo gerado.');
-    outputBox.textContent = templateFn(acao, tom);
-    meta.style.display = 'flex';
-    actions.style.display = 'flex';
-  }, 1100);
+    genBtn.disabled=false;
+  }
 }
 
-function enviarAprovacao(){
-  const tbl = document.getElementById('fila-tbl');
-  const acao = document.getElementById('ref-acao').value;
-  const row = document.createElement('tr');
-  row.innerHTML = `<td>${tipoSelecionado} gerado — ${acao}</td><td>${tipoSelecionado}</td><td>${acao}</td><td>agora</td><td><span class="status-pill status-pendente">Pendente</span></td>`;
-  tbl.prepend(row);
-  const btn = document.querySelector('.output-actions .btn-accent');
-  btn.textContent = '✓ Enviado para aprovação';
-  btn.style.background = 'linear-gradient(135deg,#059669,#10B981)';
-  setTimeout(() => { btn.textContent = 'Enviar para aprovação'; btn.style.background = ''; }, 1800);
+async function enviarAprovacao(){
+  const btn=document.getElementById('enviar-btn');
+  const outputBox=document.getElementById('output-box');
+  const conteudo=outputBox.textContent;
+  if(!conteudo) return;
+  btn.disabled=true;
+  try{
+    await sbPost('ia_conteudos',{
+      tenant_id:tid(),
+      tipo:tipoSelecionado,
+      acao_id:outputBox.dataset.acaoId||null,
+      tom:document.getElementById('ref-tom').value,
+      instrucoes:document.getElementById('ref-instrucoes').value.trim()||null,
+      conteudo,
+      status:'pendente',
+      criado_por:session.claims.email||session.claims.perfil||null,
+    });
+    btn.textContent='✓ Enviado para aprovação';
+    btn.style.background='linear-gradient(135deg,#059669,#10B981)';
+    await loadFila();
+    setTimeout(()=>{btn.textContent='Enviar para aprovação';btn.style.background='';btn.disabled=false;},1800);
+  }catch(e){
+    alert('Erro ao enviar: '+e.message.slice(0,200));
+    btn.disabled=false;
+  }
 }
 
-function gerarLivro(){
-  const btn = event.target;
-  const original = btn.textContent;
-  btn.innerHTML = '<span class="spinner"></span> Compilando ações...';
-  btn.disabled = true;
-  setTimeout(() => {
-    btn.textContent = '✓ Prévia gerada — 1.284 ações compiladas';
-    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2200);
-  }, 1800);
+async function loadFila(){
+  const tbl=document.getElementById('fila-tbl');
+  try{
+    const rows=await sbGet('ia_conteudos','select=id,tipo,conteudo,status,criado_em,acoes(titulo)&order=criado_em.desc&limit=50');
+    tbl.innerHTML=rows.length?rows.map(r=>{
+      const resumo=(r.conteudo||'').split('\n')[0].slice(0,60);
+      const acaoTitulo=(r.acoes&&r.acoes.titulo)||'—';
+      const quando=new Date(r.criado_em).toLocaleString('pt-BR');
+      const acoesBtns=r.status==='pendente'?('<button class="btn-mini ok" onclick="revisar(\''+r.id+'\',\'aprovado\')">Aprovar</button><button class="btn-mini no" onclick="revisar(\''+r.id+'\',\'reprovado\')">Reprovar</button>'):'';
+      const label=r.status==='pendente'?'Pendente':r.status==='aprovado'?'Aprovado':'Reprovado';
+      return '<tr><td>'+resumo+'</td><td>'+r.tipo+'</td><td>'+acaoTitulo+'</td><td>'+quando+'</td><td><span class="status-pill status-'+r.status+'">'+label+'</span> '+acoesBtns+'</td></tr>';
+    }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Nenhum conteúdo gerado ainda.</td></tr>';
+  }catch(e){
+    tbl.innerHTML='<tr><td colspan="5" style="color:var(--danger);">Erro ao carregar: '+e.message.slice(0,150)+'</td></tr>';
+  }
 }
 
-function populateFila(){
-  document.getElementById('fila-tbl').innerHTML = FILA_INICIAL.map(f => `
-    <tr><td>${f[0]}</td><td>${f[1]}</td><td>${f[2]}</td><td>${f[3]}</td><td><span class="status-pill status-${f[4]}">${f[4]==='pendente'?'Pendente':f[4]==='aprovado'?'Aprovado':'Reprovado'}</span></td></tr>`).join('');
+async function revisar(id,novoStatus){
+  try{
+    await sbPatch('ia_conteudos','id=eq.'+id,{status:novoStatus});
+    await loadFila();
+  }catch(e){
+    alert('Erro: '+e.message.slice(0,200));
+  }
 }
-
-buildTypes();
-populateFila();
 </script>
 <div id="cg-dev-credit" style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
 </body>
