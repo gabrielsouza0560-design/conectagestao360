@@ -461,6 +461,20 @@ function buildViews(){
   Object.keys(MODULES).forEach(key=>{const m=MODULES[key];
     html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
     html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
+    if(key==='competicoes'){
+      html+='<div class="panel" id="chaveamento-panel"><h3>🏆 Gerar chaveamento</h3><p class="panel-sub">Cria os jogos automaticamente a partir das equipes selecionadas — depois é só ajustar data/horário/local em "Jogos".</p>'+
+        '<div class="form-grid"><div class="field span-2"><label>Competição</label><select id="chv-competicao"><option value="">Selecione...</option></select></div>'+
+        '<div class="field"><label>Formato</label><select id="chv-formato" onchange="toggleChvIdaVolta()"><option value="mata_mata">Mata-mata (eliminatória)</option><option value="pontos_corridos">Pontos corridos (todos contra todos)</option></select></div>'+
+        '<div class="field" id="chv-ida-volta-wrap" style="display:none;"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="chv-ida-volta" style="width:auto;margin-right:8px;vertical-align:middle;"> Ida e volta (turno e returno)</label></div></div>'+
+        '<label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);margin:14px 0 8px;font-weight:700;">Equipes participantes</label>'+
+        '<div id="chv-equipes-lista" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;"></div>'+
+        '<div class="form-actions" style="justify-content:flex-start;"><button class="btn-accent" onclick="gerarChaveamento()">Gerar chaveamento</button></div>'+
+        '<div id="chv-status" style="margin-top:12px;font-size:12.5px;"></div>'+
+        '<div style="margin-top:26px;padding-top:20px;border-top:1px solid var(--line);"><h3 style="margin-bottom:4px;">➡️ Avançar fase (mata-mata)</h3><p class="panel-sub">Lê os placares da rodada indicada e cria a próxima fase com os vencedores. Preencha os placares dos jogos primeiro, em "Jogos".</p>'+
+        '<div class="form-grid"><div class="field span-2"><label>Competição</label><select id="chv-avancar-competicao"><option value="">Selecione...</option></select></div><div class="field"><label>Rodada atual</label><select id="chv-avancar-rodada"></select></div></div>'+
+        '<div class="form-actions" style="justify-content:flex-start;"><button class="btn-accent" onclick="avancarFaseMataMata()">Avançar fase</button></div>'+
+        '<div id="chv-avancar-status" style="margin-top:12px;font-size:12.5px;"></div></div></div>';
+    }
     html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="ft-'+key+'">Novo registro</h3><div class="form-grid">';
     m.fields.forEach(f=>{const sp=f.span?'span-'+f.span:'';
       if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" '+(f.default?'checked':'')+' style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
@@ -659,6 +673,116 @@ async function gerarRelatorioMensal(){
 
 const LOADERS={dashboard_esp:loadDashboard,secretaria_esp:loadSec,alertas_esp:loadAlertas,auditoria_esp:loadAuditoria,qualidade_esp:loadQualidade,classificacoes:loadClassificacoesOptions};
 Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>loadData(k);});
+LOADERS.competicoes=()=>{loadData('competicoes');loadChaveamentoOpcoes();};
+
+// ===================== CHAVEAMENTO AUTOMÁTICO =====================
+async function loadChaveamentoOpcoes(){
+  try{
+    const [comps,equipes]=await Promise.all([
+      sbGet('esporte_competicoes','select=id,nome&order=nome.asc'),
+      sbGet('esporte_equipes','select=id,nome&situacao=eq.ativa&order=nome.asc'),
+    ]);
+    const compOpts='<option value="">Selecione...</option>'+comps.map(c=>'<option value="'+c.id+'">'+c.nome+'</option>').join('');
+    const selGerar=document.getElementById('chv-competicao'); if(selGerar)selGerar.innerHTML=compOpts;
+    const selAvancar=document.getElementById('chv-avancar-competicao'); if(selAvancar){selAvancar.innerHTML=compOpts;selAvancar.onchange=carregarRodadasChv;}
+    const lista=document.getElementById('chv-equipes-lista');
+    if(lista)lista.innerHTML=equipes.length?equipes.map(e=>'<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;background:var(--bg);padding:7px 12px;border-radius:8px;border:1px solid var(--line);"><input type="checkbox" value="'+e.id+'" class="chv-equipe-check" style="width:auto;"> '+e.nome+'</label>').join(''):'<p style="color:var(--muted);font-size:12.5px;">Nenhuma equipe ativa cadastrada.</p>';
+  }catch(e){}
+}
+async function carregarRodadasChv(){
+  const compId=document.getElementById('chv-avancar-competicao').value;
+  const sel=document.getElementById('chv-avancar-rodada');
+  if(!compId){sel.innerHTML='';return;}
+  try{
+    const jogos=await sbGet('esporte_jogos','select=rodada&competicao_id=eq.'+compId);
+    const rodadas=[...new Set(jogos.map(j=>j.rodada).filter(Boolean))];
+    sel.innerHTML=rodadas.length?rodadas.map(r=>'<option value="'+r+'">'+r+'</option>').join(''):'<option value="">Nenhuma rodada encontrada</option>';
+  }catch(e){sel.innerHTML='';}
+}
+function toggleChvIdaVolta(){const f=document.getElementById('chv-formato').value;document.getElementById('chv-ida-volta-wrap').style.display=f==='pontos_corridos'?'block':'none';}
+function embaralhar(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function nomeFaseMataMata(nEquipes){
+  if(nEquipes<=2)return'Final';
+  if(nEquipes<=4)return'Semifinal';
+  if(nEquipes<=8)return'Quartas de Final';
+  if(nEquipes<=16)return'Oitavas de Final';
+  return'Fase de '+nEquipes;
+}
+function gerarPontosCorridos(compId,equipeIds,idaVolta){
+  let lista=equipeIds.slice();
+  if(lista.length%2!==0)lista.push(null);
+  const n=lista.length,rodadasTotal=n-1,jogos=[];
+  let atual=lista.slice();
+  for(let r=0;r<rodadasTotal;r++){
+    const rodadaNome='Rodada '+(r+1);
+    for(let i=0;i<n/2;i++){
+      const mandante=atual[i],visitante=atual[n-1-i];
+      if(mandante!=null&&visitante!=null){
+        jogos.push({tenant_id:tid(),competicao_id:compId,rodada:rodadaNome,equipe_mandante_id:mandante,equipe_visitante_id:visitante,situacao:'agendado'});
+        if(idaVolta)jogos.push({tenant_id:tid(),competicao_id:compId,rodada:rodadaNome+' (returno)',equipe_mandante_id:visitante,equipe_visitante_id:mandante,situacao:'agendado'});
+      }
+    }
+    atual=[atual[0],atual[n-1],...atual.slice(1,n-1)];
+  }
+  return jogos;
+}
+async function gerarChaveamento(){
+  const compId=document.getElementById('chv-competicao').value;
+  const formato=document.getElementById('chv-formato').value;
+  const idaVolta=document.getElementById('chv-ida-volta').checked;
+  const equipeIds=[...document.querySelectorAll('.chv-equipe-check:checked')].map(c=>c.value);
+  const status=document.getElementById('chv-status');
+  if(!compId){status.textContent='Selecione uma competição.';return;}
+  if(equipeIds.length<2){status.textContent='Selecione ao menos 2 equipes.';return;}
+  status.textContent='Gerando...';
+  try{
+    let jogos=[];
+    if(formato==='mata_mata'){
+      const embaralhadas=embaralhar(equipeIds);
+      const rodada=nomeFaseMataMata(embaralhadas.length);
+      for(let i=0;i<embaralhadas.length;i+=2){
+        jogos.push({tenant_id:tid(),competicao_id:compId,rodada,equipe_mandante_id:embaralhadas[i],equipe_visitante_id:embaralhadas[i+1]||null,situacao:'agendado'});
+      }
+    }else{
+      jogos=gerarPontosCorridos(compId,equipeIds,idaVolta);
+    }
+    if(!jogos.length){status.textContent='Nada para gerar.';return;}
+    await sbPost('esporte_jogos',jogos);
+    status.textContent='✅ '+jogos.length+' jogo(s) criado(s) em "Jogos". Preencha data/horário/local por lá.';
+    loadData('jogos');
+    carregarRodadasChv();
+  }catch(e){status.textContent='Erro: '+e.message.slice(0,200);}
+}
+async function nomeEquipe(id){try{const r=await sbGet('esporte_equipes','select=nome&id=eq.'+id);return r[0]?r[0].nome:'Equipe';}catch(e){return'Equipe';}}
+async function avancarFaseMataMata(){
+  const compId=document.getElementById('chv-avancar-competicao').value;
+  const rodada=document.getElementById('chv-avancar-rodada').value;
+  const status=document.getElementById('chv-avancar-status');
+  if(!compId||!rodada){status.textContent='Selecione a competição e a rodada.';return;}
+  status.textContent='Calculando...';
+  try{
+    const jogos=await sbGet('esporte_jogos','select=*&competicao_id=eq.'+compId+'&rodada=eq.'+encodeURIComponent(rodada)+'&order=criado_em.asc');
+    if(!jogos.length){status.textContent='Nenhum jogo encontrado nessa rodada.';return;}
+    const semPlacar=jogos.filter(j=>j.equipe_visitante_id&&(j.placar_mandante==null||j.placar_visitante==null));
+    if(semPlacar.length){status.textContent='⚠️ '+semPlacar.length+' jogo(s) dessa rodada ainda sem placar. Preencha em "Jogos" antes de avançar.';return;}
+    const vencedores=jogos.map(j=>{
+      if(!j.equipe_visitante_id)return j.equipe_mandante_id;
+      if(j.placar_mandante===j.placar_visitante)return null;
+      return j.placar_mandante>j.placar_visitante?j.equipe_mandante_id:j.equipe_visitante_id;
+    });
+    if(vencedores.includes(null)){status.textContent='⚠️ Há jogo empatado nessa rodada — mata-mata precisa de um vencedor (pênaltis, prorrogação etc.). Ajuste o placar em "Jogos" antes de avançar.';return;}
+    if(vencedores.length===1){status.textContent='🏆 '+(await nomeEquipe(vencedores[0]))+' é a campeã da competição!';return;}
+    const novaRodada=nomeFaseMataMata(vencedores.length);
+    const novosJogos=[];
+    for(let i=0;i<vencedores.length;i+=2){
+      novosJogos.push({tenant_id:tid(),competicao_id:compId,rodada:novaRodada,equipe_mandante_id:vencedores[i],equipe_visitante_id:vencedores[i+1]||null,situacao:'agendado'});
+    }
+    await sbPost('esporte_jogos',novosJogos);
+    status.textContent='✅ '+novaRodada+' criada com '+novosJogos.length+' jogo(s).';
+    loadData('jogos');
+    carregarRodadasChv();
+  }catch(e){status.textContent='Erro: '+e.message.slice(0,200);}
+}
 </script>
 <div style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
 </body>
