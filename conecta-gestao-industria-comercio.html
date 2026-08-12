@@ -235,7 +235,7 @@ const NAV_GROUPS=[
   {label:'Geral',items:[['dashboard_ic','Dashboard'],['secretaria_ic','Secretaria']]},
   {label:'Cadastros',items:[['empresas','Empresas'],['meis','MEIs'],['comercios','Comércio'],['industrias','Indústrias'],['prestadores','Prestadores de Serviços']]},
   {label:'Trabalho',items:[['empregos','Empregos'],['trabalhadores','Trabalhadores'],['vagas','Vagas de Emprego']]},
-  {label:'Empreendedorismo',items:[['atendimentos_ic','Sala do Empreendedor'],['fomento','Fomento Paraná'],['microcredito','Microcrédito'],['capacitacoes','Capacitações'],['cursos','Cursos']]},
+  {label:'Empreendedorismo',items:[['atendimentos_ic','Sala do Empreendedor'],['atendimentos_mensal_ic','Atendimentos Mensais'],['fomento','Fomento Paraná'],['microcredito','Microcrédito'],['capacitacoes','Capacitações'],['cursos','Cursos']]},
   {label:'Eventos',items:[['eventos_ic','Eventos'],['feiras','Feiras'],['empreendedores','Empreendedores'],['artesaos','Artesãos'],['produtores','Produtores']]},
   {label:'Economia',items:[['turismo','Turismo'],['compras_publicas','Compras Públicas'],['licitacoes','Licitações'],['programas_ic','Programas e Projetos']]},
   {label:'Regulação',items:[['alvaras','Alvarás e Licenças'],['fiscalizacoes','Fiscalizações']]},
@@ -334,6 +334,16 @@ const MODULES={
     {id:'retorno_necessario',label:'Retorno necessário',type:'checkbox'}
   ],cols:['data','empreendedor','servico','servidor_responsavel'],colLabels:['Data','Empreendedor','Serviço','Servidor'],
   renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='servico'?pill(r.servico):(r[c]||'—'),query:'order=data.desc'},
+
+  atendimentos_mensal_ic:{table:'ic_atendimentos_mensal',title:'Atendimentos Mensais — Sala do Empreendedor',fields:[
+    {id:'servico',label:'Serviço',span:2,required:true},{id:'ano',label:'Ano',type:'number',required:true},
+    {id:'jan',label:'Jan',type:'number'},{id:'fev',label:'Fev',type:'number'},{id:'mar',label:'Mar',type:'number'},
+    {id:'abr',label:'Abr',type:'number'},{id:'mai',label:'Mai',type:'number'},{id:'jun',label:'Jun',type:'number'},
+    {id:'jul',label:'Jul',type:'number'},{id:'ago',label:'Ago',type:'number'},{id:'set',label:'Set',type:'number'},
+    {id:'out',label:'Out',type:'number'},{id:'nov',label:'Nov',type:'number'},{id:'dez',label:'Dez',type:'number'},
+    {id:'total',label:'Total no ano',type:'number'}
+  ],cols:['servico','ano','total'],colLabels:['Serviço','Ano','Total'],
+  renderCol:(r,c)=>(r[c]??'—'),query:'order=ano.desc,total.desc'},
 
   fomento:{table:'ic_fomento',title:'Fomento Paraná',fields:[
     {id:'empreendedor',label:'Empreendedor',span:2,required:true},{id:'identificacao',label:'Identificação'},
