@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Agricultura · Gabriel Oliveira</title>
+<meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#4D7C0F">
+<style>
+:root{--royal:#4D7C0F;--neon:#65A30D;--light:#A3E635;--darkblue:#0F172A;--bg:#F8FAFC;--surface:#FFFFFF;--ink:#0F172A;--ink-soft:#475569;--line:rgba(15,23,42,.08);--ok:#059669;--danger:#DC2626;--warn:#D97706;--muted:#94A3B8;--radius:18px;--sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;--shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);}
+*{box-sizing:border-box;}body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}button{font-family:inherit;cursor:pointer;}select,input,textarea{font-family:inherit;}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(77,124,15,.4);}
+#login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+@media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+.login-brand{background:linear-gradient(150deg,var(--darkblue) 0%,#16265A 45%,var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+.login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle,rgba(163,230,53,.25),transparent 70%);}
+.brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+.brand-name{font-size:19px;font-weight:800;}.brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+.brand-quote{position:relative;z-index:1;max-width:420px;}.brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;}.brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+.brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+.login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-form{width:100%;max-width:380px;}.login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+.field{margin-bottom:18px;}.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(77,124,15,.12);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(77,124,15,.35);}
+.btn-primary:hover{transform:translateY(-1px);}.btn-primary:disabled{opacity:.6;pointer-events:none;}
+.login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
+header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.hd-left{display:flex;align-items:center;gap:12px;}.hd-left .name{font-size:16px;font-weight:800;}.hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+.hd-right{display:flex;align-items:center;gap:12px;font-size:12px;color:#B6C4DD;}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;}.btn-ghost:hover{border-color:var(--royal);color:var(--royal);}
+.btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 12px rgba(77,124,15,.35);}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;}.logout-btn:hover{border-color:var(--light);color:var(--light);}
+.back-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;text-decoration:none;}.back-btn:hover{border-color:var(--light);color:var(--light);}
+.app-body{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:240px;background:var(--darkblue);padding:12px 8px;overflow-y:auto;flex-shrink:0;}
+.sidebar::-webkit-scrollbar{width:4px;}.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+.nav-group-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:14px 10px 4px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:#B6C4DD;font-size:12px;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:background .15s;}
+.nav-item:hover{background:rgba(101,163,13,.12);}.nav-item.active{background:linear-gradient(90deg,rgba(77,124,15,.4),rgba(101,163,13,.15));color:#fff;font-weight:700;}
+main{flex:1;padding:28px 36px 60px;max-width:1300px;overflow-x:hidden;}
+@media(max-width:860px){.sidebar{display:none;}main{padding:20px;}}
+.view{display:none;}.view.active{display:block;}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.topbar h1{font-size:24px;margin:0 0 2px;font-weight:800;}.topbar .sub{font-size:12px;color:var(--muted);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:1000px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);transition:transform .2s;}.kpi:hover{transform:translateY(-2px);}
+.kpi .ico{font-size:10px;color:var(--royal);text-transform:uppercase;letter-spacing:.8px;font-weight:800;margin-bottom:6px;}
+.kpi .num{font-size:22px;color:var(--ink);font-weight:800;}.kpi .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.panel h3{font-size:15px;margin:0 0 4px;font-weight:800;}.panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 14px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+.field.span-2{grid-column:span 2;}.field.span-3{grid-column:span 3;}
+.form-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);font-weight:700;}
+td{padding:9px 8px;border-bottom:1px solid var(--line);}tr:last-child td{border-bottom:none;}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.status-ativa,.status-ativo,.status-atingida,.status-vigente,.status-aprovado,.status-boa,.status-concluida,.status-concluido,.status-entregue,.status-realizado,.status-distribuida{background:#D1FAE5;color:var(--ok);}
+.status-inativa,.status-inativo,.status-encerrada,.status-encerrado,.status-cancelada,.status-cancelado,.status-negado,.status-vencido,.status-abaixo,.status-critica,.status-critico{background:#FEF2F2;color:var(--danger);}
+.status-em_andamento,.status-atencao,.status-pendente,.status-aberta,.status-em_analise,.status-em_cotacao,.status-solicitada,.status-solicitado,.status-manutencao,.status-regular,.status-orientado,.status-agendado{background:#FEF3C7;color:var(--warn);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:1000px){.grid-2{grid-template-columns:1fr;}}
+.diag{padding:14px;border-radius:12px;font-size:12.5px;line-height:1.6;margin-bottom:8px;}
+.diag-ok{background:#D1FAE5;border:1px solid rgba(5,150,105,.25);color:#065F46;}
+.diag-warn{background:#FEF3C7;border:1px solid rgba(217,119,6,.25);color:#92400E;}
+.diag-danger{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
+.bars{display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:grid;grid-template-columns:160px 1fr 44px;align-items:center;gap:10px;font-size:12px;}
+.bar-track{background:#F7FEE7;border-radius:5px;height:8px;overflow:hidden;}.bar-fill{height:100%;border-radius:5px;}
+.bar-fill-royal{background:linear-gradient(90deg,var(--royal),var(--light));}
+.bar-fill-ok{background:linear-gradient(90deg,var(--ok),#34D399);}
+.bar-row .val{text-align:right;color:var(--ink-soft);font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name">Conecta Gestão<small>Agricultura</small></div></div>
+    <div class="brand-quote"><h1>Central Municipal de Gestão Rural.</h1><p>Produtores, propriedades, produção, máquinas, estradas rurais e assistência técnica — inteligência para decisão.</p></div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap"><div class="login-form">
+    <h2>Acessar</h2><p class="sub">Entre com sua conta institucional.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div></div>
+</div>
+<div id="app" style="display:none;">
+<header>
+  <div class="hd-left"><div class="logo">CG</div><div class="name">Conecta Gestão<small>Agricultura</small></div></div>
+  <div class="hd-right"><span id="hd-role"></span><a class="back-btn" href="conecta-gestao-painel-admin.html">← Painel</a><button class="logout-btn" onclick="doLogout()">Sair</button></div>
+</header>
+<div class="app-body">
+<aside class="sidebar" id="sidebar-nav"></aside>
+<main id="main-content"></main>
+</div>
+</div>
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+let session=null;
+function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),senha=document.getElementById('login-senha').value,err=document.getElementById('login-error'),btn=document.getElementById('login-btn');
+  err.classList.remove('show');if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
+    session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    try{localStorage.setItem('cg_session',JSON.stringify(session));}catch(e){}
+    enterApp();
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+function doLogout(){session=null;try{localStorage.removeItem('cg_session');}catch(e){}document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+function tryAutoLogin(){
+  try{const s=JSON.parse(localStorage.getItem('cg_session'));if(!s||!s.access_token)return false;
+    const c=decodeJwt(s.access_token);if(!c.exp||c.exp*1000<Date.now())return false;
+    session={access_token:s.access_token,claims:c};enterApp();return true;
+  }catch(e){return false;}
+}
+function enterApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');buildNav();buildViews();navigateTo('dashboard_agro');}
+window.addEventListener('DOMContentLoaded',()=>{tryAutoLogin();});
+
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPatch(t,q,d){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbDel(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'DELETE',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());}
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';}
+function moneyShort(v){if(!v)return'R$ 0';const n=Number(v);if(n>=1e6)return'R$ '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'R$ '+(n/1e3).toFixed(0)+'k';return'R$ '+n.toFixed(0);}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function pill(s,label){return'<span class="status-pill status-'+(s||'')+'">'+(label||s||'—')+'</span>';}
+function parseMoney(v){if(!v)return null;return parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));}
+function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-000000000001';}
+function semDados(){return '<p style="color:var(--muted);font-size:12px;">Dados insuficientes para cálculo.</p>';}
+
+const NAV_GROUPS=[
+  {label:'Geral',items:[['dashboard_agro','Dashboard'],['secretaria_agro','Secretaria']]},
+  {label:'Produtores',items:[['produtores_agro','Produtores'],['propriedades_agro','Propriedades Rurais']]},
+  {label:'Produção',items:[['producao_agro','Produção e Safras'],['pecuaria_agro','Produção Pecuária'],['familiar_agro','Agricultura Familiar'],['hortas_agro','Hortas'],['agroindustrias_agro','Agroindústrias']]},
+  {label:'Organização e Comércio',items:[['cooperativas_agro','Cooperativas'],['associacoes_agro','Associações'],['feiras_agro','Feiras do Produtor'],['eventos_agro','Eventos Rurais'],['produtos_agro','Produtos'],['comercializacao_agro','Comercialização'],['compras_publicas_agro','Compras Públicas']]},
+  {label:'Assistência e Capacitação',items:[['assistencia_tecnica_agro','Assistência e Visitas Técnicas'],['projetos_agro','Projetos'],['programas_agro','Programas'],['cursos_agro','Cursos e Capacitações']]},
+  {label:'Insumos',items:[['insumos_agro','Insumos'],['sementes_mudas_agro','Sementes e Mudas']]},
+  {label:'Máquinas e Estradas',items:[['maquinas_agro','Máquinas Agrícolas'],['implementos_agro','Implementos'],['servicos_maquinas_agro','Serviços com Máquinas'],['operadores_agro','Operadores'],['estradas_agro','Estradas Rurais'],['manutencao_estradas_agro','Manutenção de Estradas'],['pontes_bueiros_agro','Pontes e Bueiros']]},
+  {label:'Meio Rural',items:[['recursos_hidricos_agro','Água e Recursos Hídricos'],['sanidade_animal_agro','Sanidade Animal'],['sustentavel_agro','Agricultura Sustentável']]},
+  {label:'Crédito e Parcerias',items:[['credito_rural_agro','Crédito Rural'],['convenios_agro','Convênios'],['incentivos_agro','Incentivos']]},
+  {label:'Financeiro',items:[['financeiro_agro','Financeiro'],['compras_agro','Compras'],['contratos_agro','Contratos']]},
+  {label:'Gestão',items:[['metas_agro','Metas'],['indicadores_agro','Indicadores']]},
+  {label:'Sistema',items:[['relatorios_agro','Relatórios'],['qualidade_agro','Qualidade dos Dados'],['alertas_agro','Alertas'],['documentos_agro','Documentos'],['auditoria_agro','Auditoria'],['config_agro','Configurações']]},
+];
+let currentView='dashboard_agro';
+function buildNav(){let h='';NAV_GROUPS.forEach(g=>{h+='<div class="nav-group-label">'+g.label+'</div>';g.items.forEach(([k,l])=>{h+='<button class="nav-item'+(k==='dashboard_agro'?' active':'')+'" data-key="'+k+'" onclick="navigateTo(\''+k+'\')">'+l+'</button>';});});document.getElementById('sidebar-nav').innerHTML=h;}
+function navigateTo(key){currentView=key;document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.key===key));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+key));if(LOADERS[key])LOADERS[key]();}
+
+let caches={};
+const MODULES={
+  produtores_agro:{table:'agro_produtores',title:'Produtores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'cpf_cnpj',label:'CPF/CNPJ'},{id:'contato',label:'Contato'},
+    {id:'endereco',label:'Endereço',span:2},{id:'comunidade',label:'Comunidade/Localidade'},
+    {id:'atividade_principal',label:'Atividade principal'},{id:'atividades_secundarias',label:'Atividades secundárias',span:2},
+    {id:'agricultura_familiar',label:'Agricultura familiar',type:'checkbox'},{id:'associacao',label:'Associação'},{id:'cooperativa',label:'Cooperativa'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['nome','comunidade','atividade_principal','situacao'],colLabels:['Nome','Comunidade','Atividade','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  propriedades_agro:{table:'agro_propriedades',title:'Propriedades Rurais',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'nome',label:'Nome da propriedade',span:2,required:true},
+    {id:'localizacao',label:'Localização'},{id:'comunidade',label:'Comunidade'},{id:'area_total',label:'Área total (ha)',type:'number'},
+    {id:'area_produtiva',label:'Área produtiva (ha)',type:'number'},{id:'area_preservacao',label:'Área de preservação (ha)',type:'number'},
+    {id:'atividade',label:'Atividade'},{id:'acesso',label:'Acesso'},{id:'estrada',label:'Estrada de acesso'},
+    {id:'infraestrutura',label:'Infraestrutura'},{id:'agua',label:'Água'},{id:'energia',label:'Energia'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['nome','comunidade','area_total','area_produtiva','situacao'],colLabels:['Nome','Comunidade','Área total','Área produtiva','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  producao_agro:{table:'agro_producao',title:'Produção e Safras',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},
+    {id:'cultura',label:'Cultura/Atividade',span:2,required:true},{id:'safra',label:'Safra'},{id:'area_plantada',label:'Área plantada (ha)',type:'number'},
+    {id:'periodo',label:'Período'},{id:'producao_estimada',label:'Produção estimada',type:'number'},{id:'producao_realizada',label:'Produção realizada',type:'number'},
+    {id:'unidade',label:'Unidade'},{id:'produtividade',label:'Produtividade'},{id:'perdas',label:'Perdas',type:'number'},
+    {id:'comercializacao',label:'Comercialização',span:2},{id:'preco_medio',label:'Preço médio (R$)',type:'money'}
+  ],cols:['cultura','safra','area_plantada','producao_realizada','produtividade'],colLabels:['Cultura','Safra','Área (ha)','Produção','Produtividade'],
+  renderCol:(r,c)=>c==='preco_medio'?money(r.preco_medio):(r[c]??'—')},
+
+  pecuaria_agro:{table:'agro_pecuaria',title:'Produção Pecuária',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},
+    {id:'especie',label:'Espécie',span:2,required:true},{id:'quantidade',label:'Quantidade',type:'number'},{id:'finalidade',label:'Finalidade'},
+    {id:'producao',label:'Produção'},{id:'periodo',label:'Período'},{id:'comercializacao',label:'Comercialização',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['especie','quantidade','finalidade','situacao'],colLabels:['Espécie','Quantidade','Finalidade','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  familiar_agro:{table:'agro_familiar',title:'Agricultura Familiar',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},
+    {id:'producao',label:'Produção',span:2},{id:'produtos',label:'Produtos',span:2},{id:'participacao_programas',label:'Participação em programas',span:2},
+    {id:'comercializacao',label:'Comercialização'},{id:'feiras',label:'Feiras'},
+    {id:'compras_publicas',label:'Participa de compras públicas',type:'checkbox'},{id:'assistencia_tecnica',label:'Recebe assistência técnica',type:'checkbox'}
+  ],cols:['produtos','comercializacao'],colLabels:['Produtos','Comercialização'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  hortas_agro:{table:'agro_hortas',title:'Hortas',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},
+    {id:'area',label:'Área (ha)',type:'number'},{id:'culturas',label:'Culturas',span:2},{id:'producao',label:'Produção'},
+    {id:'destino',label:'Destino'},{id:'comercializacao',label:'Comercialização'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['culturas','area','destino','situacao'],colLabels:['Culturas','Área','Destino','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  agroindustrias_agro:{table:'agro_agroindustrias',title:'Agroindústrias',fields:[
+    {id:'empreendimento',label:'Empreendimento',span:2,required:true},{id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},
+    {id:'cnpj',label:'CNPJ'},{id:'atividade',label:'Atividade'},{id:'produto',label:'Produto'},{id:'capacidade',label:'Capacidade'},
+    {id:'producao',label:'Produção'},{id:'estrutura',label:'Estrutura'},{id:'licencas',label:'Licenças'},{id:'comercializacao',label:'Comercialização',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['empreendimento','produto','capacidade','situacao'],colLabels:['Empreendimento','Produto','Capacidade','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  cooperativas_agro:{table:'agro_cooperativas',title:'Cooperativas',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'cnpj',label:'CNPJ'},{id:'responsavel',label:'Responsável'},{id:'endereco',label:'Endereço'},
+    {id:'contato',label:'Contato'},{id:'produtores_associados',label:'Produtores associados',type:'number'},{id:'atividades',label:'Atividades',span:2},
+    {id:'produtos',label:'Produtos'},{id:'comercializacao',label:'Comercialização'},{id:'programas',label:'Programas'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['nome','produtores_associados','produtos','situacao'],colLabels:['Nome','Associados','Produtos','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  associacoes_agro:{table:'agro_associacoes',title:'Associações',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'cnpj',label:'CNPJ'},{id:'responsavel',label:'Responsável'},{id:'comunidade',label:'Comunidade'},
+    {id:'associados',label:'Associados',type:'number'},{id:'atividade',label:'Atividade'},{id:'producao',label:'Produção'},
+    {id:'projetos',label:'Projetos',span:2},{id:'programas',label:'Programas',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['nome','comunidade','associados','situacao'],colLabels:['Nome','Comunidade','Associados','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  feiras_agro:{table:'agro_feiras',title:'Feiras do Produtor',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'edicao',label:'Edição'},{id:'data',label:'Data',type:'date'},{id:'local',label:'Local'},
+    {id:'produtores_participantes',label:'Produtores participantes',type:'number'},{id:'bancas',label:'Bancas',type:'number'},{id:'produtos',label:'Produtos',span:2},
+    {id:'publico',label:'Público',type:'number'},{id:'comercializacao_informada',label:'Comercialização informada (R$)',type:'money'},
+    {id:'custos',label:'Custos (R$)',type:'money'},{id:'parceiros',label:'Parceiros',span:2},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','data','produtores_participantes','publico'],colLabels:['Nome','Data','Produtores','Público'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  eventos_agro:{table:'agro_eventos',title:'Eventos Rurais',fields:[
+    {id:'evento',label:'Evento',span:2,required:true},{id:'data',label:'Data',type:'date'},{id:'local',label:'Local'},
+    {id:'produtores_participantes',label:'Produtores participantes',type:'number'},{id:'participantes',label:'Participantes',type:'number'},
+    {id:'parceiros',label:'Parceiros',span:2},{id:'atividades',label:'Atividades',span:2},{id:'custo',label:'Custo (R$)',type:'money'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['evento','data','local','participantes'],colLabels:['Evento','Data','Local','Particip.'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  produtos_agro:{table:'agro_produtos',title:'Produtos',fields:[
+    {id:'produto',label:'Produto',span:2,required:true},{id:'categoria',label:'Categoria'},{id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},
+    {id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},{id:'quantidade',label:'Quantidade',type:'number'},{id:'unidade',label:'Unidade'},
+    {id:'preco',label:'Preço (R$)',type:'money'},{id:'origem',label:'Origem'},{id:'comercializacao',label:'Comercialização'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['produto','categoria','quantidade','preco','situacao'],colLabels:['Produto','Categoria','Qtd.','Preço','Situação'],
+  renderCol:(r,c)=>c==='preco'?money(r.preco):c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  comercializacao_agro:{table:'agro_comercializacao',title:'Comercialização',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'produto',label:'Produto',span:2},{id:'quantidade',label:'Quantidade',type:'number'},
+    {id:'unidade',label:'Unidade'},{id:'comprador_programa',label:'Comprador/Programa'},{id:'data',label:'Data',type:'date'},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['concluida','Concluída'],['pendente','Pendente'],['cancelada','Cancelada']]}
+  ],cols:['produto','quantidade','comprador_programa','data','valor'],colLabels:['Produto','Qtd.','Comprador','Data','Valor'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  compras_publicas_agro:{table:'agro_compras_publicas',title:'Compras Públicas',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'organizacao',label:'Organização'},{id:'produto',label:'Produto',span:2},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'valor',label:'Valor (R$)',type:'money'},{id:'orgao_comprador',label:'Órgão comprador'},
+    {id:'programa',label:'Programa'},{id:'contrato',label:'Contrato'},{id:'entrega',label:'Entrega',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_andamento','Em andamento'],['entregue','Entregue'],['cancelado','Cancelado']]}
+  ],cols:['produto','quantidade','valor','situacao'],colLabels:['Produto','Qtd.','Valor','Situação'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  assistencia_tecnica_agro:{table:'agro_assistencia_tecnica',title:'Assistência e Visitas Técnicas',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},
+    {id:'tecnico',label:'Técnico'},{id:'data',label:'Data',type:'date'},{id:'tipo',label:'Tipo',type:'select',opts:[['assistencia','Assistência técnica'],['visita_tecnica','Visita técnica']]},
+    {id:'motivo',label:'Motivo',span:2},{id:'atividade',label:'Atividade'},{id:'diagnostico',label:'Diagnóstico',span:2},{id:'orientacao',label:'Orientação/Recomendação',span:2},
+    {id:'encaminhamento',label:'Encaminhamento'},{id:'retorno',label:'Retorno',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['concluida','Concluída'],['pendente','Pendente']]}
+  ],cols:['data','tecnico','tipo','motivo','situacao'],colLabels:['Data','Técnico','Tipo','Motivo','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  projetos_agro:{table:'agro_projetos',title:'Projetos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'objetivo',label:'Objetivo',span:3},{id:'publico',label:'Público'},
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'comunidade',label:'Comunidade'},{id:'responsavel',label:'Responsável'},
+    {id:'periodo',label:'Período'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'parceiros',label:'Parceiros',span:2},{id:'meta',label:'Meta'},{id:'resultado',label:'Resultado',span:3},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_andamento','Em andamento'],['concluido','Concluído'],['cancelado','Cancelado']]}
+  ],cols:['nome','responsavel','orcamento','situacao'],colLabels:['Nome','Responsável','Orçamento','Situação'],
+  renderCol:(r,c)=>c==='orcamento'?money(r.orcamento):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  programas_agro:{table:'agro_programas',title:'Programas',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'objetivo',label:'Objetivo',span:3},{id:'publico',label:'Público'},{id:'responsavel',label:'Responsável'},
+    {id:'periodo',label:'Período'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'participantes',label:'Participantes',type:'number'},{id:'meta',label:'Meta'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','responsavel','participantes','orcamento'],colLabels:['Nome','Responsável','Particip.','Orçamento'],
+  renderCol:(r,c)=>c==='orcamento'?money(r.orcamento):(r[c]||'—')},
+
+  cursos_agro:{table:'agro_cursos',title:'Cursos e Capacitações',fields:[
+    {id:'curso',label:'Curso',span:2,required:true},{id:'tema',label:'Tema'},{id:'instrutor',label:'Instrutor'},{id:'parceiro',label:'Parceiro'},
+    {id:'data',label:'Data',type:'date'},{id:'carga_horaria',label:'Carga horária',type:'number'},{id:'vagas',label:'Vagas',type:'number'},
+    {id:'inscritos',label:'Inscritos',type:'number'},{id:'participantes',label:'Participantes',type:'number'},{id:'frequencia',label:'Frequência (%)',type:'number'},
+    {id:'conclusao',label:'Concluintes',type:'number'},{id:'certificado',label:'Certificado',type:'checkbox'},{id:'custo',label:'Custo (R$)',type:'money'}
+  ],cols:['curso','data','inscritos','participantes','conclusao'],colLabels:['Curso','Data','Inscritos','Particip.','Concluintes'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  insumos_agro:{table:'agro_insumos',title:'Insumos',fields:[
+    {id:'produto',label:'Produto',span:2,required:true},{id:'categoria',label:'Categoria',type:'select',opts:[['sementes','Sementes'],['mudas','Mudas'],['fertilizantes','Fertilizantes'],['corretivos','Corretivos'],['materiais','Materiais'],['outro','Outro']]},
+    {id:'fornecedor',label:'Fornecedor'},{id:'lote',label:'Lote'},{id:'validade',label:'Validade',type:'date'},{id:'quantidade',label:'Quantidade',type:'number'},
+    {id:'entrada',label:'Entrada',type:'number'},{id:'saida',label:'Saída',type:'number'},{id:'saldo',label:'Saldo',type:'number'},{id:'destino',label:'Destino'},
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'custo',label:'Custo (R$)',type:'money'}
+  ],cols:['produto','categoria','quantidade','saldo','validade'],colLabels:['Produto','Categoria','Qtd.','Saldo','Validade'],
+  renderCol:(r,c)=>c==='validade'?fmtDate(r.validade):c==='categoria'?pill(r.categoria):(r[c]??'—')},
+
+  sementes_mudas_agro:{table:'agro_sementes_mudas',title:'Sementes e Mudas',fields:[
+    {id:'especie',label:'Espécie',span:2,required:true},{id:'variedade',label:'Variedade'},{id:'lote',label:'Lote'},{id:'origem',label:'Origem'},
+    {id:'validade',label:'Validade',type:'date'},{id:'quantidade',label:'Quantidade',type:'number'},{id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},
+    {id:'data',label:'Data',type:'date'},{id:'situacao',label:'Situação',type:'select',opts:[['disponivel','Disponível'],['distribuida','Distribuída']]}
+  ],cols:['especie','variedade','quantidade','situacao'],colLabels:['Espécie','Variedade','Qtd.','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  maquinas_agro:{table:'agro_maquinas',title:'Máquinas Agrícolas',fields:[
+    {id:'maquina',label:'Máquina',span:2,required:true},{id:'patrimonio',label:'Patrimônio'},{id:'marca',label:'Marca'},{id:'modelo',label:'Modelo'},
+    {id:'ano',label:'Ano',type:'number'},{id:'capacidade',label:'Capacidade'},{id:'combustivel',label:'Combustível'},{id:'horimetro',label:'Horímetro',type:'number'},
+    {id:'operador',label:'Operador'},{id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['manutencao','Manutenção'],['inativo','Inativo']]}
+  ],cols:['maquina','patrimonio','horimetro','situacao'],colLabels:['Máquina','Patrimônio','Horímetro','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  implementos_agro:{table:'agro_implementos',title:'Implementos',fields:[
+    {id:'implemento',label:'Implemento',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'maquina_id',label:'Máquina',type:'ref',ref:'maquinas_agro'},
+    {id:'patrimonio',label:'Patrimônio'},{id:'localizacao',label:'Localização'},{id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['implemento','tipo','localizacao','situacao'],colLabels:['Implemento','Tipo','Localização','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  servicos_maquinas_agro:{table:'agro_servicos_maquinas',title:'Serviços com Máquinas',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},
+    {id:'servico',label:'Serviço',span:2,required:true},{id:'maquina_id',label:'Máquina',type:'ref',ref:'maquinas_agro'},{id:'operador',label:'Operador'},
+    {id:'data',label:'Data',type:'date'},{id:'local',label:'Local'},{id:'horas_trabalhadas',label:'Horas trabalhadas',type:'number'},
+    {id:'combustivel_litros',label:'Combustível (L)',type:'number'},{id:'custo',label:'Custo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitado','Solicitado'],['agendado','Agendado'],['realizado','Realizado'],['cancelado','Cancelado']]}
+  ],cols:['servico','data','horas_trabalhadas','custo','situacao'],colLabels:['Serviço','Data','Horas','Custo','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):c==='situacao'?pill(r.situacao):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  operadores_agro:{table:'agro_operadores',title:'Operadores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'matricula',label:'Matrícula'},{id:'funcao',label:'Função'},{id:'habilitacao',label:'Habilitação'},
+    {id:'maquina_autorizada',label:'Máquina autorizada'},{id:'horario',label:'Horário'},{id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['nome','funcao','maquina_autorizada','situacao'],colLabels:['Nome','Função','Máquina','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  estradas_agro:{table:'agro_estradas',title:'Estradas Rurais',fields:[
+    {id:'estrada',label:'Estrada',span:2,required:true},{id:'trecho',label:'Trecho'},{id:'comunidade',label:'Comunidade'},{id:'extensao_km',label:'Extensão (km)',type:'number'},
+    {id:'prioridade',label:'Prioridade',type:'select',opts:[['alta','Alta'],['media','Média'],['baixa','Baixa']]},
+    {id:'condicao',label:'Condição',type:'select',opts:[['boa','Boa'],['regular','Regular'],['critica','Crítica']]},
+    {id:'ultima_manutencao',label:'Última manutenção',type:'date'},{id:'proxima_manutencao',label:'Próxima manutenção',type:'date'},{id:'responsavel',label:'Responsável'}
+  ],cols:['estrada','trecho','extensao_km','condicao','prioridade'],colLabels:['Estrada','Trecho','Km','Condição','Prioridade'],
+  renderCol:(r,c)=>c==='condicao'||c==='prioridade'?pill(r[c]):(r[c]??'—')},
+
+  manutencao_estradas_agro:{table:'agro_manutencao_estradas',title:'Manutenção de Estradas',fields:[
+    {id:'estrada_id',label:'Estrada',type:'ref',ref:'estradas_agro'},{id:'problema',label:'Problema',span:2,required:true},
+    {id:'prioridade',label:'Prioridade',type:'select',opts:[['alta','Alta'],['media','Média'],['baixa','Baixa']]},{id:'maquina_id',label:'Máquina',type:'ref',ref:'maquinas_agro'},
+    {id:'equipe',label:'Equipe'},{id:'data',label:'Data',type:'date'},{id:'servico',label:'Serviço'},{id:'material',label:'Material'},
+    {id:'custo',label:'Custo (R$)',type:'money'},{id:'conclusao',label:'Conclusão',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['aberta','Aberta'],['em_andamento','Em andamento'],['concluida','Concluída'],['pendente','Pendente']]}
+  ],cols:['problema','prioridade','data','custo','situacao'],colLabels:['Problema','Prioridade','Data','Custo','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):c==='situacao'||c==='prioridade'?pill(r[c]):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  pontes_bueiros_agro:{table:'agro_pontes_bueiros',title:'Pontes e Bueiros',fields:[
+    {id:'localizacao',label:'Localização',span:2,required:true},{id:'estrada_id',label:'Estrada',type:'ref',ref:'estradas_agro'},{id:'tipo',label:'Tipo'},
+    {id:'dimensoes',label:'Dimensões'},{id:'condicao',label:'Condição',type:'select',opts:[['boa','Boa'],['regular','Regular'],['critica','Crítica']]},
+    {id:'risco',label:'Risco'},{id:'data_ultima_inspecao',label:'Última inspeção',type:'date'},
+    {id:'necessidade_intervencao',label:'Necessita intervenção',type:'checkbox'},{id:'custo_estimado',label:'Custo estimado (R$)',type:'money'}
+  ],cols:['localizacao','tipo','condicao','necessidade_intervencao'],colLabels:['Local','Tipo','Condição','Intervenção?'],
+  renderCol:(r,c)=>c==='condicao'?pill(r.condicao):c==='necessidade_intervencao'?(r.necessidade_intervencao?'Sim':'Não'):(r[c]||'—')},
+
+  recursos_hidricos_agro:{table:'agro_recursos_hidricos',title:'Água e Recursos Hídricos',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['nascente','Nascente'],['poco','Poço'],['reservatorio','Reservatório'],['sistema_agua_rural','Sistema de água rural'],['rio','Rio'],['corrego','Córrego']]},
+    {id:'comunidade',label:'Comunidade'},{id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},{id:'localizacao',label:'Localização',span:2},
+    {id:'capacidade',label:'Capacidade'},{id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo'],['risco','Em risco']]},
+    {id:'manutencao',label:'Manutenção'},{id:'projeto',label:'Projeto'}
+  ],cols:['tipo','comunidade','capacidade','situacao'],colLabels:['Tipo','Comunidade','Capacidade','Situação'],
+  renderCol:(r,c)=>c==='tipo'||c==='situacao'?pill(r[c]):(r[c]||'—')},
+
+  sanidade_animal_agro:{table:'agro_sanidade_animal',title:'Sanidade Animal',fields:[
+    {id:'acao',label:'Ação',span:2,required:true},{id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},
+    {id:'especie',label:'Espécie'},{id:'quantidade',label:'Quantidade',type:'number'},{id:'data',label:'Data',type:'date'},{id:'responsavel',label:'Responsável'},
+    {id:'resultado',label:'Resultado',span:2},{id:'encaminhamento',label:'Encaminhamento',span:2}
+  ],cols:['acao','especie','quantidade','data'],colLabels:['Ação','Espécie','Qtd.','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  sustentavel_agro:{table:'agro_sustentavel',title:'Agricultura Sustentável',fields:[
+    {id:'projeto',label:'Projeto',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},
+    {id:'propriedade_id',label:'Propriedade',type:'ref',ref:'propriedades_agro'},{id:'area_beneficiada',label:'Área beneficiada (ha)',type:'number'},{id:'acoes',label:'Ações',span:3},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_andamento','Em andamento'],['concluido','Concluído']]}
+  ],cols:['projeto','tipo','area_beneficiada','situacao'],colLabels:['Projeto','Tipo','Área','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  credito_rural_agro:{table:'agro_credito_rural',title:'Crédito Rural',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'finalidade',label:'Finalidade',span:2},{id:'instituicao',label:'Instituição'},
+    {id:'valor_solicitado',label:'Valor solicitado (R$)',type:'money'},{id:'valor_aprovado',label:'Valor aprovado (R$)',type:'money'},{id:'projeto',label:'Projeto'},{id:'data',label:'Data',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['orientado','Orientado'],['em_analise','Em análise'],['aprovado','Aprovado'],['negado','Negado']]}
+  ],cols:['finalidade','instituicao','valor_solicitado','situacao'],colLabels:['Finalidade','Instituição','Valor solicitado','Situação'],
+  renderCol:(r,c)=>c==='valor_solicitado'?money(r.valor_solicitado):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  convenios_agro:{table:'agro_convenios',title:'Convênios',fields:[
+    {id:'parceiro',label:'Parceiro',span:2,required:true},{id:'objeto',label:'Objeto',span:2},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'data_inicio',label:'Início',type:'date'},{id:'data_fim',label:'Término',type:'date'},{id:'contrapartida',label:'Contrapartida',span:2},{id:'responsavel',label:'Responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['vencido','Vencido']]}
+  ],cols:['parceiro','valor','data_fim','situacao'],colLabels:['Parceiro','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data_fim.asc.nullslast'},
+
+  incentivos_agro:{table:'agro_incentivos',title:'Incentivos',fields:[
+    {id:'produtor_id',label:'Produtor',type:'ref',ref:'produtores_agro'},{id:'programa',label:'Programa',span:2},{id:'beneficio',label:'Benefício'},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'finalidade',label:'Finalidade'},{id:'contrapartida',label:'Contrapartida'},{id:'resultado',label:'Resultado',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['encerrado','Encerrado']]}
+  ],cols:['programa','beneficio','valor','situacao'],colLabels:['Programa','Benefício','Valor','Situação'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  financeiro_agro:{table:'agro_financeiro',title:'Financeiro',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['receita','Receita'],['despesa','Despesa'],['empenho','Empenho'],['liquidacao','Liquidação'],['pagamento','Pagamento']],required:true},
+    {id:'descricao',label:'Descrição',span:2},{id:'valor',label:'Valor (R$)',type:'money'},{id:'programa',label:'Programa'},{id:'servico',label:'Serviço'},
+    {id:'fonte_recurso',label:'Fonte'},{id:'fornecedor',label:'Fornecedor'},{id:'contrato',label:'Contrato'},{id:'data',label:'Data',type:'date'}
+  ],cols:['data','tipo','descricao','valor'],colLabels:['Data','Tipo','Descrição','Valor'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  compras_agro:{table:'agro_compras',title:'Compras',fields:[
+    {id:'solicitacao',label:'Solicitação'},{id:'processo',label:'Processo'},{id:'item',label:'Item',span:2,required:true},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'cotacao',label:'Cotação (R$)',type:'money'},{id:'fornecedor',label:'Fornecedor'},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'data',label:'Data',type:'date'},{id:'entrega',label:'Entrega',type:'date'},{id:'nota_fiscal',label:'Nota fiscal'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitada','Solicitada'],['em_cotacao','Em cotação'],['empenhada','Empenhada'],['entregue','Entregue'],['cancelada','Cancelada']]}
+  ],cols:['item','fornecedor','valor','data','situacao'],colLabels:['Item','Fornecedor','Valor','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  contratos_agro:{table:'agro_contratos',title:'Contratos',fields:[
+    {id:'numero',label:'Nº contrato'},{id:'processo',label:'Processo'},{id:'fornecedor',label:'Fornecedor',required:true},{id:'cnpj',label:'CNPJ'},
+    {id:'objeto',label:'Objeto',span:3},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data_inicio',label:'Início',type:'date'},{id:'data_fim',label:'Término',type:'date'},
+    {id:'fiscal',label:'Fiscal'},{id:'saldo',label:'Saldo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['aditado','Aditado'],['rescindido','Rescindido']]}
+  ],cols:['numero','fornecedor','valor','data_fim','situacao'],colLabels:['Nº','Fornecedor','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  metas_agro:{table:'agro_metas',title:'Metas',fields:[
+    {id:'indicador',label:'Indicador',span:2,required:true},{id:'periodo',label:'Período'},{id:'meta_anual',label:'Meta anual',type:'number'},{id:'meta_mensal',label:'Meta mensal',type:'number'},
+    {id:'responsavel',label:'Responsável'},{id:'prazo',label:'Prazo',type:'date'},{id:'resultado',label:'Resultado',type:'number'},{id:'percentual',label:'% alcançado',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['atingida','Atingida'],['atencao','Atenção'],['abaixo','Abaixo da meta'],['em_andamento','Em andamento']]}
+  ],cols:['indicador','meta_mensal','resultado','percentual','situacao'],colLabels:['Indicador','Meta','Resultado','%','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao,{atingida:'Atingida',atencao:'Atenção',abaixo:'Abaixo',em_andamento:'Em andamento'}[r.situacao]):c==='percentual'?(r.percentual||0)+'%':(r[c]??'—')},
+
+  indicadores_agro:{table:'agro_indicadores',title:'Indicadores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'descricao',label:'Descrição',span:3},{id:'formula',label:'Fórmula',span:2},{id:'fonte',label:'Fonte'},
+    {id:'periodicidade',label:'Periodicidade'},{id:'meta',label:'Meta',type:'number'},{id:'resultado',label:'Resultado',type:'number'},{id:'unidade_medida',label:'Unidade'},{id:'responsavel',label:'Responsável'}
+  ],cols:['nome','formula','periodicidade','meta','resultado'],colLabels:['Nome','Fórmula','Period.','Meta','Resultado'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  documentos_agro:{table:'agro_documentos',title:'Documentos',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:2},
+    {id:'modulo',label:'Módulo'},{id:'url',label:'URL',span:2},{id:'data',label:'Data',type:'date'}
+  ],cols:['titulo','tipo','modulo','data'],colLabels:['Título','Tipo','Módulo','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+};
+
+const REF_TABLES={produtores_agro:'agro_produtores',propriedades_agro:'agro_propriedades',maquinas_agro:'agro_maquinas',estradas_agro:'agro_estradas'};
+const REF_LABEL_FIELD={produtores_agro:'nome',propriedades_agro:'nome',maquinas_agro:'maquina',estradas_agro:'estrada'};
+async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await sbGet(REF_TABLES[k],'select=id,'+REF_LABEL_FIELD[k]+'&order='+REF_LABEL_FIELD[k]+'.asc');caches[k]=d;return d;}catch(e){return[];}}
+
+function buildViews(){
+  let html='';
+  html+='<section class="view active" id="view-dashboard_agro"><div class="topbar"><div><h1>Dashboard — Agricultura</h1><div class="sub">Central Municipal de Gestão Rural</div></div><div><button class="btn-accent" onclick="gerarRelatorioMensal()">Gerar Relatório Mensal</button></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Produção por cultura</h3><div class="bars" id="dash-producao-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="grid-2"><div class="panel"><h3>O que está bom</h3><div id="dash-bom"></div></div><div class="panel"><h3>O que precisa de atenção</h3><div id="dash-atencao"></div></div></div><div class="grid-2"><div class="panel"><h3>Máquinas e Estradas</h3><div id="dash-maquinas"></div></div><div class="panel"><h3>Financeiro</h3><div id="dash-financeiro"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
+  html+='<section class="view" id="view-secretaria_agro"><div class="topbar"><div><h1>Secretaria de Agricultura</h1></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="se-nome"></div><div class="field"><label>CNPJ</label><input id="se-cnpj"></div><div class="field"><label>Secretário(a)</label><input id="se-secretario"></div><div class="field"><label>Secretário(a) adjunto(a)</label><input id="se-secretario_adjunto"></div><div class="field"><label>Telefone</label><input id="se-telefone"></div><div class="field"><label>WhatsApp</label><input id="se-whatsapp"></div><div class="field"><label>E-mail</label><input id="se-email"></div><div class="field span-3"><label>Endereço</label><input id="se-endereco"></div><div class="field"><label>Horário</label><input id="se-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="se-orcamento" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="se-meta" inputmode="decimal"></div><div class="field span-3"><label>Responsáveis pelos setores</label><textarea id="se-responsaveis" rows="2"></textarea></div><div class="field span-3"><label>Observações</label><textarea id="se-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSec()" id="se-btn">Salvar</button></div></div></section>';
+  Object.keys(MODULES).forEach(key=>{const m=MODULES[key];
+    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
+    html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
+    html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="ft-'+key+'">Novo registro</h3><div class="form-grid">';
+    m.fields.forEach(f=>{const sp=f.span?'span-'+f.span:'';
+      if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" '+(f.default?'checked':'')+' style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
+      else if(f.type==='select'){html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'">';(f.opts||[]).forEach(([v,l])=>{html+='<option value="'+v+'">'+l+'</option>';});html+='</select></div>';}
+      else if(f.type==='ref')html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'"><option value="">Selecione...</option></select></div>';
+      else{const t=f.type==='money'?'text':f.type||'text';html+='<div class="field '+sp+'"><label>'+f.label+'</label><input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+(f.type==='money'?' inputmode="decimal"':'')+'></div>';}
+    });
+    html+='</div><div class="form-actions"><button class="btn-ghost" onclick="toggleForm(\''+key+'\')">Cancelar</button><button class="btn-accent" onclick="submitCrud(\''+key+'\')" id="sb-'+key+'">Salvar</button></div></div>';
+    html+='<div class="panel"><h3>Registros</h3><p class="panel-sub" id="cnt-'+key+'"></p><div style="overflow-x:auto;"><table><thead><tr>';
+    m.colLabels.forEach(l=>{html+='<th>'+l+'</th>';});
+    html+='<th></th></tr></thead><tbody id="tbl-'+key+'"></tbody></table></div></div></section>';
+  });
+  html+='<section class="view" id="view-relatorios_agro"><div class="topbar"><div><h1>Relatórios</h1></div></div><div class="panel"><h3>Exportar relatórios</h3><div class="form-grid">';
+  Object.keys(MODULES).forEach(k=>{html+='<div class="field"><button class="btn-ghost" style="width:100%;" onclick="exportPdf(\''+k+'\')">'+MODULES[k].title+' (PDF)</button></div>';});
+  html+='</div></div></section>';
+  html+='<section class="view" id="view-qualidade_agro"><div class="topbar"><div><h1>Qualidade dos Dados</h1><div class="sub">Cadastros incompletos, pendências e indicadores sem dados suficientes — nada aqui é inventado</div></div></div><div class="panel"><div id="qualidade-lista"></div></div></section>';
+  html+='<section class="view" id="view-alertas_agro"><div class="topbar"><div><h1>Alertas</h1></div></div><div id="alertas-list"></div></section>';
+  html+='<section class="view" id="view-auditoria_agro"><div class="topbar"><div><h1>Auditoria</h1></div></div><div class="panel"><h3>Registros de auditoria</h3><p class="panel-sub" id="cnt-audit"></p><div style="overflow-x:auto;"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Módulo</th></tr></thead><tbody id="tbl-audit"></tbody></table></div></div></section>';
+  html+='<section class="view" id="view-config_agro"><div class="topbar"><div><h1>Configurações</h1></div></div><div class="panel"><h3>Configurações do módulo</h3><p class="panel-sub">Configurações gerais em breve.</p></div></section>';
+  document.getElementById('main-content').innerHTML=html;
+}
+
+let editingId={};
+function toggleForm(k){const p=document.getElementById('form-'+k);const o=p.style.display==='none';p.style.display=o?'block':'none';if(o&&!editingId[k]){clearForm(k);document.getElementById('ft-'+k).textContent='Novo registro';document.getElementById('sb-'+k).textContent='Salvar';loadRefs(k);}if(!o)editingId[k]=null;}
+function clearForm(k){MODULES[k].fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!f.default;else if(f.type==='select')el.selectedIndex=0;else el.value='';});}
+async function loadRefs(k){for(const f of MODULES[k].fields){if(f.type!=='ref')continue;const sel=document.getElementById('cf-'+k+'-'+f.id);const opts=await loadRefOptions(f.ref);const lbl=REF_LABEL_FIELD[f.ref];sel.innerHTML='<option value="">Selecione...</option>'+opts.map(o=>'<option value="'+o.id+'">'+o[lbl]+'</option>').join('');}}
+async function submitCrud(k){const m=MODULES[k],data={tenant_id:tid()};m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;let v;if(f.type==='checkbox')v=el.checked;else if(f.type==='money')v=parseMoney(el.value);else if(f.type==='number')v=el.value?Number(el.value):null;else if(f.type==='ref')v=el.value||null;else v=el.value.trim()||null;data[f.id]=v;});const btn=document.getElementById('sb-'+k);btn.disabled=true;try{if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+async function editCrud(k,id){const m=MODULES[k];try{const rows=await sbGet(m.table,'id=eq.'+id);const r=rows[0];if(!r)return;editingId[k]=id;document.getElementById('form-'+k).style.display='block';document.getElementById('ft-'+k).textContent='Editar registro';document.getElementById('sb-'+k).textContent='Salvar alterações';await loadRefs(k);m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!r[f.id];else el.value=r[f.id]??'';});}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function deleteCrud(k,id){if(!confirm('Excluir?'))return;try{await sbDel(MODULES[k].table,'id=eq.'+id);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
+
+function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)return;const n=data.length;let h='<div class="kpi"><div class="ico">Total</div><div class="num">'+n+'</div><div class="lbl">registros</div></div>';
+  if(k==='produtores_agro'){const at=data.filter(r=>r.situacao==='ativo').length;const fam=data.filter(r=>r.agricultura_familiar).length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">produtores</div></div><div class="kpi"><div class="ico">Agric. familiar</div><div class="num">'+fam+'</div><div class="lbl">produtores</div></div>';}
+  else if(k==='propriedades_agro'){const area=data.reduce((s,r)=>s+(Number(r.area_total)||0),0);h+='<div class="kpi"><div class="ico">Área total</div><div class="num">'+area.toLocaleString('pt-BR')+'</div><div class="lbl">hectares</div></div>';}
+  else if(k==='producao_agro'){const area=data.reduce((s,r)=>s+(Number(r.area_plantada)||0),0);const prod=data.reduce((s,r)=>s+(Number(r.producao_realizada)||0),0);h+='<div class="kpi"><div class="ico">Área plantada</div><div class="num">'+area.toLocaleString('pt-BR')+'</div><div class="lbl">hectares</div></div><div class="kpi"><div class="ico">Produção realizada</div><div class="num">'+prod.toLocaleString('pt-BR')+'</div><div class="lbl">no total</div></div>';}
+  else if(k==='servicos_maquinas_agro'){const real=data.filter(r=>r.situacao==='realizado').length;const horas=data.reduce((s,r)=>s+(Number(r.horas_trabalhadas)||0),0);h+='<div class="kpi"><div class="ico">Realizados</div><div class="num" style="color:var(--ok);">'+real+'</div><div class="lbl">serviços</div></div><div class="kpi"><div class="ico">Horas trabalhadas</div><div class="num">'+horas+'</div><div class="lbl">no total</div></div>';}
+  else if(k==='estradas_agro'){const km=data.reduce((s,r)=>s+(Number(r.extensao_km)||0),0);const crit=data.filter(r=>r.condicao==='critica').length;h+='<div class="kpi"><div class="ico">Extensão total</div><div class="num">'+km.toLocaleString('pt-BR')+'</div><div class="lbl">km</div></div><div class="kpi"><div class="ico">Críticas</div><div class="num" style="color:var(--danger);">'+crit+'</div><div class="lbl">estradas</div></div>';}
+  else if(k==='manutencao_estradas_agro'){const ab=data.filter(r=>r.situacao==='aberta'||r.situacao==='pendente').length;const cst=data.reduce((s,r)=>s+(Number(r.custo)||0),0);h+='<div class="kpi"><div class="ico">Abertas</div><div class="num" style="color:var(--warn);">'+ab+'</div><div class="lbl">solicitações</div></div><div class="kpi"><div class="ico">Custo</div><div class="num">'+moneyShort(cst)+'</div><div class="lbl">total</div></div>';}
+  else if(k==='insumos_agro'){const baixo=data.filter(r=>r.saldo!=null&&Number(r.saldo)<=0).length;h+='<div class="kpi"><div class="ico">Saldo zerado</div><div class="num" style="color:var(--danger);">'+baixo+'</div><div class="lbl">itens</div></div>';}
+  else if(k==='maquinas_agro'){const at=data.filter(r=>r.situacao==='ativo').length;const man=data.filter(r=>r.situacao==='manutencao').length;h+='<div class="kpi"><div class="ico">Ativas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">máquinas</div></div><div class="kpi"><div class="ico">Em manutenção</div><div class="num" style="color:var(--warn);">'+man+'</div><div class="lbl">máquinas</div></div>';}
+  else if(k==='feiras_agro'){const pub=data.reduce((s,r)=>s+(Number(r.publico)||0),0);h+='<div class="kpi"><div class="ico">Público total</div><div class="num">'+pub+'</div><div class="lbl">visitantes</div></div>';}
+  else if(k==='metas_agro'){const at=data.filter(r=>r.situacao==='atingida').length;const ab=data.filter(r=>r.situacao==='abaixo').length;h+='<div class="kpi"><div class="ico">Atingidas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">metas</div></div><div class="kpi"><div class="ico">Abaixo</div><div class="num" style="color:var(--danger);">'+ab+'</div><div class="lbl">metas</div></div>';}
+  else if(k==='contratos_agro'){const vig=data.filter(r=>r.situacao==='vigente').length;const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);h+='<div class="kpi"><div class="ico">Vigentes</div><div class="num">'+vig+'</div><div class="lbl">contratos</div></div><div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">total</div></div>';}
+  el.innerHTML=h;}
+
+async function loadDashboard(){try{
+  const [prod,prop,producao,pec,fam,assist,serv,maq,estr,manEst,feir,evt,proj,fin,met,al]=await Promise.all([
+    sbGet('agro_produtores','select=id,situacao,agricultura_familiar').catch(()=>[]),
+    sbGet('agro_propriedades','select=id,area_total,area_produtiva').catch(()=>[]),
+    sbGet('agro_producao','select=id,cultura,area_plantada,producao_realizada').catch(()=>[]),
+    sbGet('agro_pecuaria','select=id,situacao').catch(()=>[]),
+    sbGet('agro_familiar','select=id').catch(()=>[]),
+    sbGet('agro_assistencia_tecnica','select=id').catch(()=>[]),
+    sbGet('agro_servicos_maquinas','select=id,situacao,horas_trabalhadas').catch(()=>[]),
+    sbGet('agro_maquinas','select=id,situacao').catch(()=>[]),
+    sbGet('agro_estradas','select=id,extensao_km,condicao').catch(()=>[]),
+    sbGet('agro_manutencao_estradas','select=id,situacao,custo').catch(()=>[]),
+    sbGet('agro_feiras','select=id,produtores_participantes,publico').catch(()=>[]),
+    sbGet('agro_eventos','select=id').catch(()=>[]),
+    sbGet('agro_projetos','select=id,situacao').catch(()=>[]),
+    sbGet('agro_financeiro','select=id,tipo,valor').catch(()=>[]),
+    sbGet('agro_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
+    sbGet('agro_alertas','select=*&lido=eq.false&order=criado_em.desc&limit=10').catch(()=>[]),
+  ]);
+  const prodAt=prod.filter(p=>p.situacao==='ativo').length;const prodFam=prod.filter(p=>p.agricultura_familiar).length;
+  const areaTotal=prop.reduce((s,p)=>s+(Number(p.area_total)||0),0);const areaProd=producao.reduce((s,p)=>s+(Number(p.area_plantada)||0),0);
+  const servRealizados=serv.filter(s=>s.situacao==='realizado').length;const horasMaq=serv.reduce((s,r)=>s+(Number(r.horas_trabalhadas)||0),0);
+  const kmEstradas=estr.reduce((s,e)=>s+(Number(e.extensao_km)||0),0);
+  const manAb=manEst.filter(m=>m.situacao==='aberta'||m.situacao==='pendente').length;
+  const projAt=proj.filter(p=>p.situacao==='em_andamento').length;
+  const despesa=fin.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+(Number(f.valor)||0),0);
+  document.getElementById('dash-kpi').innerHTML=[
+    ['Produtores',prodAt,'ativos'],['Propriedades',prop.length,'cadastradas'],
+    ['Área produtiva',areaTotal.toLocaleString('pt-BR'),'hectares'],['Área plantada',areaProd.toLocaleString('pt-BR'),'hectares'],
+    ['Agricultura familiar',prodFam,'produtores'],['Visitas técnicas',assist.length,'realizadas'],
+    ['Serviços com máquinas',servRealizados,'realizados'],['Horas de máquina',horasMaq,'no total'],
+    ['Estradas rurais',estr.length,'cadastradas'],['Km atendidos',kmEstradas.toLocaleString('pt-BR'),'km'],
+    ['Feiras',feir.length,'realizadas'],['Programas',proj.length,'projetos'],
+    ['Projetos ativos',projAt,'em andamento'],['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+'/'+met.length,'metas'],
+  ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
+  const porCultura={};producao.forEach(p=>{if(!p.cultura)return;porCultura[p.cultura]=(porCultura[p.cultura]||0)+(Number(p.producao_realizada)||0);});
+  const maxC=Math.max(1,...Object.values(porCultura));
+  document.getElementById('dash-producao-bars').innerHTML=Object.keys(porCultura).length?Object.entries(porCultura).slice(0,8).map(([c,v])=>'<div class="bar-row"><span>'+c+'</span><div class="bar-track"><div class="bar-fill bar-fill-royal" style="width:'+Math.round(v/maxC*100)+'%"></div></div><span class="val">'+v.toLocaleString('pt-BR')+'</span></div>').join(''):semDados();
+  document.getElementById('dash-metas').innerHTML=met.length?met.slice(0,8).map(m=>{const ico=m.situacao==='atingida'?'🟢':m.situacao==='atencao'?'🟡':'🔴';const cor=m.situacao==='atingida'?'ok':m.situacao==='atencao'?'warn':'danger';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;"><span>'+ico+'</span><span style="flex:1;">'+m.indicador+'</span><span style="font-weight:700;color:var(--'+cor+');">'+(m.percentual||0)+'%</span></div>';}).join(''):semDados();
+  const bom=[],atencao=[];
+  if(manAb===0)bom.push('Sem manutenção de estradas pendente');else atencao.push(manAb+' manutenções de estradas pendentes');
+  const estrCrit=estr.filter(e=>e.condicao==='critica').length;if(estrCrit===0&&estr.length)bom.push('Nenhuma estrada em condição crítica');else if(estrCrit)atencao.push(estrCrit+' estrada(s) em condição crítica');
+  if(met.filter(m=>m.situacao==='abaixo').length)atencao.push(met.filter(m=>m.situacao==='abaixo').length+' metas abaixo do esperado');else if(met.length)bom.push('Nenhuma meta abaixo do esperado');
+  document.getElementById('dash-bom').innerHTML=bom.length?bom.map(b=>'<div class="diag diag-ok">🟢 '+b+'</div>').join(''):semDados();
+  document.getElementById('dash-atencao').innerHTML=atencao.length?atencao.map(a=>'<div class="diag diag-warn">🟡 '+a+'</div>').join(''):'<div class="diag diag-ok">🟢 Tudo dentro do esperado.</div>';
+  document.getElementById('dash-maquinas').innerHTML=(serv.length||maq.length)?('<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+    '<div style="padding:10px;background:#F7FEE7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+horasMaq+'</div><div style="font-size:11px;color:var(--ink-soft);">Horas de máquina</div></div>'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+maq.filter(m=>m.situacao==='ativo').length+'</div><div style="font-size:11px;color:var(--ink-soft);">Máquinas ativas</div></div>'+
+    '<div style="padding:10px;background:#F7FEE7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+kmEstradas.toLocaleString('pt-BR')+'</div><div style="font-size:11px;color:var(--ink-soft);">Km de estradas</div></div>'+
+    '<div style="padding:10px;background:#FEF3C7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+manAb+'</div><div style="font-size:11px;color:var(--ink-soft);">Manutenções pendentes</div></div></div>'):semDados();
+  document.getElementById('dash-financeiro').innerHTML=fin.length?('<div style="padding:10px;background:#FEF2F2;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--danger);">'+moneyShort(despesa)+'</div><div style="font-size:11px;color:var(--ink-soft);">Despesas no total</div></div>'):semDados();
+  document.getElementById('dash-alertas').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'">'+ico+' '+a.mensagem+'</div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum alerta.</p>';
+}catch(e){document.getElementById('dash-kpi').innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,200)+'</div>';}}
+
+let secId=null;
+async function loadSec(){try{const rows=await sbGet('agro_secretaria','select=*&limit=1');if(rows.length){const s=rows[0];secId=s.id;['nome','cnpj','secretario','secretario_adjunto','telefone','whatsapp','email','endereco'].forEach(f=>{const el=document.getElementById('se-'+f);if(el)el.value=s[f]||'';});document.getElementById('se-horario').value=s.horario_atendimento||'';document.getElementById('se-orcamento').value=s.orcamento_anual||'';document.getElementById('se-meta').value=s.meta_anual||'';document.getElementById('se-responsaveis').value=s.responsaveis_setores||'';document.getElementById('se-obs').value=s.observacoes||'';}}catch(e){}}
+async function salvarSec(){const data={tenant_id:tid(),nome:document.getElementById('se-nome').value.trim()||'Secretaria Municipal de Agricultura e Desenvolvimento Rural',cnpj:document.getElementById('se-cnpj').value.trim()||null,secretario:document.getElementById('se-secretario').value.trim()||null,secretario_adjunto:document.getElementById('se-secretario_adjunto').value.trim()||null,telefone:document.getElementById('se-telefone').value.trim()||null,whatsapp:document.getElementById('se-whatsapp').value.trim()||null,email:document.getElementById('se-email').value.trim()||null,endereco:document.getElementById('se-endereco').value.trim()||null,horario_atendimento:document.getElementById('se-horario').value.trim()||null,orcamento_anual:parseMoney(document.getElementById('se-orcamento').value),meta_anual:parseMoney(document.getElementById('se-meta').value),responsaveis_setores:document.getElementById('se-responsaveis').value.trim()||null,observacoes:document.getElementById('se-obs').value.trim()||null,atualizado_em:new Date().toISOString()};const btn=document.getElementById('se-btn');btn.disabled=true;try{if(secId){await sbPatch('agro_secretaria','id=eq.'+secId,data);}else{const r=await sbPost('agro_secretaria',data);secId=r[0].id;}alert('Salvo!');}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+
+async function loadAlertas(){try{const al=await sbGet('agro_alertas','select=*&order=criado_em.desc');document.getElementById('alertas-list').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'" style="display:flex;justify-content:space-between;align-items:center;">'+ico+' '+a.mensagem+(a.lido?'':' <button class="btn-ghost" style="font-size:10px;padding:3px 8px;" onclick="marcarLido(\''+a.id+'\')">Lido</button>')+'</div>';}).join(''):'<div class="panel"><p style="color:var(--muted);text-align:center;padding:30px;">Nenhum alerta.</p></div>';}catch(e){}}
+async function marcarLido(id){try{await sbPatch('agro_alertas','id=eq.'+id,{lido:true});loadAlertas();}catch(e){}}
+
+async function loadAuditoria(){try{const rows=await sbGet('agro_auditoria','select=*&order=data.desc&limit=100');document.getElementById('cnt-audit').textContent=rows.length+' registro(s)';document.getElementById('tbl-audit').innerHTML=rows.length?rows.map(r=>'<tr><td>'+new Date(r.data).toLocaleString('pt-BR')+'</td><td>'+(r.usuario||'—')+'</td><td>'+(r.acao||'—')+'</td><td>'+(r.modulo||'—')+'</td></tr>').join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Sem registros.</td></tr>';}catch(e){}}
+
+async function loadQualidade(){
+  const el=document.getElementById('qualidade-lista');el.innerHTML='<p style="color:var(--muted);font-size:12px;">Carregando...</p>';
+  try{
+    const checks=[
+      ['Produtores sem comunidade definida','agro_produtores','comunidade=is.null'],
+      ['Propriedades sem área total definida','agro_propriedades','area_total=is.null'],
+      ['Registros de produção sem produção realizada','agro_producao','producao_realizada=is.null'],
+      ['Máquinas sem operador definido','agro_maquinas','operador=is.null'],
+      ['Estradas sem última manutenção registrada','agro_estradas','ultima_manutencao=is.null'],
+      ['Contratos sem data de término','agro_contratos','data_fim=is.null'],
+    ];
+    const results=await Promise.all(checks.map(([label,table,q])=>sbGet(table,'select=id&'+q).then(d=>[label,d.length]).catch(()=>[label,null])));
+    el.innerHTML='<table><thead><tr><th>Verificação</th><th>Pendências</th></tr></thead><tbody>'+
+      results.map(([label,n])=>'<tr><td>'+label+'</td><td>'+(n===null?'Dados insuficientes para cálculo':(n===0?'<span class="status-pill status-ativo">Ok</span>':'<span class="status-pill status-pendente">'+n+' pendente(s)</span>')) +'</td></tr>').join('')+
+      '</tbody></table>';
+  }catch(e){el.innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,150)+'</div>';}
+}
+
+function exportPdf(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFontSize(16);doc.text(m.title+' — Conecta Gestão Agricultura',14,18);doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,26);const rows=data.map(r=>m.cols.map(c=>{const v=m.renderCol(r,c);return String(v).replace(/<[^>]+>/g,'');}));doc.autoTable({head:[m.colLabels],body:rows,startY:32,styles:{fontSize:9},headStyles:{fillColor:[77,124,15]}});doc.save(k+'_agricultura.pdf');}
+function exportXlsx(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const rows=data.map(r=>{const o={};m.cols.forEach((c,i)=>{o[m.colLabels[i]]=String(m.renderCol(r,c)).replace(/<[^>]+>/g,'');});return o;});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,m.title.slice(0,31));XLSX.writeFile(wb,k+'_agricultura.xlsx');}
+
+async function gerarRelatorioMensal(){
+  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');let y=20;
+  doc.setFontSize(18);doc.text('Relatório Mensal — Agricultura',14,y);y+=10;
+  doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,y);y+=12;
+  try{
+    const [prod,prop,producao,assist,serv,estr,manEst,feir,proj,fin,met]=await Promise.all([
+      sbGet('agro_produtores','select=id,situacao').catch(()=>[]),
+      sbGet('agro_propriedades','select=id,area_total').catch(()=>[]),
+      sbGet('agro_producao','select=id,producao_realizada').catch(()=>[]),
+      sbGet('agro_assistencia_tecnica','select=id').catch(()=>[]),
+      sbGet('agro_servicos_maquinas','select=id,horas_trabalhadas').catch(()=>[]),
+      sbGet('agro_estradas','select=id,extensao_km').catch(()=>[]),
+      sbGet('agro_manutencao_estradas','select=id,situacao').catch(()=>[]),
+      sbGet('agro_feiras','select=id,produtores_participantes').catch(()=>[]),
+      sbGet('agro_projetos','select=id,situacao').catch(()=>[]),
+      sbGet('agro_financeiro','select=id,tipo,valor').catch(()=>[]),
+      sbGet('agro_metas','select=id,situacao').catch(()=>[]),
+    ]);
+    const items=[
+      ['Produtores ativos',prod.filter(p=>p.situacao==='ativo').length],['Propriedades cadastradas',prop.length],
+      ['Área total (ha)',prop.reduce((s,p)=>s+(Number(p.area_total)||0),0)],
+      ['Assistências/visitas técnicas',assist.length],['Serviços com máquinas',serv.length],
+      ['Horas de máquina',serv.reduce((s,r)=>s+(Number(r.horas_trabalhadas)||0),0)],
+      ['Estradas rurais (km)',estr.reduce((s,e)=>s+(Number(e.extensao_km)||0),0)],
+      ['Manutenções pendentes',manEst.filter(m=>m.situacao==='aberta'||m.situacao==='pendente').length],
+      ['Feiras realizadas',feir.length],['Projetos em andamento',proj.filter(p=>p.situacao==='em_andamento').length],
+      ['Despesas',moneyShort(fin.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+(Number(f.valor)||0),0))],
+      ['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+' de '+met.length],
+    ];
+    doc.autoTable({head:[['Indicador','Valor']],body:items,startY:y,styles:{fontSize:10},headStyles:{fillColor:[77,124,15]}});
+    doc.save('relatorio_mensal_agricultura.pdf');
+    alert('Relatório mensal gerado!');
+  }catch(e){alert('Erro: '+e.message.slice(0,200));}
+}
+
+const LOADERS={dashboard_agro:loadDashboard,secretaria_agro:loadSec,alertas_agro:loadAlertas,auditoria_agro:loadAuditoria,qualidade_agro:loadQualidade};
+Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>loadData(k);});
+</script>
+<div style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>

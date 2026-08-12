@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Esporte · Gabriel Oliveira</title>
+<meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#16A34A">
+<style>
+:root{--royal:#16A34A;--neon:#22C55E;--light:#4ADE80;--darkblue:#0F172A;--bg:#F8FAFC;--surface:#FFFFFF;--ink:#0F172A;--ink-soft:#475569;--line:rgba(15,23,42,.08);--ok:#059669;--danger:#DC2626;--warn:#D97706;--muted:#94A3B8;--radius:18px;--sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;--shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);}
+*{box-sizing:border-box;}body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}button{font-family:inherit;cursor:pointer;}select,input,textarea{font-family:inherit;}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(22,163,74,.4);}
+#login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+@media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+.login-brand{background:linear-gradient(150deg,var(--darkblue) 0%,#16265A 45%,var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+.login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle,rgba(74,222,128,.25),transparent 70%);}
+.brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+.brand-name{font-size:19px;font-weight:800;}.brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+.brand-quote{position:relative;z-index:1;max-width:420px;}.brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;}.brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+.brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+.login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-form{width:100%;max-width:380px;}.login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+.field{margin-bottom:18px;}.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(22,163,74,.12);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(22,163,74,.35);}
+.btn-primary:hover{transform:translateY(-1px);}.btn-primary:disabled{opacity:.6;pointer-events:none;}
+.login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
+header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.hd-left{display:flex;align-items:center;gap:12px;}.hd-left .name{font-size:16px;font-weight:800;}.hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+.hd-right{display:flex;align-items:center;gap:12px;font-size:12px;color:#B6C4DD;}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;}.btn-ghost:hover{border-color:var(--royal);color:var(--royal);}
+.btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 12px rgba(22,163,74,.35);}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;}.logout-btn:hover{border-color:var(--light);color:var(--light);}
+.back-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;text-decoration:none;}.back-btn:hover{border-color:var(--light);color:var(--light);}
+.app-body{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:240px;background:var(--darkblue);padding:12px 8px;overflow-y:auto;flex-shrink:0;}
+.sidebar::-webkit-scrollbar{width:4px;}.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+.nav-group-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:14px 10px 4px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:#B6C4DD;font-size:12px;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:background .15s;}
+.nav-item:hover{background:rgba(34,197,94,.12);}.nav-item.active{background:linear-gradient(90deg,rgba(22,163,74,.4),rgba(34,197,94,.15));color:#fff;font-weight:700;}
+main{flex:1;padding:28px 36px 60px;max-width:1300px;overflow-x:hidden;}
+@media(max-width:860px){.sidebar{display:none;}main{padding:20px;}}
+.view{display:none;}.view.active{display:block;}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.topbar h1{font-size:24px;margin:0 0 2px;font-weight:800;}.topbar .sub{font-size:12px;color:var(--muted);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:1000px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);transition:transform .2s;}.kpi:hover{transform:translateY(-2px);}
+.kpi .ico{font-size:10px;color:var(--royal);text-transform:uppercase;letter-spacing:.8px;font-weight:800;margin-bottom:6px;}
+.kpi .num{font-size:22px;color:var(--ink);font-weight:800;}.kpi .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.panel h3{font-size:15px;margin:0 0 4px;font-weight:800;}.panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 14px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+.field.span-2{grid-column:span 2;}.field.span-3{grid-column:span 3;}
+.form-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);font-weight:700;}
+td{padding:9px 8px;border-bottom:1px solid var(--line);}tr:last-child td{border-bottom:none;}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.status-ativa,.status-ativo,.status-atingida,.status-vigente,.status-aprovado,.status-disponivel,.status-realizado,.status-realizada,.status-resolvido,.status-confirmado,.status-confirmada,.status-concluido,.status-concluida,.status-bom,.status-ouro{background:#D1FAE5;color:var(--ok);}
+.status-inativa,.status-inativo,.status-encerrada,.status-encerrado,.status-cancelada,.status-cancelado,.status-reprovado,.status-vencido,.status-abaixo,.status-danificado,.status-ruim,.status-recusada,.status-eliminado{background:#FEF2F2;color:var(--danger);}
+.status-em_andamento,.status-atencao,.status-pendente,.status-aberta,.status-agendado,.status-agendada,.status-solicitada,.status-manutencao,.status-aguardando,.status-regular,.status-planejada,.status-suspensa,.status-inscrito,.status-prata:{background:#FEF3C7;color:var(--warn);}
+.status-prata,.status-bronze{background:#FEF3C7;color:var(--warn);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:1000px){.grid-2{grid-template-columns:1fr;}}
+.diag{padding:14px;border-radius:12px;font-size:12.5px;line-height:1.6;margin-bottom:8px;}
+.diag-ok{background:#D1FAE5;border:1px solid rgba(5,150,105,.25);color:#065F46;}
+.diag-warn{background:#FEF3C7;border:1px solid rgba(217,119,6,.25);color:#92400E;}
+.diag-danger{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
+.bars{display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:grid;grid-template-columns:160px 1fr 44px;align-items:center;gap:10px;font-size:12px;}
+.bar-track{background:#ECFDF5;border-radius:5px;height:8px;overflow:hidden;}.bar-fill{height:100%;border-radius:5px;}
+.bar-fill-royal{background:linear-gradient(90deg,var(--royal),var(--light));}
+.bar-fill-ok{background:linear-gradient(90deg,var(--ok),#34D399);}
+.bar-row .val{text-align:right;color:var(--ink-soft);font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name">Conecta Gestão<small>Esporte</small></div></div>
+    <div class="brand-quote"><h1>Central Municipal de Gestão Esportiva.</h1><p>Atletas, modalidades, competições, espaços esportivos, projetos e resultados — inteligência para decisão.</p></div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap"><div class="login-form">
+    <h2>Acessar</h2><p class="sub">Entre com sua conta institucional.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div></div>
+</div>
+<div id="app" style="display:none;">
+<header>
+  <div class="hd-left"><div class="logo">CG</div><div class="name">Conecta Gestão<small>Esporte</small></div></div>
+  <div class="hd-right"><span id="hd-role"></span><a class="back-btn" href="conecta-gestao-painel-admin.html">← Painel</a><button class="logout-btn" onclick="doLogout()">Sair</button></div>
+</header>
+<div class="app-body">
+<aside class="sidebar" id="sidebar-nav"></aside>
+<main id="main-content"></main>
+</div>
+</div>
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+let session=null;
+function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),senha=document.getElementById('login-senha').value,err=document.getElementById('login-error'),btn=document.getElementById('login-btn');
+  err.classList.remove('show');if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
+    session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    try{localStorage.setItem('cg_session',JSON.stringify(session));}catch(e){}
+    enterApp();
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+function doLogout(){session=null;try{localStorage.removeItem('cg_session');}catch(e){}document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+function tryAutoLogin(){
+  try{const s=JSON.parse(localStorage.getItem('cg_session'));if(!s||!s.access_token)return false;
+    const c=decodeJwt(s.access_token);if(!c.exp||c.exp*1000<Date.now())return false;
+    session={access_token:s.access_token,claims:c};enterApp();return true;
+  }catch(e){return false;}
+}
+function enterApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');buildNav();buildViews();navigateTo('dashboard_esp');}
+window.addEventListener('DOMContentLoaded',()=>{tryAutoLogin();});
+
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPatch(t,q,d){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbDel(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'DELETE',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());}
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';}
+function moneyShort(v){if(!v)return'R$ 0';const n=Number(v);if(n>=1e6)return'R$ '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'R$ '+(n/1e3).toFixed(0)+'k';return'R$ '+n.toFixed(0);}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function pill(s,label){return'<span class="status-pill status-'+(s||'')+'">'+(label||s||'—')+'</span>';}
+function parseMoney(v){if(!v)return null;return parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));}
+function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-000000000001';}
+function semDados(){return '<p style="color:var(--muted);font-size:12px;">Dados insuficientes para cálculo.</p>';}
+
+const NAV_GROUPS=[
+  {label:'Geral',items:[['dashboard_esp','Dashboard'],['secretaria_esp','Secretaria']]},
+  {label:'Estrutura Esportiva',items:[['modalidades','Modalidades'],['categorias','Categorias'],['equipes','Equipes'],['profissionais','Professores e Técnicos'],['atletas','Atletas']]},
+  {label:'Formação',items:[['escolinhas','Escolinhas'],['projetos_esp','Projetos Esportivos'],['treinamentos','Treinamentos']]},
+  {label:'Competições',items:[['competicoes','Competições e Campeonatos'],['jogos','Jogos'],['resultados','Resultados'],['classificacoes','Classificações'],['arbitragem','Arbitragem']]},
+  {label:'Eventos',items:[['eventos_esp','Eventos Esportivos'],['inscricoes','Inscrições']]},
+  {label:'Infraestrutura',items:[['espacos','Espaços Esportivos'],['reservas','Reservas'],['manutencao_esp','Manutenção']]},
+  {label:'Materiais e Logística',items:[['materiais','Materiais Esportivos'],['uniformes','Uniformes'],['estoque_esp','Estoque'],['estoque_mov_esp','Movimentações Estoque'],['transporte_esp','Transporte'],['frota_esp','Frota'],['frota_abast_esp','Abastecimentos'],['frota_manut_esp','Manutenções Frota']]},
+  {label:'Atletas e Incentivos',items:[['avaliacoes_esp','Avaliação Esportiva'],['bolsas','Bolsas e Incentivos']]},
+  {label:'Parcerias e Financeiro',items:[['convenios_esp','Convênios'],['patrocinios','Patrocínios'],['programas_esp','Programas'],['financeiro_esp','Financeiro'],['compras_esp','Compras'],['contratos_esp','Contratos']]},
+  {label:'Gestão',items:[['metas_esp','Metas'],['indicadores_esp','Indicadores']]},
+  {label:'Sistema',items:[['relatorios_esp','Relatórios'],['qualidade_esp','Qualidade dos Dados'],['alertas_esp','Alertas'],['documentos_esp','Documentos'],['auditoria_esp','Auditoria'],['config_esp','Configurações']]},
+];
+let currentView='dashboard_esp';
+function buildNav(){let h='';NAV_GROUPS.forEach(g=>{h+='<div class="nav-group-label">'+g.label+'</div>';g.items.forEach(([k,l])=>{h+='<button class="nav-item'+(k==='dashboard_esp'?' active':'')+'" data-key="'+k+'" onclick="navigateTo(\''+k+'\')">'+l+'</button>';});});document.getElementById('sidebar-nav').innerHTML=h;}
+function navigateTo(key){currentView=key;document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.key===key));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+key));if(LOADERS[key])LOADERS[key]();}
+
+let caches={};
+const MODULES={
+  modalidades:{table:'esporte_modalidades',title:'Modalidades',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'descricao',label:'Descrição',span:3},
+    {id:'faixa_etaria',label:'Faixa etária'},{id:'local',label:'Local'},{id:'dias',label:'Dias'},{id:'horarios',label:'Horários'},
+    {id:'capacidade',label:'Capacidade',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['nome','faixa_etaria','local','capacidade','situacao'],colLabels:['Nome','Faixa etária','Local','Capac.','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  categorias:{table:'esporte_categorias',title:'Categorias',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'idade_minima',label:'Idade mínima',type:'number'},{id:'idade_maxima',label:'Idade máxima',type:'number'},
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'sexo',label:'Sexo',type:'select',opts:[['M','Masculino'],['F','Feminino'],['misto','Misto']]},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['nome','idade_minima','idade_maxima','sexo','situacao'],colLabels:['Nome','Idade min.','Idade máx.','Sexo','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  equipes:{table:'esporte_equipes',title:'Equipes',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},
+    {id:'categoria_id',label:'Categoria',type:'ref',ref:'categorias_esp'},{id:'tecnico',label:'Técnico'},{id:'comissao',label:'Comissão técnica',span:2},
+    {id:'local_treinamento',label:'Local de treinamento'},{id:'calendario',label:'Calendário',span:2},
+    {id:'vitorias',label:'Vitórias',type:'number'},{id:'derrotas',label:'Derrotas',type:'number'},{id:'empates',label:'Empates',type:'number'},{id:'titulos',label:'Títulos',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['nome','tecnico','vitorias','derrotas','empates','situacao'],colLabels:['Nome','Técnico','Vitórias','Derrotas','Empates','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  profissionais:{table:'esporte_profissionais',title:'Professores e Técnicos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'matricula',label:'Matrícula'},
+    {id:'funcao',label:'Função',type:'select',opts:[['professor','Professor'],['tecnico','Técnico'],['monitor','Monitor'],['arbitro','Árbitro'],['outro','Outro']]},
+    {id:'formacao',label:'Formação'},{id:'especialidade',label:'Especialidade'},
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'categoria_id',label:'Categoria',type:'ref',ref:'categorias_esp'},
+    {id:'carga_horaria',label:'Carga horária',type:'number'},{id:'horario',label:'Horário'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['afastado','Afastado'],['inativo','Inativo']]}
+  ],cols:['nome','funcao','carga_horaria','situacao'],colLabels:['Nome','Função','CH','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):c==='funcao'?pill(r.funcao):(r[c]||'—')},
+
+  atletas:{table:'esporte_atletas',title:'Atletas',fields:[
+    {id:'identificador',label:'Identificador'},{id:'nome',label:'Nome',span:2,required:true},
+    {id:'data_nascimento',label:'Data de nascimento',type:'date'},{id:'sexo',label:'Sexo',type:'select',opts:[['M','Masculino'],['F','Feminino']]},
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'categoria_id',label:'Categoria',type:'ref',ref:'categorias_esp'},
+    {id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},{id:'escola',label:'Escola'},{id:'bairro',label:'Bairro'},{id:'contato',label:'Contato'},
+    {id:'responsavel_nome',label:'Responsável (se menor)'},{id:'responsavel_contato',label:'Contato do responsável'},
+    {id:'nivel_esportivo',label:'Nível esportivo'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['nome','bairro','nivel_esportivo','situacao'],colLabels:['Nome','Bairro','Nível','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  escolinhas:{table:'esporte_escolinhas',title:'Escolinhas Esportivas',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},
+    {id:'local',label:'Local'},{id:'professor',label:'Professor'},{id:'tecnico',label:'Técnico'},
+    {id:'categoria_id',label:'Categoria',type:'ref',ref:'categorias_esp'},{id:'dias',label:'Dias'},{id:'horarios',label:'Horários'},
+    {id:'capacidade',label:'Capacidade',type:'number'},{id:'inscritos',label:'Inscritos',type:'number'},{id:'lista_espera',label:'Lista de espera',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['nome','local','inscritos','capacidade','lista_espera','situacao'],colLabels:['Nome','Local','Inscritos','Capac.','Espera','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  projetos_esp:{table:'esporte_projetos',title:'Projetos Esportivos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'objetivo',label:'Objetivo',span:3},{id:'publico',label:'Público'},
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'responsavel',label:'Responsável'},{id:'local',label:'Local'},
+    {id:'periodo',label:'Período'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'parceiros',label:'Parceiros',span:2},
+    {id:'meta',label:'Meta',type:'number'},{id:'participantes',label:'Participantes',type:'number'},{id:'resultado',label:'Resultado',span:3},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_andamento','Em andamento'],['concluido','Concluído'],['cancelado','Cancelado']]}
+  ],cols:['nome','responsavel','participantes','orcamento','situacao'],colLabels:['Nome','Responsável','Particip.','Orçamento','Situação'],
+  renderCol:(r,c)=>c==='orcamento'?money(r.orcamento):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  treinamentos:{table:'esporte_treinamentos',title:'Treinamentos',fields:[
+    {id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},{id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},
+    {id:'tecnico',label:'Técnico'},{id:'data',label:'Data',type:'date',required:true},{id:'horario',label:'Horário'},{id:'local',label:'Local'},
+    {id:'duracao_min',label:'Duração (min)',type:'number'},{id:'participantes',label:'Participantes',type:'number'},{id:'presenca',label:'Presença',type:'number'},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['data','tecnico','local','participantes','presenca'],colLabels:['Data','Técnico','Local','Particip.','Presença'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc'},
+
+  competicoes:{table:'esporte_competicoes',title:'Competições e Campeonatos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['competicao','Competição'],['campeonato','Campeonato']]},
+    {id:'edicao',label:'Edição'},{id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'categoria_id',label:'Categoria',type:'ref',ref:'categorias_esp'},
+    {id:'organizacao',label:'Organização'},{id:'local',label:'Local'},{id:'periodo_inicio',label:'Início',type:'date'},{id:'periodo_fim',label:'Término',type:'date'},
+    {id:'regulamento',label:'Regulamento',span:2},{id:'premiacao',label:'Premiação'},{id:'custo',label:'Custo (R$)',type:'money'},{id:'patrocinadores',label:'Patrocinadores',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['planejada','Planejada'],['em_andamento','Em andamento'],['concluida','Concluída'],['cancelada','Cancelada']]}
+  ],cols:['nome','tipo','local','periodo_inicio','situacao'],colLabels:['Nome','Tipo','Local','Início','Situação'],
+  renderCol:(r,c)=>c==='periodo_inicio'?fmtDate(r.periodo_inicio):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  jogos:{table:'esporte_jogos',title:'Jogos',fields:[
+    {id:'competicao_id',label:'Competição',type:'ref',ref:'competicoes_esp'},{id:'rodada',label:'Rodada'},{id:'data',label:'Data',type:'date'},{id:'horario',label:'Horário'},
+    {id:'local',label:'Local'},{id:'equipe_mandante_id',label:'Equipe mandante',type:'ref',ref:'equipes_esp'},{id:'equipe_visitante_id',label:'Equipe visitante',type:'ref',ref:'equipes_esp'},
+    {id:'placar_mandante',label:'Placar mandante',type:'number'},{id:'placar_visitante',label:'Placar visitante',type:'number'},
+    {id:'arbitro',label:'Arbitragem'},{id:'publico',label:'Público',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['agendado','Agendado'],['realizado','Realizado'],['cancelado','Cancelado'],['adiado','Adiado']]}
+  ],cols:['data','rodada','local','placar_mandante','placar_visitante','situacao'],colLabels:['Data','Rodada','Local','Placar M.','Placar V.','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  resultados:{table:'esporte_resultados',title:'Resultados',fields:[
+    {id:'atleta_id',label:'Atleta',type:'ref',ref:'atletas_esp'},{id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},
+    {id:'competicao_id',label:'Competição',type:'ref',ref:'competicoes_esp'},{id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},
+    {id:'colocacao',label:'Colocação'},{id:'medalha',label:'Medalha',type:'select',opts:[['','Nenhuma'],['ouro','Ouro'],['prata','Prata'],['bronze','Bronze']]},
+    {id:'pontuacao',label:'Pontuação',type:'number'},{id:'recorde',label:'Recorde',type:'checkbox'},{id:'titulo',label:'Título',type:'checkbox'},
+    {id:'data',label:'Data',type:'date'},{id:'observacoes',label:'Observações',span:3}
+  ],cols:['data','colocacao','medalha','pontuacao'],colLabels:['Data','Colocação','Medalha','Pontuação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='medalha'?(r.medalha?pill(r.medalha):'—'):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  eventos_esp:{table:'esporte_eventos',title:'Eventos Esportivos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'data',label:'Data',type:'date'},{id:'local',label:'Local'},
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'publico_estimado',label:'Público estimado',type:'number'},
+    {id:'participantes',label:'Participantes',type:'number'},{id:'parceiros',label:'Parceiros',span:2},{id:'patrocinadores',label:'Patrocinadores',span:2},
+    {id:'custo',label:'Custo (R$)',type:'money'},{id:'estrutura',label:'Estrutura',span:2},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','data','local','participantes','custo'],colLabels:['Nome','Data','Local','Particip.','Custo'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  inscricoes:{table:'esporte_inscricoes',title:'Inscrições',fields:[
+    {id:'evento_id',label:'Evento',type:'ref',ref:'eventos_esp'},{id:'competicao_id',label:'Competição',type:'ref',ref:'competicoes_esp'},
+    {id:'atleta_id',label:'Atleta',type:'ref',ref:'atletas_esp'},{id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'categoria_id',label:'Categoria',type:'ref',ref:'categorias_esp'},
+    {id:'data',label:'Data',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['inscrito','Inscrito'],['confirmado','Confirmado'],['cancelado','Cancelado'],['eliminado','Eliminado'],['concluido','Concluído']]}
+  ],cols:['data','situacao'],colLabels:['Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  arbitragem:{table:'esporte_arbitragem',title:'Arbitragem',fields:[
+    {id:'arbitro',label:'Árbitro',span:2,required:true},{id:'competicao_id',label:'Competição',type:'ref',ref:'competicoes_esp'},
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'categoria_id',label:'Categoria',type:'ref',ref:'categorias_esp'},
+    {id:'data',label:'Data',type:'date'},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['confirmado','Confirmado'],['pendente','Pendente'],['cancelado','Cancelado']]}
+  ],cols:['arbitro','data','valor','situacao'],colLabels:['Árbitro','Data','Valor','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  espacos:{table:'esporte_espacos',title:'Espaços Esportivos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['ginasio','Ginásio'],['quadra','Quadra'],['campo','Campo'],['estadio','Estádio'],['pista','Pista'],['centro_esportivo','Centro esportivo'],['academia','Academia'],['comunitario','Espaço comunitário'],['outro','Outro']]},
+    {id:'endereco',label:'Endereço',span:2},{id:'responsavel',label:'Responsável'},{id:'capacidade',label:'Capacidade',type:'number'},{id:'modalidades',label:'Modalidades atendidas'},
+    {id:'iluminacao',label:'Iluminação',type:'checkbox'},{id:'vestiarios',label:'Vestiários',type:'checkbox'},{id:'banheiros',label:'Banheiros',type:'checkbox'},
+    {id:'arquibancada',label:'Arquibancada',type:'checkbox'},{id:'acessibilidade',label:'Acessibilidade',type:'checkbox'},{id:'estacionamento',label:'Estacionamento',type:'checkbox'},
+    {id:'estado_conservacao',label:'Estado de conservação',type:'select',opts:[['bom','Bom'],['regular','Regular'],['ruim','Ruim']]},
+    {id:'equipamentos',label:'Equipamentos',span:2},{id:'horario_funcionamento',label:'Horário de funcionamento'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['nome','tipo','capacidade','estado_conservacao','situacao'],colLabels:['Nome','Tipo','Capac.','Conservação','Situação'],
+  renderCol:(r,c)=>c==='situacao'||c==='estado_conservacao'?pill(r[c]):(r[c]||'—')},
+
+  reservas:{table:'esporte_reservas',title:'Reservas de Espaços',fields:[
+    {id:'espaco_id',label:'Espaço',type:'ref',ref:'espacos_esp'},{id:'solicitante',label:'Solicitante',span:2,required:true},
+    {id:'data',label:'Data',type:'date',required:true},{id:'horario_inicio',label:'Horário início',type:'time'},{id:'horario_fim',label:'Horário fim',type:'time'},
+    {id:'finalidade',label:'Finalidade',span:2},{id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},
+    {id:'quantidade_participantes',label:'Qtd. participantes',type:'number'},{id:'responsavel',label:'Responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitada','Solicitada'],['aprovada','Aprovada'],['recusada','Recusada'],['realizada','Realizada'],['cancelada','Cancelada']]}
+  ],cols:['solicitante','data','finalidade','situacao'],colLabels:['Solicitante','Data','Finalidade','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  manutencao_esp:{table:'esporte_manutencao',title:'Manutenção dos Espaços',fields:[
+    {id:'espaco_id',label:'Espaço',type:'ref',ref:'espacos_esp'},{id:'problema',label:'Problema',span:2,required:true},
+    {id:'prioridade',label:'Prioridade',type:'select',opts:[['alta','Alta'],['media','Média'],['baixa','Baixa']]},
+    {id:'data',label:'Data',type:'date'},{id:'responsavel',label:'Responsável'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'custo',label:'Custo (R$)',type:'money'},
+    {id:'conclusao',label:'Conclusão',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['aberta','Aberta'],['em_andamento','Em andamento'],['resolvido','Resolvido'],['pendente','Pendente']]}
+  ],cols:['problema','prioridade','data','custo','situacao'],colLabels:['Problema','Prioridade','Data','Custo','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):c==='situacao'||c==='prioridade'?pill(r[c]):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  materiais:{table:'esporte_materiais',title:'Materiais Esportivos',fields:[
+    {id:'item',label:'Item',span:2,required:true},{id:'categoria',label:'Categoria'},{id:'quantidade',label:'Quantidade',type:'number'},
+    {id:'patrimonio',label:'Patrimônio'},{id:'localizacao',label:'Localização'},
+    {id:'estado',label:'Estado',type:'select',opts:[['bom','Bom'],['regular','Regular'],['danificado','Danificado']]},
+    {id:'responsavel',label:'Responsável'},{id:'data_aquisicao',label:'Aquisição',type:'date'},{id:'valor',label:'Valor (R$)',type:'money'}
+  ],cols:['item','categoria','quantidade','estado','valor'],colLabels:['Item','Categoria','Qtd.','Estado','Valor'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='estado'?pill(r.estado):(r[c]||'—')},
+
+  uniformes:{table:'esporte_uniformes',title:'Uniformes',fields:[
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},
+    {id:'atleta_id',label:'Atleta',type:'ref',ref:'atletas_esp'},{id:'tamanho',label:'Tamanho'},{id:'quantidade',label:'Quantidade',type:'number'},
+    {id:'fornecedor',label:'Fornecedor'},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data_entrega',label:'Entrega',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['disponivel','Disponível'],['entregue','Entregue'],['pendente','Pendente']]}
+  ],cols:['tamanho','quantidade','fornecedor','valor','situacao'],colLabels:['Tamanho','Qtd.','Fornecedor','Valor','Situação'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data_entrega.desc.nullslast'},
+
+  estoque_esp:{table:'esporte_estoque',title:'Estoque',fields:[
+    {id:'material',label:'Material',span:2,required:true},{id:'categoria',label:'Categoria'},{id:'unidade_medida',label:'Unidade'},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'estoque_minimo',label:'Estoque mínimo',type:'number'},{id:'estoque_maximo',label:'Estoque máximo',type:'number'},
+    {id:'localizacao',label:'Localização'}
+  ],cols:['material','categoria','quantidade','estoque_minimo'],colLabels:['Material','Categoria','Qtd.','Mínimo'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  estoque_mov_esp:{table:'esporte_estoque_mov',title:'Movimentações de Estoque',fields:[
+    {id:'estoque_id',label:'Item',type:'ref',ref:'estoque_esp'},{id:'tipo',label:'Tipo',type:'select',opts:[['entrada','Entrada'],['saida','Saída'],['ajuste','Ajuste'],['perda','Perda']]},
+    {id:'quantidade',label:'Quantidade',type:'number',required:true},{id:'data',label:'Data',type:'date'},{id:'destino',label:'Destino'},{id:'observacoes',label:'Observações',span:2}
+  ],cols:['tipo','quantidade','data','destino'],colLabels:['Tipo','Qtd.','Data','Destino'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  transporte_esp:{table:'esporte_transporte',title:'Transporte',fields:[
+    {id:'competicao_id',label:'Competição',type:'ref',ref:'competicoes_esp'},{id:'evento_id',label:'Evento',type:'ref',ref:'eventos_esp'},
+    {id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},{id:'destino',label:'Destino',span:2},{id:'data',label:'Data',type:'date'},{id:'horario',label:'Horário'},
+    {id:'veiculo',label:'Veículo'},{id:'motorista',label:'Motorista'},{id:'passageiros',label:'Passageiros',type:'number'},
+    {id:'quilometragem',label:'Km',type:'number'},{id:'combustivel_litros',label:'Combustível (L)',type:'number'},{id:'custo',label:'Custo (R$)',type:'money'}
+  ],cols:['destino','data','passageiros','quilometragem','custo'],colLabels:['Destino','Data','Passag.','Km','Custo'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  frota_esp:{table:'esporte_frota',title:'Frota',fields:[
+    {id:'veiculo',label:'Veículo',span:2,required:true},{id:'placa',label:'Placa'},{id:'modelo',label:'Modelo'},{id:'ano',label:'Ano',type:'number'},
+    {id:'capacidade',label:'Capacidade',type:'number'},{id:'combustivel',label:'Combustível'},{id:'quilometragem',label:'Km',type:'number'},{id:'motorista',label:'Motorista'},
+    {id:'seguro_vencimento',label:'Seguro (vencimento)',type:'date'},{id:'licenciamento_vencimento',label:'Licenciamento (vencimento)',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['manutencao','Manutenção'],['inativo','Inativo']]}
+  ],cols:['veiculo','placa','capacidade','quilometragem','situacao'],colLabels:['Veículo','Placa','Capac.','Km','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  frota_abast_esp:{table:'esporte_frota_abastecimentos',title:'Abastecimentos',fields:[
+    {id:'veiculo_id',label:'Veículo',type:'ref',ref:'frota_esp'},{id:'data',label:'Data',type:'date',required:true},
+    {id:'litros',label:'Litros',type:'number'},{id:'valor',label:'Valor (R$)',type:'money'},{id:'quilometragem',label:'Km',type:'number'},{id:'posto',label:'Posto'}
+  ],cols:['data','litros','valor','quilometragem'],colLabels:['Data','Litros','Valor','Km'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):(r[c]||'—'),query:'order=data.desc'},
+
+  frota_manut_esp:{table:'esporte_frota_manutencoes',title:'Manutenções Frota',fields:[
+    {id:'veiculo_id',label:'Veículo',type:'ref',ref:'frota_esp'},{id:'data',label:'Data',type:'date',required:true},
+    {id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:2},{id:'valor',label:'Valor (R$)',type:'money'},{id:'oficina',label:'Oficina'}
+  ],cols:['data','tipo','oficina','valor'],colLabels:['Data','Tipo','Oficina','Valor'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):(r[c]||'—'),query:'order=data.desc'},
+
+  avaliacoes_esp:{table:'esporte_avaliacoes',title:'Avaliação Esportiva',fields:[
+    {id:'atleta_id',label:'Atleta',type:'ref',ref:'atletas_esp'},{id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},
+    {id:'data',label:'Data',type:'date'},{id:'avaliacao',label:'Avaliação',span:2},{id:'resultado',label:'Resultado'},{id:'evolucao',label:'Evolução'},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['data','avaliacao','resultado','evolucao'],colLabels:['Data','Avaliação','Resultado','Evolução'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  bolsas:{table:'esporte_bolsas',title:'Bolsas e Incentivos',fields:[
+    {id:'atleta_id',label:'Atleta',type:'ref',ref:'atletas_esp'},{id:'programa',label:'Programa',span:2},{id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},
+    {id:'beneficio',label:'Benefício'},{id:'valor',label:'Valor (R$)',type:'money'},{id:'periodo',label:'Período'},{id:'criterios',label:'Critérios',span:2},{id:'resultado',label:'Resultado',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['encerrada','Encerrada'],['suspensa','Suspensa']]}
+  ],cols:['programa','beneficio','valor','situacao'],colLabels:['Programa','Benefício','Valor','Situação'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  convenios_esp:{table:'esporte_convenios',title:'Convênios',fields:[
+    {id:'parceiro',label:'Parceiro',span:2,required:true},{id:'objeto',label:'Objeto',span:2},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'data_inicio',label:'Início',type:'date'},{id:'data_fim',label:'Término',type:'date'},{id:'contrapartida',label:'Contrapartida',span:2},{id:'responsavel',label:'Responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['vencido','Vencido']]}
+  ],cols:['parceiro','valor','data_fim','situacao'],colLabels:['Parceiro','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data_fim.asc.nullslast'},
+
+  patrocinios:{table:'esporte_patrocinios',title:'Patrocínios',fields:[
+    {id:'empresa',label:'Empresa',span:2,required:true},{id:'evento_id',label:'Evento',type:'ref',ref:'eventos_esp'},{id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'valor',label:'Valor (R$)',type:'money'},{id:'tipo_apoio',label:'Tipo de apoio'},
+    {id:'periodo',label:'Período'},{id:'contrapartida',label:'Contrapartida',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['encerrado','Encerrado']]}
+  ],cols:['empresa','valor','tipo_apoio','situacao'],colLabels:['Empresa','Valor','Tipo de apoio','Situação'],
+  renderCol:(r,c)=>c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  programas_esp:{table:'esporte_programas',title:'Programas',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'objetivo',label:'Objetivo',span:3},{id:'publico',label:'Público'},
+    {id:'modalidade_id',label:'Modalidade',type:'ref',ref:'modalidades_esp'},{id:'responsavel',label:'Responsável'},{id:'periodo',label:'Período'},
+    {id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'meta',label:'Meta',type:'number'},{id:'participantes',label:'Participantes',type:'number'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','responsavel','participantes','orcamento'],colLabels:['Nome','Responsável','Particip.','Orçamento'],
+  renderCol:(r,c)=>c==='orcamento'?money(r.orcamento):(r[c]||'—')},
+
+  financeiro_esp:{table:'esporte_financeiro',title:'Financeiro',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['receita','Receita'],['despesa','Despesa'],['empenho','Empenho'],['liquidacao','Liquidação'],['pagamento','Pagamento']],required:true},
+    {id:'descricao',label:'Descrição',span:2},{id:'valor',label:'Valor (R$)',type:'money'},{id:'programa',label:'Programa'},{id:'projeto',label:'Projeto'},
+    {id:'evento',label:'Evento'},{id:'competicao',label:'Competição'},{id:'fonte_recurso',label:'Fonte'},{id:'fornecedor',label:'Fornecedor'},{id:'contrato',label:'Contrato'},{id:'data',label:'Data',type:'date'}
+  ],cols:['data','tipo','descricao','valor'],colLabels:['Data','Tipo','Descrição','Valor'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  compras_esp:{table:'esporte_compras',title:'Compras',fields:[
+    {id:'solicitacao',label:'Solicitação'},{id:'processo',label:'Processo'},{id:'item',label:'Item',span:2,required:true},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'cotacao',label:'Cotação (R$)',type:'money'},{id:'fornecedor',label:'Fornecedor'},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'data',label:'Data',type:'date'},{id:'entrega',label:'Entrega',type:'date'},{id:'nota_fiscal',label:'Nota fiscal'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitada','Solicitada'],['em_cotacao','Em cotação'],['empenhada','Empenhada'],['entregue','Entregue'],['cancelada','Cancelada']]}
+  ],cols:['item','fornecedor','valor','data','situacao'],colLabels:['Item','Fornecedor','Valor','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  contratos_esp:{table:'esporte_contratos',title:'Contratos',fields:[
+    {id:'numero',label:'Nº contrato'},{id:'processo',label:'Processo'},{id:'fornecedor',label:'Fornecedor',required:true},{id:'cnpj',label:'CNPJ'},
+    {id:'objeto',label:'Objeto',span:3},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data_inicio',label:'Início',type:'date'},{id:'data_fim',label:'Término',type:'date'},
+    {id:'fiscal',label:'Fiscal'},{id:'saldo',label:'Saldo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['aditado','Aditado'],['rescindido','Rescindido']]}
+  ],cols:['numero','fornecedor','valor','data_fim','situacao'],colLabels:['Nº','Fornecedor','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  metas_esp:{table:'esporte_metas',title:'Metas',fields:[
+    {id:'indicador',label:'Indicador',span:2,required:true},{id:'periodo',label:'Período'},{id:'meta_anual',label:'Meta anual',type:'number'},{id:'meta_mensal',label:'Meta mensal',type:'number'},
+    {id:'responsavel',label:'Responsável'},{id:'prazo',label:'Prazo',type:'date'},{id:'resultado',label:'Resultado',type:'number'},{id:'percentual',label:'% alcançado',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['atingida','Atingida'],['atencao','Atenção'],['abaixo','Abaixo da meta'],['em_andamento','Em andamento']]}
+  ],cols:['indicador','meta_mensal','resultado','percentual','situacao'],colLabels:['Indicador','Meta','Resultado','%','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao,{atingida:'Atingida',atencao:'Atenção',abaixo:'Abaixo',em_andamento:'Em andamento'}[r.situacao]):c==='percentual'?(r.percentual||0)+'%':(r[c]??'—')},
+
+  indicadores_esp:{table:'esporte_indicadores',title:'Indicadores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'descricao',label:'Descrição',span:3},{id:'formula',label:'Fórmula',span:2},{id:'fonte',label:'Fonte'},
+    {id:'periodicidade',label:'Periodicidade'},{id:'meta',label:'Meta',type:'number'},{id:'resultado',label:'Resultado',type:'number'},{id:'unidade_medida',label:'Unidade'},{id:'responsavel',label:'Responsável'}
+  ],cols:['nome','formula','periodicidade','meta','resultado'],colLabels:['Nome','Fórmula','Period.','Meta','Resultado'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  documentos_esp:{table:'esporte_documentos',title:'Documentos',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:2},
+    {id:'modulo',label:'Módulo'},{id:'url',label:'URL',span:2},{id:'data',label:'Data',type:'date'}
+  ],cols:['titulo','tipo','modulo','data'],colLabels:['Título','Tipo','Módulo','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+};
+
+const REF_TABLES={modalidades_esp:'esporte_modalidades',categorias_esp:'esporte_categorias',equipes_esp:'esporte_equipes',atletas_esp:'esporte_atletas',competicoes_esp:'esporte_competicoes',eventos_esp:'esporte_eventos',espacos_esp:'esporte_espacos',frota_esp:'esporte_frota',estoque_esp:'esporte_estoque'};
+const REF_LABEL_FIELD={modalidades_esp:'nome',categorias_esp:'nome',equipes_esp:'nome',atletas_esp:'nome',competicoes_esp:'nome',eventos_esp:'nome',espacos_esp:'nome',frota_esp:'veiculo',estoque_esp:'material'};
+async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await sbGet(REF_TABLES[k],'select=id,'+REF_LABEL_FIELD[k]+'&order='+REF_LABEL_FIELD[k]+'.asc');caches[k]=d;return d;}catch(e){return[];}}
+
+function buildViews(){
+  let html='';
+  html+='<section class="view active" id="view-dashboard_esp"><div class="topbar"><div><h1>Dashboard — Esporte</h1><div class="sub">Central Municipal de Gestão Esportiva</div></div><div><button class="btn-accent" onclick="gerarRelatorioMensal()">Gerar Relatório Mensal</button></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Equipes — aproveitamento</h3><div class="bars" id="dash-equipes-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="grid-2"><div class="panel"><h3>O que está bom</h3><div id="dash-bom"></div></div><div class="panel"><h3>O que precisa de atenção</h3><div id="dash-atencao"></div></div></div><div class="grid-2"><div class="panel"><h3>Infraestrutura</h3><div id="dash-infra"></div></div><div class="panel"><h3>Financeiro</h3><div id="dash-financeiro"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
+  html+='<section class="view" id="view-secretaria_esp"><div class="topbar"><div><h1>Secretaria de Esporte</h1></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="se-nome"></div><div class="field"><label>CNPJ</label><input id="se-cnpj"></div><div class="field"><label>Secretário(a)</label><input id="se-secretario"></div><div class="field"><label>Secretário(a) adjunto(a)</label><input id="se-secretario_adjunto"></div><div class="field"><label>Telefone</label><input id="se-telefone"></div><div class="field"><label>WhatsApp</label><input id="se-whatsapp"></div><div class="field"><label>E-mail</label><input id="se-email"></div><div class="field span-3"><label>Endereço</label><input id="se-endereco"></div><div class="field"><label>Horário</label><input id="se-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="se-orcamento" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="se-meta" inputmode="decimal"></div><div class="field span-3"><label>Responsáveis pelos setores</label><textarea id="se-responsaveis" rows="2"></textarea></div><div class="field span-3"><label>Observações</label><textarea id="se-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSec()" id="se-btn">Salvar</button></div></div></section>';
+  Object.keys(MODULES).forEach(key=>{const m=MODULES[key];
+    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
+    html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
+    html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="ft-'+key+'">Novo registro</h3><div class="form-grid">';
+    m.fields.forEach(f=>{const sp=f.span?'span-'+f.span:'';
+      if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" '+(f.default?'checked':'')+' style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
+      else if(f.type==='select'){html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'">';(f.opts||[]).forEach(([v,l])=>{html+='<option value="'+v+'">'+l+'</option>';});html+='</select></div>';}
+      else if(f.type==='ref')html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'"><option value="">Selecione...</option></select></div>';
+      else{const t=f.type==='money'?'text':f.type||'text';html+='<div class="field '+sp+'"><label>'+f.label+'</label><input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+(f.type==='money'?' inputmode="decimal"':'')+'></div>';}
+    });
+    html+='</div><div class="form-actions"><button class="btn-ghost" onclick="toggleForm(\''+key+'\')">Cancelar</button><button class="btn-accent" onclick="submitCrud(\''+key+'\')" id="sb-'+key+'">Salvar</button></div></div>';
+    html+='<div class="panel"><h3>Registros</h3><p class="panel-sub" id="cnt-'+key+'"></p><div style="overflow-x:auto;"><table><thead><tr>';
+    m.colLabels.forEach(l=>{html+='<th>'+l+'</th>';});
+    html+='<th></th></tr></thead><tbody id="tbl-'+key+'"></tbody></table></div></div></section>';
+  });
+  html+='<section class="view" id="view-classificacoes"><div class="topbar"><div><h1>Classificações</h1><div class="sub">Ranking calculado automaticamente a partir dos jogos realizados</div></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Competição</label><select id="cls-competicao" onchange="loadClassificacoes()"><option value="">Selecione uma competição...</option></select></div></div><div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Equipe</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>Saldo</th></tr></thead><tbody id="tbl-classificacoes"></tbody></table></div></div></section>';
+  html+='<section class="view" id="view-relatorios_esp"><div class="topbar"><div><h1>Relatórios</h1></div></div><div class="panel"><h3>Exportar relatórios</h3><div class="form-grid">';
+  Object.keys(MODULES).forEach(k=>{html+='<div class="field"><button class="btn-ghost" style="width:100%;" onclick="exportPdf(\''+k+'\')">'+MODULES[k].title+' (PDF)</button></div>';});
+  html+='</div></div></section>';
+  html+='<section class="view" id="view-qualidade_esp"><div class="topbar"><div><h1>Qualidade dos Dados</h1><div class="sub">Cadastros incompletos, pendências e indicadores sem dados suficientes — nada aqui é inventado</div></div></div><div class="panel"><div id="qualidade-lista"></div></div></section>';
+  html+='<section class="view" id="view-alertas_esp"><div class="topbar"><div><h1>Alertas</h1></div></div><div id="alertas-list"></div></section>';
+  html+='<section class="view" id="view-auditoria_esp"><div class="topbar"><div><h1>Auditoria</h1></div></div><div class="panel"><h3>Registros de auditoria</h3><p class="panel-sub" id="cnt-audit"></p><div style="overflow-x:auto;"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Módulo</th></tr></thead><tbody id="tbl-audit"></tbody></table></div></div></section>';
+  html+='<section class="view" id="view-config_esp"><div class="topbar"><div><h1>Configurações</h1></div></div><div class="panel"><h3>Configurações do módulo</h3><p class="panel-sub">Configurações gerais em breve.</p></div></section>';
+  document.getElementById('main-content').innerHTML=html;
+}
+
+let editingId={};
+function toggleForm(k){const p=document.getElementById('form-'+k);const o=p.style.display==='none';p.style.display=o?'block':'none';if(o&&!editingId[k]){clearForm(k);document.getElementById('ft-'+k).textContent='Novo registro';document.getElementById('sb-'+k).textContent='Salvar';loadRefs(k);}if(!o)editingId[k]=null;}
+function clearForm(k){MODULES[k].fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!f.default;else if(f.type==='select')el.selectedIndex=0;else el.value='';});}
+async function loadRefs(k){for(const f of MODULES[k].fields){if(f.type!=='ref')continue;const sel=document.getElementById('cf-'+k+'-'+f.id);const opts=await loadRefOptions(f.ref);const lbl=REF_LABEL_FIELD[f.ref];sel.innerHTML='<option value="">Selecione...</option>'+opts.map(o=>'<option value="'+o.id+'">'+o[lbl]+'</option>').join('');}}
+async function submitCrud(k){const m=MODULES[k],data={tenant_id:tid()};m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;let v;if(f.type==='checkbox')v=el.checked;else if(f.type==='money')v=parseMoney(el.value);else if(f.type==='number')v=el.value?Number(el.value):null;else if(f.type==='ref')v=el.value||null;else v=el.value.trim()||null;data[f.id]=v;});const btn=document.getElementById('sb-'+k);btn.disabled=true;try{if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+async function editCrud(k,id){const m=MODULES[k];try{const rows=await sbGet(m.table,'id=eq.'+id);const r=rows[0];if(!r)return;editingId[k]=id;document.getElementById('form-'+k).style.display='block';document.getElementById('ft-'+k).textContent='Editar registro';document.getElementById('sb-'+k).textContent='Salvar alterações';await loadRefs(k);m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!r[f.id];else el.value=r[f.id]??'';});}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function deleteCrud(k,id){if(!confirm('Excluir?'))return;try{await sbDel(MODULES[k].table,'id=eq.'+id);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
+
+function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)return;const n=data.length;let h='<div class="kpi"><div class="ico">Total</div><div class="num">'+n+'</div><div class="lbl">registros</div></div>';
+  if(k==='atletas'){const at=data.filter(r=>r.situacao==='ativo').length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">atletas</div></div>';}
+  else if(k==='equipes'){const v=data.reduce((s,r)=>s+(Number(r.vitorias)||0),0);const d=data.reduce((s,r)=>s+(Number(r.derrotas)||0),0);const e=data.reduce((s,r)=>s+(Number(r.empates)||0),0);const jogos=v+d+e;h+='<div class="kpi"><div class="ico">Vitórias</div><div class="num" style="color:var(--ok);">'+v+'</div><div class="lbl">no total</div></div><div class="kpi"><div class="ico">Aproveitamento</div><div class="num">'+(jogos?Math.round(v/jogos*100):0)+'%</div><div class="lbl">geral</div></div>';}
+  else if(k==='escolinhas'){const insc=data.reduce((s,r)=>s+(Number(r.inscritos)||0),0);const esp=data.reduce((s,r)=>s+(Number(r.lista_espera)||0),0);h+='<div class="kpi"><div class="ico">Inscritos</div><div class="num">'+insc+'</div><div class="lbl">alunos</div></div><div class="kpi"><div class="ico">Lista de espera</div><div class="num" style="color:var(--warn);">'+esp+'</div><div class="lbl">aguardando</div></div>';}
+  else if(k==='competicoes'){const and=data.filter(r=>r.situacao==='em_andamento').length;const conc=data.filter(r=>r.situacao==='concluida').length;h+='<div class="kpi"><div class="ico">Em andamento</div><div class="num" style="color:var(--warn);">'+and+'</div><div class="lbl">competições</div></div><div class="kpi"><div class="ico">Concluídas</div><div class="num" style="color:var(--ok);">'+conc+'</div><div class="lbl">competições</div></div>';}
+  else if(k==='jogos'){const real=data.filter(r=>r.situacao==='realizado').length;const pub=data.reduce((s,r)=>s+(Number(r.publico)||0),0);h+='<div class="kpi"><div class="ico">Realizados</div><div class="num" style="color:var(--ok);">'+real+'</div><div class="lbl">jogos</div></div><div class="kpi"><div class="ico">Público total</div><div class="num">'+pub+'</div><div class="lbl">espectadores</div></div>';}
+  else if(k==='resultados'){const med=data.filter(r=>r.medalha).length;const tit=data.filter(r=>r.titulo).length;h+='<div class="kpi"><div class="ico">Medalhas</div><div class="num" style="color:var(--ok);">'+med+'</div><div class="lbl">conquistadas</div></div><div class="kpi"><div class="ico">Títulos</div><div class="num">'+tit+'</div><div class="lbl">conquistados</div></div>';}
+  else if(k==='eventos_esp'){const part=data.reduce((s,r)=>s+(Number(r.participantes)||0),0);const cst=data.reduce((s,r)=>s+(Number(r.custo)||0),0);h+='<div class="kpi"><div class="ico">Participantes</div><div class="num">'+part+'</div><div class="lbl">no total</div></div><div class="kpi"><div class="ico">Custo</div><div class="num">'+moneyShort(cst)+'</div><div class="lbl">total</div></div>';}
+  else if(k==='reservas'){const aprov=data.filter(r=>r.situacao==='aprovada'||r.situacao==='realizada').length;const canc=data.filter(r=>r.situacao==='cancelada').length;h+='<div class="kpi"><div class="ico">Aprovadas</div><div class="num" style="color:var(--ok);">'+aprov+'</div><div class="lbl">reservas</div></div><div class="kpi"><div class="ico">Canceladas</div><div class="num" style="color:var(--danger);">'+canc+'</div><div class="lbl">reservas</div></div>';}
+  else if(k==='manutencao_esp'){const ab=data.filter(r=>r.situacao==='aberta'||r.situacao==='pendente').length;const res=data.filter(r=>r.situacao==='resolvido').length;const cst=data.reduce((s,r)=>s+(Number(r.custo)||0),0);h+='<div class="kpi"><div class="ico">Abertas</div><div class="num" style="color:var(--warn);">'+ab+'</div><div class="lbl">solicitações</div></div><div class="kpi"><div class="ico">Resolvidas</div><div class="num" style="color:var(--ok);">'+res+'</div><div class="lbl">solicitações</div></div><div class="kpi"><div class="ico">Custo</div><div class="num">'+moneyShort(cst)+'</div><div class="lbl">total</div></div>';}
+  else if(k==='estoque_esp'){const baixo=data.filter(r=>r.quantidade!=null&&r.estoque_minimo!=null&&Number(r.quantidade)<=Number(r.estoque_minimo)).length;h+='<div class="kpi"><div class="ico">Estoque baixo</div><div class="num" style="color:var(--danger);">'+baixo+'</div><div class="lbl">itens</div></div>';}
+  else if(k==='frota_esp'){const at=data.filter(r=>r.situacao==='ativo').length;const man=data.filter(r=>r.situacao==='manutencao').length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">veículos</div></div><div class="kpi"><div class="ico">Em manutenção</div><div class="num" style="color:var(--warn);">'+man+'</div><div class="lbl">veículos</div></div>';}
+  else if(k==='metas_esp'){const at=data.filter(r=>r.situacao==='atingida').length;const ab=data.filter(r=>r.situacao==='abaixo').length;h+='<div class="kpi"><div class="ico">Atingidas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">metas</div></div><div class="kpi"><div class="ico">Abaixo</div><div class="num" style="color:var(--danger);">'+ab+'</div><div class="lbl">metas</div></div>';}
+  else if(k==='contratos_esp'){const vig=data.filter(r=>r.situacao==='vigente').length;const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);h+='<div class="kpi"><div class="ico">Vigentes</div><div class="num">'+vig+'</div><div class="lbl">contratos</div></div><div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">total</div></div>';}
+  el.innerHTML=h;}
+
+async function loadClassificacoesOptions(){try{const comps=await sbGet('esporte_competicoes','select=id,nome&order=nome.asc');document.getElementById('cls-competicao').innerHTML='<option value="">Selecione uma competição...</option>'+comps.map(c=>'<option value="'+c.id+'">'+c.nome+'</option>').join('');}catch(e){}}
+async function loadClassificacoes(){
+  const compId=document.getElementById('cls-competicao').value;const tb=document.getElementById('tbl-classificacoes');
+  if(!compId){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Selecione uma competição.</td></tr>';return;}
+  try{
+    const [jogos,equipes]=await Promise.all([
+      sbGet('esporte_jogos','select=*&competicao_id=eq.'+compId+'&situacao=eq.realizado'),
+      sbGet('esporte_equipes','select=id,nome'),
+    ]);
+    const nomeEquipe={};equipes.forEach(e=>nomeEquipe[e.id]=e.nome);
+    const tab={};
+    function ensure(id){if(!tab[id])tab[id]={equipe:nomeEquipe[id]||'—',pts:0,j:0,v:0,e:0,d:0,gp:0,gc:0};return tab[id];}
+    jogos.forEach(j=>{
+      if(j.equipe_mandante_id==null||j.equipe_visitante_id==null||j.placar_mandante==null||j.placar_visitante==null)return;
+      const m=ensure(j.equipe_mandante_id),vv=ensure(j.equipe_visitante_id);
+      m.j++;vv.j++;m.gp+=j.placar_mandante;m.gc+=j.placar_visitante;vv.gp+=j.placar_visitante;vv.gc+=j.placar_mandante;
+      if(j.placar_mandante>j.placar_visitante){m.v++;m.pts+=3;vv.d++;}
+      else if(j.placar_mandante<j.placar_visitante){vv.v++;vv.pts+=3;m.d++;}
+      else{m.e++;vv.e++;m.pts++;vv.pts++;}
+    });
+    const rows=Object.values(tab).sort((a,b)=>b.pts-a.pts||(b.gp-b.gc)-(a.gp-a.gc));
+    tb.innerHTML=rows.length?rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+r.equipe+'</td><td><strong>'+r.pts+'</strong></td><td>'+r.j+'</td><td>'+r.v+'</td><td>'+r.e+'</td><td>'+r.d+'</td><td>'+(r.gp-r.gc)+'</td></tr>').join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Dados insuficientes para cálculo — nenhum jogo realizado cadastrado para esta competição.</td></tr>';
+  }catch(e){tb.innerHTML='<tr><td colspan="8" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}
+}
+
+async function loadDashboard(){try{
+  const [mod,atl,equ,esc,proj,comp,jog,res,evt,esp,rsv,man,met,fin,al]=await Promise.all([
+    sbGet('esporte_modalidades','select=id').catch(()=>[]),
+    sbGet('esporte_atletas','select=id,situacao').catch(()=>[]),
+    sbGet('esporte_equipes','select=id,nome,vitorias,derrotas,empates').catch(()=>[]),
+    sbGet('esporte_escolinhas','select=id,inscritos').catch(()=>[]),
+    sbGet('esporte_projetos','select=id,situacao').catch(()=>[]),
+    sbGet('esporte_competicoes','select=id,situacao').catch(()=>[]),
+    sbGet('esporte_jogos','select=id,situacao').catch(()=>[]),
+    sbGet('esporte_resultados','select=id,medalha,titulo').catch(()=>[]),
+    sbGet('esporte_eventos','select=id,participantes').catch(()=>[]),
+    sbGet('esporte_espacos','select=id,estado_conservacao').catch(()=>[]),
+    sbGet('esporte_reservas','select=id,situacao').catch(()=>[]),
+    sbGet('esporte_manutencao','select=id,situacao,custo').catch(()=>[]),
+    sbGet('esporte_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
+    sbGet('esporte_financeiro','select=id,tipo,valor').catch(()=>[]),
+    sbGet('esporte_alertas','select=*&lido=eq.false&order=criado_em.desc&limit=10').catch(()=>[]),
+  ]);
+  const atlAt=atl.filter(a=>a.situacao==='ativo').length;
+  const inscEsc=esc.reduce((s,e)=>s+(Number(e.inscritos)||0),0);
+  const partEvt=evt.reduce((s,e)=>s+(Number(e.participantes)||0),0);
+  const medalhas=res.filter(r=>r.medalha).length;const titulos=res.filter(r=>r.titulo).length;
+  const rsvAprov=rsv.filter(r=>r.situacao==='aprovada'||r.situacao==='realizada').length;
+  const projAt=proj.filter(p=>p.situacao==='em_andamento').length;
+  const despesa=fin.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+(Number(f.valor)||0),0);
+  const receita=fin.filter(f=>f.tipo==='receita').reduce((s,f)=>s+(Number(f.valor)||0),0);
+  const manAb=man.filter(m=>m.situacao==='aberta'||m.situacao==='pendente').length;
+  document.getElementById('dash-kpi').innerHTML=[
+    ['Atletas',atlAt,'ativos'],['Modalidades',mod.length,'cadastradas'],
+    ['Equipes',equ.length,'cadastradas'],['Escolinhas',esc.length,'em funcionamento'],
+    ['Inscritos escolinhas',inscEsc,'alunos'],['Eventos',evt.length,'cadastrados'],
+    ['Participantes eventos',partEvt,'no total'],['Competições',comp.length,'cadastradas'],
+    ['Medalhas',medalhas,'conquistadas'],['Títulos',titulos,'conquistados'],
+    ['Espaços esportivos',esp.length,'cadastrados'],['Reservas aprovadas',rsvAprov,'reservas'],
+    ['Projetos ativos',projAt,'em andamento'],['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+'/'+met.length,'metas'],
+  ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
+  const equComPts=equ.map(e=>({nome:e.nome,ap:(Number(e.vitorias)||0)+(Number(e.derrotas)||0)+(Number(e.empates)||0)?Math.round((Number(e.vitorias)||0)/((Number(e.vitorias)||0)+(Number(e.derrotas)||0)+(Number(e.empates)||0))*100):null})).filter(e=>e.ap!==null);
+  document.getElementById('dash-equipes-bars').innerHTML=equComPts.length?equComPts.slice(0,8).map(e=>'<div class="bar-row"><span>'+e.nome+'</span><div class="bar-track"><div class="bar-fill bar-fill-royal" style="width:'+e.ap+'%"></div></div><span class="val">'+e.ap+'%</span></div>').join(''):semDados();
+  document.getElementById('dash-metas').innerHTML=met.length?met.slice(0,8).map(m=>{const ico=m.situacao==='atingida'?'🟢':m.situacao==='atencao'?'🟡':'🔴';const cor=m.situacao==='atingida'?'ok':m.situacao==='atencao'?'warn':'danger';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;"><span>'+ico+'</span><span style="flex:1;">'+m.indicador+'</span><span style="font-weight:700;color:var(--'+cor+');">'+(m.percentual||0)+'%</span></div>';}).join(''):semDados();
+  const bom=[],atencao=[];
+  if(equ.length&&equComPts.length){const media=equComPts.reduce((s,e)=>s+e.ap,0)/equComPts.length;if(media>=50)bom.push('Aproveitamento médio das equipes em '+Math.round(media)+'%');else atencao.push('Aproveitamento médio das equipes em '+Math.round(media)+'% — abaixo do esperado');}
+  if(manAb===0)bom.push('Sem manutenção pendente nos espaços esportivos');else atencao.push(manAb+' problemas de manutenção pendentes nos espaços');
+  const rsvPend=rsv.filter(r=>r.situacao==='solicitada').length;if(rsvPend)atencao.push(rsvPend+' reservas aguardando aprovação');
+  if(met.filter(m=>m.situacao==='abaixo').length)atencao.push(met.filter(m=>m.situacao==='abaixo').length+' metas abaixo do esperado');else if(met.length)bom.push('Nenhuma meta abaixo do esperado');
+  document.getElementById('dash-bom').innerHTML=bom.length?bom.map(b=>'<div class="diag diag-ok">🟢 '+b+'</div>').join(''):semDados();
+  document.getElementById('dash-atencao').innerHTML=atencao.length?atencao.map(a=>'<div class="diag diag-warn">🟡 '+a+'</div>').join(''):'<div class="diag diag-ok">🟢 Tudo dentro do esperado.</div>';
+  const bom_esp=esp.filter(e=>e.estado_conservacao==='bom').length;const ruim_esp=esp.filter(e=>e.estado_conservacao==='ruim').length;
+  document.getElementById('dash-infra').innerHTML=esp.length?('<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+bom_esp+'</div><div style="font-size:11px;color:var(--ink-soft);">Espaços em bom estado</div></div>'+
+    '<div style="padding:10px;background:#FEF2F2;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--danger);">'+ruim_esp+'</div><div style="font-size:11px;color:var(--ink-soft);">Espaços em estado ruim</div></div>'+
+    '<div style="padding:10px;background:#FEF3C7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+manAb+'</div><div style="font-size:11px;color:var(--ink-soft);">Manutenções pendentes</div></div>'+
+    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+rsvAprov+'</div><div style="font-size:11px;color:var(--ink-soft);">Reservas aprovadas</div></div></div>'):semDados();
+  document.getElementById('dash-financeiro').innerHTML=fin.length?('<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+moneyShort(receita)+'</div><div style="font-size:11px;color:var(--ink-soft);">Receitas</div></div>'+
+    '<div style="padding:10px;background:#FEF2F2;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--danger);">'+moneyShort(despesa)+'</div><div style="font-size:11px;color:var(--ink-soft);">Despesas</div></div></div>'):semDados();
+  document.getElementById('dash-alertas').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'">'+ico+' '+a.mensagem+'</div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum alerta.</p>';
+}catch(e){document.getElementById('dash-kpi').innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,200)+'</div>';}}
+
+let secId=null;
+async function loadSec(){try{const rows=await sbGet('esporte_secretaria','select=*&limit=1');if(rows.length){const s=rows[0];secId=s.id;['nome','cnpj','secretario','secretario_adjunto','telefone','whatsapp','email','endereco'].forEach(f=>{const el=document.getElementById('se-'+f);if(el)el.value=s[f]||'';});document.getElementById('se-horario').value=s.horario_atendimento||'';document.getElementById('se-orcamento').value=s.orcamento_anual||'';document.getElementById('se-meta').value=s.meta_anual||'';document.getElementById('se-responsaveis').value=s.responsaveis_setores||'';document.getElementById('se-obs').value=s.observacoes||'';}}catch(e){}}
+async function salvarSec(){const data={tenant_id:tid(),nome:document.getElementById('se-nome').value.trim()||'Secretaria Municipal de Esporte',cnpj:document.getElementById('se-cnpj').value.trim()||null,secretario:document.getElementById('se-secretario').value.trim()||null,secretario_adjunto:document.getElementById('se-secretario_adjunto').value.trim()||null,telefone:document.getElementById('se-telefone').value.trim()||null,whatsapp:document.getElementById('se-whatsapp').value.trim()||null,email:document.getElementById('se-email').value.trim()||null,endereco:document.getElementById('se-endereco').value.trim()||null,horario_atendimento:document.getElementById('se-horario').value.trim()||null,orcamento_anual:parseMoney(document.getElementById('se-orcamento').value),meta_anual:parseMoney(document.getElementById('se-meta').value),responsaveis_setores:document.getElementById('se-responsaveis').value.trim()||null,observacoes:document.getElementById('se-obs').value.trim()||null,atualizado_em:new Date().toISOString()};const btn=document.getElementById('se-btn');btn.disabled=true;try{if(secId){await sbPatch('esporte_secretaria','id=eq.'+secId,data);}else{const r=await sbPost('esporte_secretaria',data);secId=r[0].id;}alert('Salvo!');}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+
+async function loadAlertas(){try{const al=await sbGet('esporte_alertas','select=*&order=criado_em.desc');document.getElementById('alertas-list').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'" style="display:flex;justify-content:space-between;align-items:center;">'+ico+' '+a.mensagem+(a.lido?'':' <button class="btn-ghost" style="font-size:10px;padding:3px 8px;" onclick="marcarLido(\''+a.id+'\')">Lido</button>')+'</div>';}).join(''):'<div class="panel"><p style="color:var(--muted);text-align:center;padding:30px;">Nenhum alerta.</p></div>';}catch(e){}}
+async function marcarLido(id){try{await sbPatch('esporte_alertas','id=eq.'+id,{lido:true});loadAlertas();}catch(e){}}
+
+async function loadAuditoria(){try{const rows=await sbGet('esporte_auditoria','select=*&order=data.desc&limit=100');document.getElementById('cnt-audit').textContent=rows.length+' registro(s)';document.getElementById('tbl-audit').innerHTML=rows.length?rows.map(r=>'<tr><td>'+new Date(r.data).toLocaleString('pt-BR')+'</td><td>'+(r.usuario||'—')+'</td><td>'+(r.acao||'—')+'</td><td>'+(r.modulo||'—')+'</td></tr>').join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Sem registros.</td></tr>';}catch(e){}}
+
+async function loadQualidade(){
+  const el=document.getElementById('qualidade-lista');el.innerHTML='<p style="color:var(--muted);font-size:12px;">Carregando...</p>';
+  try{
+    const checks=[
+      ['Atletas sem modalidade definida','esporte_atletas','modalidade_id=is.null'],
+      ['Equipes sem técnico definido','esporte_equipes','tecnico=is.null'],
+      ['Espaços sem responsável definido','esporte_espacos','responsavel=is.null'],
+      ['Competições sem data de início','esporte_competicoes','periodo_inicio=is.null'],
+      ['Jogos sem placar lançado (situação realizado)','esporte_jogos','situacao=eq.realizado&or=(placar_mandante.is.null,placar_visitante.is.null)'],
+      ['Contratos sem data de término','esporte_contratos','data_fim=is.null'],
+    ];
+    const results=await Promise.all(checks.map(([label,table,q])=>sbGet(table,'select=id&'+q).then(d=>[label,d.length]).catch(()=>[label,null])));
+    el.innerHTML='<table><thead><tr><th>Verificação</th><th>Pendências</th></tr></thead><tbody>'+
+      results.map(([label,n])=>'<tr><td>'+label+'</td><td>'+(n===null?'Dados insuficientes para cálculo':(n===0?'<span class="status-pill status-ativo">Ok</span>':'<span class="status-pill status-pendente">'+n+' pendente(s)</span>')) +'</td></tr>').join('')+
+      '</tbody></table>';
+  }catch(e){el.innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,150)+'</div>';}
+}
+
+function exportPdf(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFontSize(16);doc.text(m.title+' — Conecta Gestão Esporte',14,18);doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,26);const rows=data.map(r=>m.cols.map(c=>{const v=m.renderCol(r,c);return String(v).replace(/<[^>]+>/g,'');}));doc.autoTable({head:[m.colLabels],body:rows,startY:32,styles:{fontSize:9},headStyles:{fillColor:[22,163,74]}});doc.save(k+'_esporte.pdf');}
+function exportXlsx(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const rows=data.map(r=>{const o={};m.cols.forEach((c,i)=>{o[m.colLabels[i]]=String(m.renderCol(r,c)).replace(/<[^>]+>/g,'');});return o;});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,m.title.slice(0,31));XLSX.writeFile(wb,k+'_esporte.xlsx');}
+
+async function gerarRelatorioMensal(){
+  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');let y=20;
+  doc.setFontSize(18);doc.text('Relatório Mensal — Esporte',14,y);y+=10;
+  doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,y);y+=12;
+  try{
+    const [atl,mod,equ,esc,comp,jog,res,evt,esp,man,proj,met]=await Promise.all([
+      sbGet('esporte_atletas','select=id,situacao').catch(()=>[]),
+      sbGet('esporte_modalidades','select=id').catch(()=>[]),
+      sbGet('esporte_equipes','select=id').catch(()=>[]),
+      sbGet('esporte_escolinhas','select=id,inscritos').catch(()=>[]),
+      sbGet('esporte_competicoes','select=id').catch(()=>[]),
+      sbGet('esporte_jogos','select=id,situacao').catch(()=>[]),
+      sbGet('esporte_resultados','select=id,medalha,titulo').catch(()=>[]),
+      sbGet('esporte_eventos','select=id,participantes').catch(()=>[]),
+      sbGet('esporte_espacos','select=id').catch(()=>[]),
+      sbGet('esporte_manutencao','select=id,situacao').catch(()=>[]),
+      sbGet('esporte_projetos','select=id,situacao').catch(()=>[]),
+      sbGet('esporte_metas','select=id,situacao').catch(()=>[]),
+    ]);
+    const items=[
+      ['Atletas ativos',atl.filter(a=>a.situacao==='ativo').length],['Modalidades',mod.length],
+      ['Equipes',equ.length],['Escolinhas',esc.length],['Inscritos nas escolinhas',esc.reduce((s,e)=>s+(Number(e.inscritos)||0),0)],
+      ['Competições cadastradas',comp.length],['Jogos realizados',jog.filter(j=>j.situacao==='realizado').length],
+      ['Medalhas conquistadas',res.filter(r=>r.medalha).length],['Títulos conquistados',res.filter(r=>r.titulo).length],
+      ['Eventos realizados',evt.length],['Participantes em eventos',evt.reduce((s,e)=>s+(Number(e.participantes)||0),0)],
+      ['Espaços esportivos',esp.length],['Manutenções pendentes',man.filter(m=>m.situacao==='aberta'||m.situacao==='pendente').length],
+      ['Projetos em andamento',proj.filter(p=>p.situacao==='em_andamento').length],
+      ['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+' de '+met.length],
+    ];
+    doc.autoTable({head:[['Indicador','Valor']],body:items,startY:y,styles:{fontSize:10},headStyles:{fillColor:[22,163,74]}});
+    doc.save('relatorio_mensal_esporte.pdf');
+    alert('Relatório mensal gerado!');
+  }catch(e){alert('Erro: '+e.message.slice(0,200));}
+}
+
+const LOADERS={dashboard_esp:loadDashboard,secretaria_esp:loadSec,alertas_esp:loadAlertas,auditoria_esp:loadAuditoria,qualidade_esp:loadQualidade,classificacoes:loadClassificacoesOptions};
+Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>loadData(k);});
+</script>
+<div style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>

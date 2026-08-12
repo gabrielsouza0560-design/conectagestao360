@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Meio Ambiente · Gabriel Oliveira</title>
+<meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#0D9488">
+<style>
+:root{--royal:#0D9488;--neon:#14B8A6;--light:#5EEAD4;--darkblue:#0F172A;--bg:#F8FAFC;--surface:#FFFFFF;--ink:#0F172A;--ink-soft:#475569;--line:rgba(15,23,42,.08);--ok:#059669;--danger:#DC2626;--warn:#D97706;--muted:#94A3B8;--radius:18px;--sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;--shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);}
+*{box-sizing:border-box;}body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}button{font-family:inherit;cursor:pointer;}select,input,textarea{font-family:inherit;}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(13,148,136,.4);}
+#login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+@media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+.login-brand{background:linear-gradient(150deg,var(--darkblue) 0%,#16265A 45%,var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+.login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle,rgba(94,234,212,.25),transparent 70%);}
+.brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+.brand-name{font-size:19px;font-weight:800;}.brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+.brand-quote{position:relative;z-index:1;max-width:420px;}.brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;}.brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+.brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+.login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-form{width:100%;max-width:380px;}.login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+.field{margin-bottom:18px;}.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(13,148,136,.12);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(13,148,136,.35);}
+.btn-primary:hover{transform:translateY(-1px);}.btn-primary:disabled{opacity:.6;pointer-events:none;}
+.login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
+header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.hd-left{display:flex;align-items:center;gap:12px;}.hd-left .name{font-size:16px;font-weight:800;}.hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+.hd-right{display:flex;align-items:center;gap:12px;font-size:12px;color:#B6C4DD;}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;}.btn-ghost:hover{border-color:var(--royal);color:var(--royal);}
+.btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 12px rgba(13,148,136,.35);}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;}.logout-btn:hover{border-color:var(--light);color:var(--light);}
+.back-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;text-decoration:none;}.back-btn:hover{border-color:var(--light);color:var(--light);}
+.app-body{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:240px;background:var(--darkblue);padding:12px 8px;overflow-y:auto;flex-shrink:0;}
+.sidebar::-webkit-scrollbar{width:4px;}.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+.nav-group-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:14px 10px 4px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:#B6C4DD;font-size:12px;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:background .15s;}
+.nav-item:hover{background:rgba(20,184,166,.12);}.nav-item.active{background:linear-gradient(90deg,rgba(13,148,136,.4),rgba(20,184,166,.15));color:#fff;font-weight:700;}
+main{flex:1;padding:28px 36px 60px;max-width:1300px;overflow-x:hidden;}
+@media(max-width:860px){.sidebar{display:none;}main{padding:20px;}}
+.view{display:none;}.view.active{display:block;}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.topbar h1{font-size:24px;margin:0 0 2px;font-weight:800;}.topbar .sub{font-size:12px;color:var(--muted);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:1000px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);transition:transform .2s;}.kpi:hover{transform:translateY(-2px);}
+.kpi .ico{font-size:10px;color:var(--royal);text-transform:uppercase;letter-spacing:.8px;font-weight:800;margin-bottom:6px;}
+.kpi .num{font-size:22px;color:var(--ink);font-weight:800;}.kpi .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.panel h3{font-size:15px;margin:0 0 4px;font-weight:800;}.panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 14px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+.field.span-2{grid-column:span 2;}.field.span-3{grid-column:span 3;}
+.form-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);font-weight:700;}
+td{padding:9px 8px;border-bottom:1px solid var(--line);}tr:last-child td{border-bottom:none;}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.status-ativa,.status-ativo,.status-atingida,.status-vigente,.status-aprovado,.status-boa,.status-conservada,.status-realizada,.status-realizado,.status-preservada,.status-deferido,.status-recuperada,.status-atendida,.status-dentro_padrao,.status-concluida{background:#D1FAE5;color:var(--ok);}
+.status-inativa,.status-inativo,.status-encerrada,.status-encerrado,.status-cancelada,.status-cancelado,.status-negada,.status-vencido,.status-abaixo,.status-degradada,.status-em_risco,.status-risco,.status-fora_padrao,.status-indeferido,.status-urgente{background:#FEF2F2;color:var(--danger);}
+.status-em_andamento,.status-atencao,.status-pendente,.status-aberta,.status-em_analise,.status-em_cotacao,.status-solicitada,.status-agendada,.status-manutencao_pendente,.status-regular,.status-recurso,.status-alta{background:#FEF3C7;color:var(--warn);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:1000px){.grid-2{grid-template-columns:1fr;}}
+.diag{padding:14px;border-radius:12px;font-size:12.5px;line-height:1.6;margin-bottom:8px;}
+.diag-ok{background:#D1FAE5;border:1px solid rgba(5,150,105,.25);color:#065F46;}
+.diag-warn{background:#FEF3C7;border:1px solid rgba(217,119,6,.25);color:#92400E;}
+.diag-danger{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
+.bars{display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:grid;grid-template-columns:160px 1fr 44px;align-items:center;gap:10px;font-size:12px;}
+.bar-track{background:#F0FDFA;border-radius:5px;height:8px;overflow:hidden;}.bar-fill{height:100%;border-radius:5px;}
+.bar-fill-royal{background:linear-gradient(90deg,var(--royal),var(--light));}
+.bar-fill-ok{background:linear-gradient(90deg,var(--ok),#34D399);}
+.bar-row .val{text-align:right;color:var(--ink-soft);font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name">Conecta Gestão<small>Meio Ambiente</small></div></div>
+    <div class="brand-quote"><h1>Central Municipal de Gestão Ambiental.</h1><p>Resíduos, arborização, recursos hídricos, fiscalização e educação ambiental — inteligência para decisão.</p></div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap"><div class="login-form">
+    <h2>Acessar</h2><p class="sub">Entre com sua conta institucional.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div></div>
+</div>
+<div id="app" style="display:none;">
+<header>
+  <div class="hd-left"><div class="logo">CG</div><div class="name">Conecta Gestão<small>Meio Ambiente</small></div></div>
+  <div class="hd-right"><span id="hd-role"></span><a class="back-btn" href="conecta-gestao-painel-admin.html">← Painel</a><button class="logout-btn" onclick="doLogout()">Sair</button></div>
+</header>
+<div class="app-body">
+<aside class="sidebar" id="sidebar-nav"></aside>
+<main id="main-content"></main>
+</div>
+</div>
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+let session=null;
+function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),senha=document.getElementById('login-senha').value,err=document.getElementById('login-error'),btn=document.getElementById('login-btn');
+  err.classList.remove('show');if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
+    session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    try{localStorage.setItem('cg_session',JSON.stringify(session));}catch(e){}
+    enterApp();
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+function doLogout(){session=null;try{localStorage.removeItem('cg_session');}catch(e){}document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+function tryAutoLogin(){
+  try{const s=JSON.parse(localStorage.getItem('cg_session'));if(!s||!s.access_token)return false;
+    const c=decodeJwt(s.access_token);if(!c.exp||c.exp*1000<Date.now())return false;
+    session={access_token:s.access_token,claims:c};enterApp();return true;
+  }catch(e){return false;}
+}
+function enterApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');buildNav();buildViews();navigateTo('dashboard_ma');}
+window.addEventListener('DOMContentLoaded',()=>{tryAutoLogin();});
+
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPatch(t,q,d){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbDel(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'DELETE',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());}
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';}
+function moneyShort(v){if(!v)return'R$ 0';const n=Number(v);if(n>=1e6)return'R$ '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'R$ '+(n/1e3).toFixed(0)+'k';return'R$ '+n.toFixed(0);}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function pill(s,label){return'<span class="status-pill status-'+(s||'')+'">'+(label||s||'—')+'</span>';}
+function parseMoney(v){if(!v)return null;return parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));}
+function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-000000000001';}
+function semDados(){return '<p style="color:var(--muted);font-size:12px;">Dados insuficientes para cálculo.</p>';}
+
+const NAV_GROUPS=[
+  {label:'Geral',items:[['dashboard_ma','Dashboard'],['secretaria_ma','Secretaria']]},
+  {label:'Áreas Verdes e Arborização',items:[['areas_verdes_ma','Áreas Verdes, Praças e Parques'],['arvores_ma','Arborização Urbana'],['podas_ma','Podas'],['supressao_ma','Supressão de Árvores'],['plantio_ma','Plantio'],['viveiro_ma','Viveiro Municipal']]},
+  {label:'Recursos Hídricos',items:[['recursos_hidricos_ma','Nascentes, Rios e Recursos Hídricos'],['qualidade_agua_ma','Qualidade da Água']]},
+  {label:'Resíduos Sólidos',items:[['residuos_ma','Resíduos Sólidos'],['coleta_ma','Coleta de Lixo e Seletiva'],['catadores_ma','Catadores e Cooperativas'],['ecopontos_ma','Ecopontos'],['compostagem_ma','Compostagem']]},
+  {label:'Fauna',items:[['fauna_ma','Fauna'],['animais_ma','Castração e Bem-estar Animal']]},
+  {label:'Fiscalização',items:[['fiscalizacao_ma','Fiscalização Ambiental'],['ocorrencias_ma','Denúncias e Ocorrências'],['licenciamento_ma','Licenciamento e Autorizações'],['vistorias_ma','Vistorias'],['multas_ma','Multas']]},
+  {label:'Educação e Projetos',items:[['educacao_ambiental_ma','Educação Ambiental e Campanhas'],['projetos_ma','Projetos Ambientais'],['recuperacao_ma','Recuperação Ambiental']]},
+  {label:'Riscos Ambientais',items:[['queimadas_ma','Queimadas'],['poluicao_ma','Poluição']]},
+  {label:'Sustentabilidade',items:[['sustentabilidade_ma','Sustentabilidade'],['mudancas_climaticas_ma','Mudanças Climáticas'],['energia_ma','Energia']]},
+  {label:'Mapa',items:[['mapa_ma','Mapa Ambiental']]},
+  {label:'Parcerias e Financeiro',items:[['convenios_ma','Convênios'],['financeiro_ma','Financeiro'],['compras_ma','Compras'],['contratos_ma','Contratos']]},
+  {label:'Gestão',items:[['metas_ma','Metas'],['indicadores_ma','Indicadores']]},
+  {label:'Sistema',items:[['relatorios_ma','Relatórios'],['qualidade_ma','Qualidade dos Dados'],['alertas_ma','Alertas'],['documentos_ma','Documentos'],['auditoria_ma','Auditoria'],['config_ma','Configurações']]},
+];
+let currentView='dashboard_ma';
+function buildNav(){let h='';NAV_GROUPS.forEach(g=>{h+='<div class="nav-group-label">'+g.label+'</div>';g.items.forEach(([k,l])=>{h+='<button class="nav-item'+(k==='dashboard_ma'?' active':'')+'" data-key="'+k+'" onclick="navigateTo(\''+k+'\')">'+l+'</button>';});});document.getElementById('sidebar-nav').innerHTML=h;}
+function navigateTo(key){currentView=key;document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.key===key));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+key));if(LOADERS[key])LOADERS[key]();}
+
+let caches={};
+const MODULES={
+  areas_verdes_ma:{table:'ma_areas_verdes',title:'Áreas Verdes, Praças e Parques',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['area_verde','Área verde'],['praca','Praça'],['parque','Parque'],['bosque','Bosque']]},
+    {id:'localizacao',label:'Localização',span:2},{id:'latitude',label:'Latitude',type:'number'},{id:'longitude',label:'Longitude',type:'number'},
+    {id:'area',label:'Área (m²)',type:'number'},{id:'vegetacao',label:'Vegetação'},{id:'infraestrutura',label:'Infraestrutura',span:2},{id:'responsavel',label:'Responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['conservada','Conservada'],['manutencao_pendente','Manutenção pendente'],['degradada','Degradada']]}
+  ],cols:['nome','tipo','area','situacao'],colLabels:['Nome','Tipo','Área','Situação'],
+  renderCol:(r,c)=>c==='situacao'||c==='tipo'?pill(r[c]):(r[c]??'—')},
+
+  arvores_ma:{table:'ma_arvores',title:'Arborização Urbana',fields:[
+    {id:'localizacao',label:'Localização',span:2,required:true},{id:'latitude',label:'Latitude',type:'number'},{id:'longitude',label:'Longitude',type:'number'},
+    {id:'especie',label:'Espécie'},{id:'porte',label:'Porte'},{id:'condicao',label:'Condição',type:'select',opts:[['boa','Boa'],['regular','Regular'],['risco','Risco']]},
+    {id:'idade_estimada',label:'Idade estimada (anos)',type:'number'},{id:'necessidade_poda',label:'Necessita poda',type:'checkbox'},{id:'data_plantio',label:'Data de plantio',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['removida','Removida']]}
+  ],cols:['localizacao','especie','condicao','necessidade_poda'],colLabels:['Localização','Espécie','Condição','Poda?'],
+  renderCol:(r,c)=>c==='condicao'?pill(r.condicao):c==='necessidade_poda'?(r.necessidade_poda?'Sim':'Não'):(r[c]||'—')},
+
+  podas_ma:{table:'ma_podas',title:'Podas',fields:[
+    {id:'arvore_id',label:'Árvore',type:'ref',ref:'arvores_ma'},{id:'localizacao',label:'Localização',span:2},{id:'motivo',label:'Motivo'},
+    {id:'data',label:'Data',type:'date'},{id:'equipe',label:'Equipe'},{id:'responsavel',label:'Responsável'},{id:'custo',label:'Custo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitada','Solicitada'],['agendada','Agendada'],['realizada','Realizada'],['pendente','Pendente']]}
+  ],cols:['localizacao','motivo','data','situacao'],colLabels:['Localização','Motivo','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  supressao_ma:{table:'ma_supressao',title:'Supressão de Árvores',fields:[
+    {id:'localizacao',label:'Localização',span:2,required:true},{id:'motivo',label:'Motivo'},{id:'especie',label:'Espécie'},{id:'autorizacao',label:'Autorização'},
+    {id:'responsavel',label:'Responsável'},{id:'data',label:'Data',type:'date'},{id:'compensacao_ambiental',label:'Compensação ambiental',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitada','Solicitada'],['autorizada','Autorizada'],['negada','Negada'],['executada','Executada']]}
+  ],cols:['localizacao','motivo','data','situacao'],colLabels:['Localização','Motivo','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  plantio_ma:{table:'ma_plantio',title:'Plantio',fields:[
+    {id:'local',label:'Local',span:2,required:true},{id:'especie',label:'Espécie'},{id:'quantidade',label:'Quantidade',type:'number'},
+    {id:'data',label:'Data',type:'date'},{id:'responsavel',label:'Responsável'},{id:'projeto',label:'Projeto'},{id:'origem_mudas',label:'Origem das mudas'}
+  ],cols:['local','especie','quantidade','data'],colLabels:['Local','Espécie','Qtd.','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  viveiro_ma:{table:'ma_viveiro',title:'Viveiro Municipal',fields:[
+    {id:'especie',label:'Espécie',span:2,required:true},{id:'quantidade_produzida',label:'Quantidade produzida',type:'number'},{id:'quantidade_disponivel',label:'Quantidade disponível',type:'number'},
+    {id:'origem',label:'Origem'},{id:'entrada',label:'Entrada',type:'number'},{id:'saida',label:'Saída',type:'number'},{id:'perdas',label:'Perdas',type:'number'},{id:'distribuicao',label:'Distribuição',span:2}
+  ],cols:['especie','quantidade_produzida','quantidade_disponivel','perdas'],colLabels:['Espécie','Produzidas','Disponíveis','Perdas'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  recursos_hidricos_ma:{table:'ma_recursos_hidricos',title:'Nascentes, Rios e Recursos Hídricos',fields:[
+    {id:'identificacao',label:'Identificação',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['nascente','Nascente'],['rio','Rio'],['corrego','Córrego'],['reservatorio','Reservatório'],['poco','Poço']]},
+    {id:'localizacao',label:'Localização',span:2},{id:'latitude',label:'Latitude',type:'number'},{id:'longitude',label:'Longitude',type:'number'},{id:'propriedade',label:'Propriedade'},
+    {id:'protecao',label:'Protegida',type:'checkbox'},{id:'vegetacao',label:'Vegetação'},{id:'intervencao',label:'Intervenção',span:2},{id:'monitoramento',label:'Monitoramento'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['preservada','Preservada'],['em_risco','Em risco'],['degradada','Degradada'],['recuperada','Recuperada']]}
+  ],cols:['identificacao','tipo','protecao','situacao'],colLabels:['Identificação','Tipo','Protegida?','Situação'],
+  renderCol:(r,c)=>c==='protecao'?(r.protecao?'Sim':'Não'):c==='situacao'||c==='tipo'?pill(r[c]):(r[c]||'—')},
+
+  qualidade_agua_ma:{table:'ma_qualidade_agua',title:'Qualidade da Água',fields:[
+    {id:'ponto_coleta',label:'Ponto de coleta',span:2,required:true},{id:'data',label:'Data',type:'date'},{id:'parametro',label:'Parâmetro'},
+    {id:'resultado',label:'Resultado',type:'number'},{id:'unidade',label:'Unidade'},{id:'responsavel',label:'Responsável'},{id:'documento_laudo',label:'Documento/Laudo',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['dentro_padrao','Dentro do padrão'],['atencao','Atenção'],['fora_padrao','Fora do padrão']]}
+  ],cols:['ponto_coleta','parametro','resultado','situacao'],colLabels:['Ponto de coleta','Parâmetro','Resultado','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  residuos_ma:{table:'ma_residuos',title:'Resíduos Sólidos',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['domiciliar','Domiciliar'],['reciclavel','Reciclável'],['organico','Orgânico'],['construcao_civil','Construção civil'],['poda','Poda'],['volumoso','Volumoso'],['eletronico','Eletrônico'],['outro','Outro']]},
+    {id:'origem',label:'Origem'},{id:'quantidade_toneladas',label:'Quantidade (toneladas)',type:'number'},{id:'destino',label:'Destino'},{id:'responsavel',label:'Responsável'},{id:'data',label:'Data',type:'date'}
+  ],cols:['tipo','quantidade_toneladas','destino','data'],colLabels:['Tipo','Toneladas','Destino','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='tipo'?pill(r.tipo):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  coleta_ma:{table:'ma_coleta',title:'Coleta de Lixo e Seletiva',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['lixo','Coleta de lixo'],['seletiva','Coleta seletiva']]},{id:'rota',label:'Rota',span:2,required:true},
+    {id:'bairro',label:'Bairro'},{id:'frequencia',label:'Frequência'},{id:'veiculo',label:'Veículo'},{id:'equipe',label:'Equipe'},{id:'cooperativa',label:'Cooperativa'},
+    {id:'horario',label:'Horário'},{id:'quantidade_coletada',label:'Quantidade coletada (ton)',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['rota','tipo','bairro','quantidade_coletada','situacao'],colLabels:['Rota','Tipo','Bairro','Coletado','Situação'],
+  renderCol:(r,c)=>c==='tipo'||c==='situacao'?pill(r[c]):(r[c]??'—')},
+
+  catadores_ma:{table:'ma_catadores',title:'Catadores e Cooperativas',fields:[
+    {id:'cooperativa_associacao',label:'Cooperativa/Associação',span:2,required:true},{id:'integrantes',label:'Integrantes',type:'number'},{id:'contato',label:'Contato'},
+    {id:'materiais',label:'Materiais',span:2},{id:'volume_coletado',label:'Volume coletado (ton)',type:'number'},{id:'parcerias',label:'Parcerias'},{id:'apoio_municipal',label:'Apoio municipal',span:2}
+  ],cols:['cooperativa_associacao','integrantes','volume_coletado'],colLabels:['Cooperativa','Integrantes','Volume'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  ecopontos_ma:{table:'ma_ecopontos',title:'Ecopontos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'localizacao',label:'Localização',span:2},{id:'latitude',label:'Latitude',type:'number'},{id:'longitude',label:'Longitude',type:'number'},
+    {id:'responsavel',label:'Responsável'},{id:'tipos_residuos_aceitos',label:'Resíduos aceitos',span:2},{id:'capacidade',label:'Capacidade'},{id:'volume_recebido',label:'Volume recebido (ton)',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['nome','localizacao','volume_recebido','situacao'],colLabels:['Nome','Local','Volume','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  compostagem_ma:{table:'ma_compostagem',title:'Compostagem',fields:[
+    {id:'unidade',label:'Unidade',span:2,required:true},{id:'capacidade',label:'Capacidade'},{id:'residuos_recebidos',label:'Resíduos recebidos (ton)',type:'number'},
+    {id:'quantidade_composto_produzido',label:'Composto produzido (ton)',type:'number'},{id:'destino',label:'Destino'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['unidade','residuos_recebidos','quantidade_composto_produzido','situacao'],colLabels:['Unidade','Recebido','Composto','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  fauna_ma:{table:'ma_fauna',title:'Fauna',fields:[
+    {id:'especie',label:'Espécie',span:2,required:true},{id:'ocorrencia',label:'Ocorrência',span:2},{id:'localizacao',label:'Localização'},{id:'data',label:'Data',type:'date'},
+    {id:'encaminhamento',label:'Encaminhamento',span:2},{id:'orgao_responsavel',label:'Órgão responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_analise','Em análise'],['encaminhada','Encaminhada'],['resolvida','Resolvida']]}
+  ],cols:['especie','localizacao','data','situacao'],colLabels:['Espécie','Local','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  animais_ma:{table:'ma_animais',title:'Castração e Bem-estar Animal',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['castracao','Castração'],['bem_estar','Ocorrência de bem-estar']]},{id:'animal_especie',label:'Espécie do animal'},{id:'localizacao',label:'Localização'},
+    {id:'campanha',label:'Campanha'},{id:'data',label:'Data',type:'date'},{id:'procedimento',label:'Procedimento'},{id:'profissional',label:'Profissional'},
+    {id:'identificacao',label:'Identificação'},{id:'custo',label:'Custo (R$)',type:'money'},{id:'encaminhamento',label:'Encaminhamento',span:2}
+  ],cols:['tipo','animal_especie','data','custo'],colLabels:['Tipo','Espécie','Data','Custo'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  fiscalizacao_ma:{table:'ma_fiscalizacao',title:'Fiscalização Ambiental',fields:[
+    {id:'local',label:'Local',span:2,required:true},{id:'data',label:'Data',type:'date'},{id:'tipo',label:'Tipo'},{id:'responsavel',label:'Responsável'},
+    {id:'vistoria',label:'Vistoria',span:2},{id:'providencia',label:'Providência',span:2},{id:'prazo',label:'Prazo',type:'date'},{id:'resultado',label:'Resultado',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['aberta','Aberta'],['em_andamento','Em andamento'],['concluida','Concluída']]}
+  ],cols:['local','tipo','data','situacao'],colLabels:['Local','Tipo','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  ocorrencias_ma:{table:'ma_ocorrencias',title:'Denúncias e Ocorrências',fields:[
+    {id:'origem',label:'Origem',type:'select',opts:[['denuncia','Denúncia'],['ocorrencia','Ocorrência']]},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['descarte_irregular','Descarte irregular'],['queimada','Queimada'],['poluicao','Poluição'],['corte_irregular','Corte irregular'],['maus_tratos','Maus-tratos'],['erosao','Erosão'],['assoreamento','Assoreamento'],['danos_ambientais','Danos ambientais'],['outro','Outro']]},
+    {id:'protocolo',label:'Protocolo'},{id:'local',label:'Local',span:2,required:true},{id:'data',label:'Data',type:'date'},{id:'descricao',label:'Descrição',span:3},
+    {id:'prioridade',label:'Prioridade',type:'select',opts:[['normal','Normal'],['alta','Alta'],['urgente','Urgente']]},{id:'responsavel',label:'Responsável'},
+    {id:'providencia',label:'Providência',span:2},{id:'resultado',label:'Resultado',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['pendente','Pendente'],['em_andamento','Em andamento'],['atendida','Atendida'],['arquivada','Arquivada']]}
+  ],cols:['local','tipo','data','prioridade','situacao'],colLabels:['Local','Tipo','Data','Prioridade','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'||c==='tipo'||c==='prioridade'?pill(r[c]):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  licenciamento_ma:{table:'ma_licenciamento',title:'Licenciamento e Autorizações',fields:[
+    {id:'empreendimento_solicitante',label:'Empreendimento/Solicitante',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['licenciamento','Licenciamento'],['autorizacao','Autorização']]},
+    {id:'processo',label:'Processo'},{id:'protocolo',label:'Protocolo'},{id:'data',label:'Data',type:'date'},{id:'documentos',label:'Documentos',span:2},
+    {id:'analise',label:'Análise',span:2},{id:'validade',label:'Validade',type:'date'},{id:'responsavel',label:'Responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_analise','Em análise'],['deferido','Deferido'],['indeferido','Indeferido'],['vencido','Vencido']]}
+  ],cols:['empreendimento_solicitante','tipo','validade','situacao'],colLabels:['Solicitante','Tipo','Validade','Situação'],
+  renderCol:(r,c)=>c==='validade'?fmtDate(r.validade):c==='situacao'||c==='tipo'?pill(r[c]):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  vistorias_ma:{table:'ma_vistorias',title:'Vistorias',fields:[
+    {id:'processo',label:'Processo'},{id:'local',label:'Local',span:2,required:true},{id:'data',label:'Data',type:'date'},{id:'fiscal',label:'Fiscal'},
+    {id:'motivo',label:'Motivo',span:2},{id:'resultado',label:'Resultado',span:2},{id:'irregularidades',label:'Irregularidades',span:2},{id:'prazo',label:'Prazo',type:'date'},{id:'retorno',label:'Retorno',type:'date'}
+  ],cols:['local','fiscal','data','motivo'],colLabels:['Local','Fiscal','Data','Motivo'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  multas_ma:{table:'ma_multas',title:'Multas',fields:[
+    {id:'processo',label:'Processo'},{id:'ocorrencia_id',label:'Ocorrência',type:'ref',ref:'ocorrencias_ma'},{id:'fundamento_legal',label:'Fundamento legal',span:2},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'data',label:'Data',type:'date'},{id:'documento',label:'Documento'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['aplicada','Aplicada'],['recurso','Em recurso'],['paga','Paga'],['cancelada','Cancelada']]}
+  ],cols:['processo','valor','data','situacao'],colLabels:['Processo','Valor','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  educacao_ambiental_ma:{table:'ma_educacao_ambiental',title:'Educação Ambiental e Campanhas',fields:[
+    {id:'atividade',label:'Atividade',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['acao_educativa','Ação educativa'],['campanha','Campanha']]},
+    {id:'local_escola',label:'Local/Escola',span:2},{id:'publico',label:'Público'},{id:'data',label:'Data',type:'date'},{id:'tema',label:'Tema'},
+    {id:'participantes',label:'Participantes',type:'number'},{id:'custo',label:'Custo (R$)',type:'money'},{id:'resultado',label:'Resultado',span:2}
+  ],cols:['atividade','tipo','data','participantes'],colLabels:['Atividade','Tipo','Data','Particip.'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='tipo'?pill(r.tipo):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  projetos_ma:{table:'ma_projetos',title:'Projetos Ambientais',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'objetivo',label:'Objetivo',span:3},{id:'local',label:'Local'},{id:'responsavel',label:'Responsável'},
+    {id:'periodo',label:'Período'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},{id:'parceiros',label:'Parceiros',span:2},{id:'meta',label:'Meta'},{id:'resultado',label:'Resultado',span:3},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_andamento','Em andamento'],['concluido','Concluído'],['cancelado','Cancelado']]}
+  ],cols:['nome','responsavel','orcamento','situacao'],colLabels:['Nome','Responsável','Orçamento','Situação'],
+  renderCol:(r,c)=>c==='orcamento'?money(r.orcamento):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  recuperacao_ma:{table:'ma_recuperacao',title:'Recuperação Ambiental',fields:[
+    {id:'area',label:'Área',span:2,required:true},{id:'problema',label:'Problema',span:2},{id:'extensao',label:'Extensão (ha)',type:'number'},
+    {id:'projeto',label:'Projeto'},{id:'acao',label:'Ação',span:2},{id:'responsavel',label:'Responsável'},{id:'custo',label:'Custo (R$)',type:'money'},{id:'resultado',label:'Resultado',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_andamento','Em andamento'],['concluida','Concluída']]}
+  ],cols:['area','problema','custo','situacao'],colLabels:['Área','Problema','Custo','Situação'],
+  renderCol:(r,c)=>c==='custo'?money(r.custo):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  queimadas_ma:{table:'ma_queimadas',title:'Queimadas',fields:[
+    {id:'localizacao',label:'Localização',span:2,required:true},{id:'latitude',label:'Latitude',type:'number'},{id:'longitude',label:'Longitude',type:'number'},
+    {id:'data',label:'Data',type:'date'},{id:'area_estimada',label:'Área estimada (ha)',type:'number'},{id:'origem',label:'Origem'},{id:'atendimento',label:'Atendimento',span:2},{id:'responsavel',label:'Responsável'},{id:'resultado',label:'Resultado',span:2}
+  ],cols:['localizacao','data','area_estimada','origem'],colLabels:['Local','Data','Área','Origem'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  poluicao_ma:{table:'ma_poluicao',title:'Poluição',fields:[
+    {id:'tipo',label:'Tipo',span:2,required:true},{id:'local',label:'Local',span:2},{id:'data',label:'Data',type:'date'},{id:'origem',label:'Origem'},
+    {id:'vistoria',label:'Vistoria',span:2},{id:'providencia',label:'Providência',span:2},{id:'resultado',label:'Resultado',span:2}
+  ],cols:['tipo','local','data'],colLabels:['Tipo','Local','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  sustentabilidade_ma:{table:'ma_sustentabilidade',title:'Sustentabilidade',fields:[
+    {id:'projeto',label:'Projeto',span:2,required:true},{id:'area',label:'Área',type:'select',opts:[['energia','Energia'],['agua','Água'],['residuos','Resíduos'],['reciclagem','Reciclagem'],['eficiencia','Eficiência'],['arborizacao','Arborização'],['mobilidade','Mobilidade'],['educacao','Educação']]},
+    {id:'recursos_aplicados',label:'Recursos aplicados (R$)',type:'money'},{id:'economia_gerada',label:'Economia gerada (R$)',type:'money'},{id:'resultado',label:'Resultado',span:3},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_andamento','Em andamento'],['concluido','Concluído']]}
+  ],cols:['projeto','area','recursos_aplicados','situacao'],colLabels:['Projeto','Área','Recursos','Situação'],
+  renderCol:(r,c)=>c==='recursos_aplicados'?money(r.recursos_aplicados):c==='situacao'||c==='area'?pill(r[c]):(r[c]||'—')},
+
+  mudancas_climaticas_ma:{table:'ma_mudancas_climaticas',title:'Mudanças Climáticas',fields:[
+    {id:'risco_ocorrencia',label:'Risco/Ocorrência',span:2,required:true},{id:'area_vulneravel',label:'Área vulnerável',span:2},{id:'data',label:'Data',type:'date'},
+    {id:'acao_preventiva',label:'Ação preventiva',span:2},{id:'projeto',label:'Projeto'},{id:'situacao',label:'Situação',type:'select',opts:[['monitorado','Monitorado'],['em_acao','Em ação'],['mitigado','Mitigado']]}
+  ],cols:['risco_ocorrencia','area_vulneravel','data','situacao'],colLabels:['Risco','Área','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  energia_ma:{table:'ma_energia',title:'Energia',fields:[
+    {id:'unidade',label:'Unidade',span:2,required:true},{id:'consumo_kwh',label:'Consumo (kWh)',type:'number'},{id:'periodo',label:'Período'},
+    {id:'custo',label:'Custo (R$)',type:'money'},{id:'fonte',label:'Fonte'},{id:'equipamento',label:'Equipamento'},{id:'projeto_eficiencia',label:'Projeto de eficiência',span:2}
+  ],cols:['unidade','consumo_kwh','periodo','custo'],colLabels:['Unidade','Consumo','Período','Custo'],
+  renderCol:(r,c)=>c==='custo'?money(r.custo):(r[c]??'—')},
+
+  convenios_ma:{table:'ma_convenios',title:'Convênios',fields:[
+    {id:'parceiro',label:'Parceiro',span:2,required:true},{id:'objeto',label:'Objeto',span:2},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'data_inicio',label:'Início',type:'date'},{id:'data_fim',label:'Término',type:'date'},{id:'contrapartida',label:'Contrapartida',span:2},{id:'responsavel',label:'Responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['vencido','Vencido']]}
+  ],cols:['parceiro','valor','data_fim','situacao'],colLabels:['Parceiro','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data_fim.asc.nullslast'},
+
+  financeiro_ma:{table:'ma_financeiro',title:'Financeiro',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['receita','Receita'],['despesa','Despesa'],['empenho','Empenho'],['liquidacao','Liquidação'],['pagamento','Pagamento']],required:true},
+    {id:'descricao',label:'Descrição',span:2},{id:'valor',label:'Valor (R$)',type:'money'},{id:'programa',label:'Programa'},{id:'servico',label:'Serviço'},
+    {id:'fonte_recurso',label:'Fonte'},{id:'fornecedor',label:'Fornecedor'},{id:'contrato',label:'Contrato'},{id:'data',label:'Data',type:'date'}
+  ],cols:['data','tipo','descricao','valor'],colLabels:['Data','Tipo','Descrição','Valor'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  compras_ma:{table:'ma_compras',title:'Compras',fields:[
+    {id:'solicitacao',label:'Solicitação'},{id:'processo',label:'Processo'},{id:'item',label:'Item',span:2,required:true},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'cotacao',label:'Cotação (R$)',type:'money'},{id:'fornecedor',label:'Fornecedor'},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'data',label:'Data',type:'date'},{id:'entrega',label:'Entrega',type:'date'},{id:'nota_fiscal',label:'Nota fiscal'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitada','Solicitada'],['em_cotacao','Em cotação'],['empenhada','Empenhada'],['entregue','Entregue'],['cancelada','Cancelada']]}
+  ],cols:['item','fornecedor','valor','data','situacao'],colLabels:['Item','Fornecedor','Valor','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  contratos_ma:{table:'ma_contratos',title:'Contratos',fields:[
+    {id:'numero',label:'Nº contrato'},{id:'processo',label:'Processo'},{id:'fornecedor',label:'Fornecedor',required:true},{id:'cnpj',label:'CNPJ'},
+    {id:'objeto',label:'Objeto',span:3},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data_inicio',label:'Início',type:'date'},{id:'data_fim',label:'Término',type:'date'},
+    {id:'fiscal',label:'Fiscal'},{id:'saldo',label:'Saldo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['aditado','Aditado'],['rescindido','Rescindido']]}
+  ],cols:['numero','fornecedor','valor','data_fim','situacao'],colLabels:['Nº','Fornecedor','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  metas_ma:{table:'ma_metas',title:'Metas',fields:[
+    {id:'indicador',label:'Indicador',span:2,required:true},{id:'periodo',label:'Período'},{id:'meta_anual',label:'Meta anual',type:'number'},{id:'meta_mensal',label:'Meta mensal',type:'number'},
+    {id:'responsavel',label:'Responsável'},{id:'prazo',label:'Prazo',type:'date'},{id:'resultado',label:'Resultado',type:'number'},{id:'percentual',label:'% alcançado',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['atingida','Atingida'],['atencao','Atenção'],['abaixo','Abaixo da meta'],['em_andamento','Em andamento']]}
+  ],cols:['indicador','meta_mensal','resultado','percentual','situacao'],colLabels:['Indicador','Meta','Resultado','%','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao,{atingida:'Atingida',atencao:'Atenção',abaixo:'Abaixo',em_andamento:'Em andamento'}[r.situacao]):c==='percentual'?(r.percentual||0)+'%':(r[c]??'—')},
+
+  indicadores_ma:{table:'ma_indicadores',title:'Indicadores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'descricao',label:'Descrição',span:3},{id:'formula',label:'Fórmula',span:2},{id:'fonte',label:'Fonte'},
+    {id:'periodicidade',label:'Periodicidade'},{id:'meta',label:'Meta',type:'number'},{id:'resultado',label:'Resultado',type:'number'},{id:'unidade_medida',label:'Unidade'},{id:'responsavel',label:'Responsável'}
+  ],cols:['nome','formula','periodicidade','meta','resultado'],colLabels:['Nome','Fórmula','Period.','Meta','Resultado'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  documentos_ma:{table:'ma_documentos',title:'Documentos',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:2},
+    {id:'modulo',label:'Módulo'},{id:'url',label:'URL',span:2},{id:'data',label:'Data',type:'date'}
+  ],cols:['titulo','tipo','modulo','data'],colLabels:['Título','Tipo','Módulo','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+};
+
+const REF_TABLES={arvores_ma:'ma_arvores',ocorrencias_ma:'ma_ocorrencias'};
+const REF_LABEL_FIELD={arvores_ma:'localizacao',ocorrencias_ma:'local'};
+async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await sbGet(REF_TABLES[k],'select=id,'+REF_LABEL_FIELD[k]+'&order='+REF_LABEL_FIELD[k]+'.asc');caches[k]=d;return d;}catch(e){return[];}}
+
+function buildViews(){
+  let html='';
+  html+='<section class="view active" id="view-dashboard_ma"><div class="topbar"><div><h1>Dashboard — Meio Ambiente</h1><div class="sub">Central Municipal de Gestão Ambiental</div></div><div><button class="btn-accent" onclick="gerarRelatorioMensal()">Gerar Relatório Mensal</button></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Resíduos por tipo</h3><div class="bars" id="dash-residuos-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="grid-2"><div class="panel"><h3>O que está bom</h3><div id="dash-bom"></div></div><div class="panel"><h3>O que precisa de atenção</h3><div id="dash-atencao"></div></div></div><div class="grid-2"><div class="panel"><h3>Fiscalização</h3><div id="dash-fiscalizacao"></div></div><div class="panel"><h3>Financeiro</h3><div id="dash-financeiro"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
+  html+='<section class="view" id="view-secretaria_ma"><div class="topbar"><div><h1>Secretaria de Meio Ambiente</h1></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="se-nome"></div><div class="field"><label>CNPJ</label><input id="se-cnpj"></div><div class="field"><label>Secretário(a)</label><input id="se-secretario"></div><div class="field"><label>Secretário(a) adjunto(a)</label><input id="se-secretario_adjunto"></div><div class="field"><label>Telefone</label><input id="se-telefone"></div><div class="field"><label>WhatsApp</label><input id="se-whatsapp"></div><div class="field"><label>E-mail</label><input id="se-email"></div><div class="field span-3"><label>Endereço</label><input id="se-endereco"></div><div class="field"><label>Horário</label><input id="se-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="se-orcamento" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="se-meta" inputmode="decimal"></div><div class="field span-3"><label>Responsáveis pelos setores</label><textarea id="se-responsaveis" rows="2"></textarea></div><div class="field span-3"><label>Observações</label><textarea id="se-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSec()" id="se-btn">Salvar</button></div></div></section>';
+  Object.keys(MODULES).forEach(key=>{const m=MODULES[key];
+    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
+    html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
+    html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="ft-'+key+'">Novo registro</h3><div class="form-grid">';
+    m.fields.forEach(f=>{const sp=f.span?'span-'+f.span:'';
+      if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" '+(f.default?'checked':'')+' style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
+      else if(f.type==='select'){html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'">';(f.opts||[]).forEach(([v,l])=>{html+='<option value="'+v+'">'+l+'</option>';});html+='</select></div>';}
+      else if(f.type==='ref')html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'"><option value="">Selecione...</option></select></div>';
+      else{const t=f.type==='money'?'text':f.type||'text';html+='<div class="field '+sp+'"><label>'+f.label+'</label><input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+(f.type==='money'?' inputmode="decimal"':'')+'></div>';}
+    });
+    html+='</div><div class="form-actions"><button class="btn-ghost" onclick="toggleForm(\''+key+'\')">Cancelar</button><button class="btn-accent" onclick="submitCrud(\''+key+'\')" id="sb-'+key+'">Salvar</button></div></div>';
+    html+='<div class="panel"><h3>Registros</h3><p class="panel-sub" id="cnt-'+key+'"></p><div style="overflow-x:auto;"><table><thead><tr>';
+    m.colLabels.forEach(l=>{html+='<th>'+l+'</th>';});
+    html+='<th></th></tr></thead><tbody id="tbl-'+key+'"></tbody></table></div></div></section>';
+  });
+  html+='<section class="view" id="view-mapa_ma"><div class="topbar"><div><h1>Mapa Ambiental</h1><div class="sub">Pontos com localização cadastrada (áreas verdes, recursos hídricos, ecopontos, ocorrências)</div></div></div><div class="panel"><div id="mapa-lista"></div></div></section>';
+  html+='<section class="view" id="view-relatorios_ma"><div class="topbar"><div><h1>Relatórios</h1></div></div><div class="panel"><h3>Exportar relatórios</h3><div class="form-grid">';
+  Object.keys(MODULES).forEach(k=>{html+='<div class="field"><button class="btn-ghost" style="width:100%;" onclick="exportPdf(\''+k+'\')">'+MODULES[k].title+' (PDF)</button></div>';});
+  html+='</div></div></section>';
+  html+='<section class="view" id="view-qualidade_ma"><div class="topbar"><div><h1>Qualidade dos Dados</h1><div class="sub">Cadastros incompletos, pendências e indicadores sem dados suficientes — nada aqui é inventado</div></div></div><div class="panel"><div id="qualidade-lista"></div></div></section>';
+  html+='<section class="view" id="view-alertas_ma"><div class="topbar"><div><h1>Alertas</h1></div></div><div id="alertas-list"></div></section>';
+  html+='<section class="view" id="view-auditoria_ma"><div class="topbar"><div><h1>Auditoria</h1></div></div><div class="panel"><h3>Registros de auditoria</h3><p class="panel-sub" id="cnt-audit"></p><div style="overflow-x:auto;"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Módulo</th></tr></thead><tbody id="tbl-audit"></tbody></table></div></div></section>';
+  html+='<section class="view" id="view-config_ma"><div class="topbar"><div><h1>Configurações</h1></div></div><div class="panel"><h3>Configurações do módulo</h3><p class="panel-sub">Configurações gerais em breve.</p></div></section>';
+  document.getElementById('main-content').innerHTML=html;
+}
+
+let editingId={};
+function toggleForm(k){const p=document.getElementById('form-'+k);const o=p.style.display==='none';p.style.display=o?'block':'none';if(o&&!editingId[k]){clearForm(k);document.getElementById('ft-'+k).textContent='Novo registro';document.getElementById('sb-'+k).textContent='Salvar';loadRefs(k);}if(!o)editingId[k]=null;}
+function clearForm(k){MODULES[k].fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!f.default;else if(f.type==='select')el.selectedIndex=0;else el.value='';});}
+async function loadRefs(k){for(const f of MODULES[k].fields){if(f.type!=='ref')continue;const sel=document.getElementById('cf-'+k+'-'+f.id);const opts=await loadRefOptions(f.ref);const lbl=REF_LABEL_FIELD[f.ref];sel.innerHTML='<option value="">Selecione...</option>'+opts.map(o=>'<option value="'+o.id+'">'+o[lbl]+'</option>').join('');}}
+async function submitCrud(k){const m=MODULES[k],data={tenant_id:tid()};m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;let v;if(f.type==='checkbox')v=el.checked;else if(f.type==='money')v=parseMoney(el.value);else if(f.type==='number')v=el.value?Number(el.value):null;else if(f.type==='ref')v=el.value||null;else v=el.value.trim()||null;data[f.id]=v;});const btn=document.getElementById('sb-'+k);btn.disabled=true;try{if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+async function editCrud(k,id){const m=MODULES[k];try{const rows=await sbGet(m.table,'id=eq.'+id);const r=rows[0];if(!r)return;editingId[k]=id;document.getElementById('form-'+k).style.display='block';document.getElementById('ft-'+k).textContent='Editar registro';document.getElementById('sb-'+k).textContent='Salvar alterações';await loadRefs(k);m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!r[f.id];else el.value=r[f.id]??'';});}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function deleteCrud(k,id){if(!confirm('Excluir?'))return;try{await sbDel(MODULES[k].table,'id=eq.'+id);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
+
+function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)return;const n=data.length;let h='<div class="kpi"><div class="ico">Total</div><div class="num">'+n+'</div><div class="lbl">registros</div></div>';
+  if(k==='areas_verdes_ma'){const cons=data.filter(r=>r.situacao==='conservada').length;h+='<div class="kpi"><div class="ico">Conservadas</div><div class="num" style="color:var(--ok);">'+cons+'</div><div class="lbl">áreas</div></div>';}
+  else if(k==='arvores_ma'){const risco=data.filter(r=>r.condicao==='risco').length;const podar=data.filter(r=>r.necessidade_poda).length;h+='<div class="kpi"><div class="ico">Em risco</div><div class="num" style="color:var(--danger);">'+risco+'</div><div class="lbl">árvores</div></div><div class="kpi"><div class="ico">Necessitam poda</div><div class="num" style="color:var(--warn);">'+podar+'</div><div class="lbl">árvores</div></div>';}
+  else if(k==='residuos_ma'){const ton=data.reduce((s,r)=>s+(Number(r.quantidade_toneladas)||0),0);h+='<div class="kpi"><div class="ico">Toneladas</div><div class="num">'+ton.toLocaleString('pt-BR')+'</div><div class="lbl">coletadas</div></div>';}
+  else if(k==='ocorrencias_ma'){const pend=data.filter(r=>r.situacao==='pendente').length;const atend=data.filter(r=>r.situacao==='atendida').length;h+='<div class="kpi"><div class="ico">Pendentes</div><div class="num" style="color:var(--warn);">'+pend+'</div><div class="lbl">ocorrências</div></div><div class="kpi"><div class="ico">Atendidas</div><div class="num" style="color:var(--ok);">'+atend+'</div><div class="lbl">ocorrências</div></div>';}
+  else if(k==='recursos_hidricos_ma'){const prot=data.filter(r=>r.protecao).length;const risco=data.filter(r=>r.situacao==='em_risco').length;h+='<div class="kpi"><div class="ico">Protegidas</div><div class="num" style="color:var(--ok);">'+prot+'</div><div class="lbl">fontes</div></div><div class="kpi"><div class="ico">Em risco</div><div class="num" style="color:var(--danger);">'+risco+'</div><div class="lbl">fontes</div></div>';}
+  else if(k==='multas_ma'){const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);h+='<div class="kpi"><div class="ico">Valor total</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">em multas</div></div>';}
+  else if(k==='animais_ma'){const cast=data.filter(r=>r.tipo==='castracao').length;h+='<div class="kpi"><div class="ico">Castrações</div><div class="num" style="color:var(--ok);">'+cast+'</div><div class="lbl">realizadas</div></div>';}
+  else if(k==='metas_ma'){const at=data.filter(r=>r.situacao==='atingida').length;const ab=data.filter(r=>r.situacao==='abaixo').length;h+='<div class="kpi"><div class="ico">Atingidas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">metas</div></div><div class="kpi"><div class="ico">Abaixo</div><div class="num" style="color:var(--danger);">'+ab+'</div><div class="lbl">metas</div></div>';}
+  else if(k==='contratos_ma'){const vig=data.filter(r=>r.situacao==='vigente').length;const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);h+='<div class="kpi"><div class="ico">Vigentes</div><div class="num">'+vig+'</div><div class="lbl">contratos</div></div><div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">total</div></div>';}
+  el.innerHTML=h;}
+
+async function loadDashboard(){try{
+  const [av,arv,res,col,eco,fau,ani,ocor,vis,mul,proj,rec,fin,met,al]=await Promise.all([
+    sbGet('ma_areas_verdes','select=id,situacao').catch(()=>[]),
+    sbGet('ma_arvores','select=id,condicao,necessidade_poda').catch(()=>[]),
+    sbGet('ma_residuos','select=id,tipo,quantidade_toneladas').catch(()=>[]),
+    sbGet('ma_coleta','select=id,tipo,situacao').catch(()=>[]),
+    sbGet('ma_ecopontos','select=id').catch(()=>[]),
+    sbGet('ma_fauna','select=id,situacao').catch(()=>[]),
+    sbGet('ma_animais','select=id,tipo').catch(()=>[]),
+    sbGet('ma_ocorrencias','select=id,situacao').catch(()=>[]),
+    sbGet('ma_vistorias','select=id').catch(()=>[]),
+    sbGet('ma_multas','select=id,valor').catch(()=>[]),
+    sbGet('ma_projetos','select=id,situacao').catch(()=>[]),
+    sbGet('ma_recursos_hidricos','select=id,protecao,situacao').catch(()=>[]),
+    sbGet('ma_financeiro','select=id,tipo,valor').catch(()=>[]),
+    sbGet('ma_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
+    sbGet('ma_alertas','select=*&lido=eq.false&order=criado_em.desc&limit=10').catch(()=>[]),
+  ]);
+  const arvRisco=arv.filter(a=>a.condicao==='risco').length;
+  const tonResiduos=res.reduce((s,r)=>s+(Number(r.quantidade_toneladas)||0),0);
+  const tonReciclavel=res.filter(r=>r.tipo==='reciclavel').reduce((s,r)=>s+(Number(r.quantidade_toneladas)||0),0);
+  const projAt=proj.filter(p=>p.situacao==='em_andamento').length;
+  const ocorPend=ocor.filter(o=>o.situacao==='pendente').length;const ocorAtend=ocor.filter(o=>o.situacao==='atendida').length;
+  const nascProt=rec.filter(r=>r.protecao).length;
+  const despesa=fin.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+(Number(f.valor)||0),0);
+  document.getElementById('dash-kpi').innerHTML=[
+    ['Áreas verdes',av.length,'cadastradas'],['Árvores cadastradas',arv.length,'no total'],
+    ['Toneladas coletadas',tonResiduos.toLocaleString('pt-BR'),'no total'],['Recicláveis',tonReciclavel.toLocaleString('pt-BR'),'toneladas'],
+    ['Nascentes/recursos hídricos',rec.length,'cadastrados'],['Protegidas',nascProt,'fontes'],
+    ['Fiscalizações',vis.length,'vistorias'],['Denúncias/Ocorrências',ocor.length,'registradas'],
+    ['Animais atendidos',ani.length,'no total'],['Ecopontos',eco.length,'cadastrados'],
+    ['Projetos ativos',projAt,'em andamento'],['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+'/'+met.length,'metas'],
+  ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
+  const porTipo={};res.forEach(r=>{if(!r.tipo)return;porTipo[r.tipo]=(porTipo[r.tipo]||0)+(Number(r.quantidade_toneladas)||0);});
+  const maxT=Math.max(1,...Object.values(porTipo));
+  document.getElementById('dash-residuos-bars').innerHTML=Object.keys(porTipo).length?Object.entries(porTipo).map(([t,v])=>'<div class="bar-row"><span>'+t+'</span><div class="bar-track"><div class="bar-fill bar-fill-royal" style="width:'+Math.round(v/maxT*100)+'%"></div></div><span class="val">'+v.toLocaleString('pt-BR')+'</span></div>').join(''):semDados();
+  document.getElementById('dash-metas').innerHTML=met.length?met.slice(0,8).map(m=>{const ico=m.situacao==='atingida'?'🟢':m.situacao==='atencao'?'🟡':'🔴';const cor=m.situacao==='atingida'?'ok':m.situacao==='atencao'?'warn':'danger';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;"><span>'+ico+'</span><span style="flex:1;">'+m.indicador+'</span><span style="font-weight:700;color:var(--'+cor+');">'+(m.percentual||0)+'%</span></div>';}).join(''):semDados();
+  const bom=[],atencao=[];
+  if(arvRisco===0&&arv.length)bom.push('Nenhuma árvore em condição de risco');else if(arvRisco)atencao.push(arvRisco+' árvores em condição de risco');
+  if(ocorPend===0&&ocor.length)bom.push('Sem denúncias/ocorrências pendentes');else if(ocorPend)atencao.push(ocorPend+' denúncias/ocorrências pendentes');
+  if(met.filter(m=>m.situacao==='abaixo').length)atencao.push(met.filter(m=>m.situacao==='abaixo').length+' metas abaixo do esperado');else if(met.length)bom.push('Nenhuma meta abaixo do esperado');
+  document.getElementById('dash-bom').innerHTML=bom.length?bom.map(b=>'<div class="diag diag-ok">🟢 '+b+'</div>').join(''):semDados();
+  document.getElementById('dash-atencao').innerHTML=atencao.length?atencao.map(a=>'<div class="diag diag-warn">🟡 '+a+'</div>').join(''):'<div class="diag diag-ok">🟢 Tudo dentro do esperado.</div>';
+  document.getElementById('dash-fiscalizacao').innerHTML=(ocor.length||vis.length)?('<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+    '<div style="padding:10px;background:#FEF3C7;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+ocorPend+'</div><div style="font-size:11px;color:var(--ink-soft);">Pendentes</div></div>'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+ocorAtend+'</div><div style="font-size:11px;color:var(--ink-soft);">Atendidas</div></div>'+
+    '<div style="padding:10px;background:#F0FDFA;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+vis.length+'</div><div style="font-size:11px;color:var(--ink-soft);">Vistorias</div></div>'+
+    '<div style="padding:10px;background:#FEF2F2;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--danger);">'+moneyShort(mul.reduce((s,m)=>s+(Number(m.valor)||0),0))+'</div><div style="font-size:11px;color:var(--ink-soft);">Em multas</div></div></div>'):semDados();
+  document.getElementById('dash-financeiro').innerHTML=fin.length?('<div style="padding:10px;background:#FEF2F2;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--danger);">'+moneyShort(despesa)+'</div><div style="font-size:11px;color:var(--ink-soft);">Despesas no total</div></div>'):semDados();
+  document.getElementById('dash-alertas').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'">'+ico+' '+a.mensagem+'</div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum alerta.</p>';
+}catch(e){document.getElementById('dash-kpi').innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,200)+'</div>';}}
+
+async function loadMapa(){
+  const el=document.getElementById('mapa-lista');el.innerHTML='<p style="color:var(--muted);font-size:12px;">Carregando...</p>';
+  try{
+    const [av,rh,eco,arv,quei]=await Promise.all([
+      sbGet('ma_areas_verdes','select=nome,latitude,longitude&latitude=not.is.null').catch(()=>[]),
+      sbGet('ma_recursos_hidricos','select=identificacao,latitude,longitude&latitude=not.is.null').catch(()=>[]),
+      sbGet('ma_ecopontos','select=nome,latitude,longitude&latitude=not.is.null').catch(()=>[]),
+      sbGet('ma_arvores','select=localizacao,latitude,longitude&latitude=not.is.null').catch(()=>[]),
+      sbGet('ma_queimadas','select=localizacao,latitude,longitude&latitude=not.is.null').catch(()=>[]),
+    ]);
+    const pontos=[
+      ...av.map(p=>({nome:p.nome,tipo:'Área verde',lat:p.latitude,lng:p.longitude})),
+      ...rh.map(p=>({nome:p.identificacao,tipo:'Recurso hídrico',lat:p.latitude,lng:p.longitude})),
+      ...eco.map(p=>({nome:p.nome,tipo:'Ecoponto',lat:p.latitude,lng:p.longitude})),
+      ...arv.map(p=>({nome:p.localizacao,tipo:'Árvore',lat:p.latitude,lng:p.longitude})),
+      ...quei.map(p=>({nome:p.localizacao,tipo:'Queimada',lat:p.latitude,lng:p.longitude})),
+    ];
+    el.innerHTML=pontos.length?('<table><thead><tr><th>Nome</th><th>Tipo</th><th>Coordenadas</th><th></th></tr></thead><tbody>'+
+      pontos.map(p=>'<tr><td>'+(p.nome||'—')+'</td><td>'+pill(p.tipo.toLowerCase().replace(/[^a-z]/g,'_'),p.tipo)+'</td><td>'+p.lat+', '+p.lng+'</td><td><a href="https://www.google.com/maps?q='+p.lat+','+p.lng+'" target="_blank" style="color:var(--royal);">Ver no mapa ↗</a></td></tr>').join('')+
+      '</tbody></table>'):('<p style="color:var(--muted);font-size:12px;">Nenhum ponto com latitude/longitude cadastrada ainda. Preencha as coordenadas nos cadastros de Áreas Verdes, Recursos Hídricos, Ecopontos, Árvores ou Queimadas pra eles aparecerem aqui.</p>');
+  }catch(e){el.innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,150)+'</div>';}
+}
+
+let secId=null;
+async function loadSec(){try{const rows=await sbGet('ma_secretaria','select=*&limit=1');if(rows.length){const s=rows[0];secId=s.id;['nome','cnpj','secretario','secretario_adjunto','telefone','whatsapp','email','endereco'].forEach(f=>{const el=document.getElementById('se-'+f);if(el)el.value=s[f]||'';});document.getElementById('se-horario').value=s.horario_atendimento||'';document.getElementById('se-orcamento').value=s.orcamento_anual||'';document.getElementById('se-meta').value=s.meta_anual||'';document.getElementById('se-responsaveis').value=s.responsaveis_setores||'';document.getElementById('se-obs').value=s.observacoes||'';}}catch(e){}}
+async function salvarSec(){const data={tenant_id:tid(),nome:document.getElementById('se-nome').value.trim()||'Secretaria Municipal de Meio Ambiente',cnpj:document.getElementById('se-cnpj').value.trim()||null,secretario:document.getElementById('se-secretario').value.trim()||null,secretario_adjunto:document.getElementById('se-secretario_adjunto').value.trim()||null,telefone:document.getElementById('se-telefone').value.trim()||null,whatsapp:document.getElementById('se-whatsapp').value.trim()||null,email:document.getElementById('se-email').value.trim()||null,endereco:document.getElementById('se-endereco').value.trim()||null,horario_atendimento:document.getElementById('se-horario').value.trim()||null,orcamento_anual:parseMoney(document.getElementById('se-orcamento').value),meta_anual:parseMoney(document.getElementById('se-meta').value),responsaveis_setores:document.getElementById('se-responsaveis').value.trim()||null,observacoes:document.getElementById('se-obs').value.trim()||null,atualizado_em:new Date().toISOString()};const btn=document.getElementById('se-btn');btn.disabled=true;try{if(secId){await sbPatch('ma_secretaria','id=eq.'+secId,data);}else{const r=await sbPost('ma_secretaria',data);secId=r[0].id;}alert('Salvo!');}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+
+async function loadAlertas(){try{const al=await sbGet('ma_alertas','select=*&order=criado_em.desc');document.getElementById('alertas-list').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'" style="display:flex;justify-content:space-between;align-items:center;">'+ico+' '+a.mensagem+(a.lido?'':' <button class="btn-ghost" style="font-size:10px;padding:3px 8px;" onclick="marcarLido(\''+a.id+'\')">Lido</button>')+'</div>';}).join(''):'<div class="panel"><p style="color:var(--muted);text-align:center;padding:30px;">Nenhum alerta.</p></div>';}catch(e){}}
+async function marcarLido(id){try{await sbPatch('ma_alertas','id=eq.'+id,{lido:true});loadAlertas();}catch(e){}}
+
+async function loadAuditoria(){try{const rows=await sbGet('ma_auditoria','select=*&order=data.desc&limit=100');document.getElementById('cnt-audit').textContent=rows.length+' registro(s)';document.getElementById('tbl-audit').innerHTML=rows.length?rows.map(r=>'<tr><td>'+new Date(r.data).toLocaleString('pt-BR')+'</td><td>'+(r.usuario||'—')+'</td><td>'+(r.acao||'—')+'</td><td>'+(r.modulo||'—')+'</td></tr>').join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Sem registros.</td></tr>';}catch(e){}}
+
+async function loadQualidade(){
+  const el=document.getElementById('qualidade-lista');el.innerHTML='<p style="color:var(--muted);font-size:12px;">Carregando...</p>';
+  try{
+    const checks=[
+      ['Árvores sem espécie definida','ma_arvores','especie=is.null'],
+      ['Áreas verdes sem responsável definido','ma_areas_verdes','responsavel=is.null'],
+      ['Ocorrências sem providência registrada (atendidas)','ma_ocorrencias','situacao=eq.atendida&providencia=is.null'],
+      ['Licenciamentos sem validade definida','ma_licenciamento','validade=is.null'],
+      ['Contratos sem data de término','ma_contratos','data_fim=is.null'],
+    ];
+    const results=await Promise.all(checks.map(([label,table,q])=>sbGet(table,'select=id&'+q).then(d=>[label,d.length]).catch(()=>[label,null])));
+    el.innerHTML='<table><thead><tr><th>Verificação</th><th>Pendências</th></tr></thead><tbody>'+
+      results.map(([label,n])=>'<tr><td>'+label+'</td><td>'+(n===null?'Dados insuficientes para cálculo':(n===0?'<span class="status-pill status-ativo">Ok</span>':'<span class="status-pill status-pendente">'+n+' pendente(s)</span>')) +'</td></tr>').join('')+
+      '</tbody></table>';
+  }catch(e){el.innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,150)+'</div>';}
+}
+
+function exportPdf(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFontSize(16);doc.text(m.title+' — Conecta Gestão Meio Ambiente',14,18);doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,26);const rows=data.map(r=>m.cols.map(c=>{const v=m.renderCol(r,c);return String(v).replace(/<[^>]+>/g,'');}));doc.autoTable({head:[m.colLabels],body:rows,startY:32,styles:{fontSize:9},headStyles:{fillColor:[13,148,136]}});doc.save(k+'_meio_ambiente.pdf');}
+function exportXlsx(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const rows=data.map(r=>{const o={};m.cols.forEach((c,i)=>{o[m.colLabels[i]]=String(m.renderCol(r,c)).replace(/<[^>]+>/g,'');});return o;});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,m.title.slice(0,31));XLSX.writeFile(wb,k+'_meio_ambiente.xlsx');}
+
+async function gerarRelatorioMensal(){
+  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');let y=20;
+  doc.setFontSize(18);doc.text('Relatório Mensal — Meio Ambiente',14,y);y+=10;
+  doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,y);y+=12;
+  try{
+    const [res,col,arv,plant,rec,ocor,vis,lic,fau,ani,edu,proj,fin,met]=await Promise.all([
+      sbGet('ma_residuos','select=id,quantidade_toneladas').catch(()=>[]),
+      sbGet('ma_coleta','select=id').catch(()=>[]),
+      sbGet('ma_arvores','select=id').catch(()=>[]),
+      sbGet('ma_plantio','select=id,quantidade').catch(()=>[]),
+      sbGet('ma_recursos_hidricos','select=id,protecao').catch(()=>[]),
+      sbGet('ma_ocorrencias','select=id,situacao').catch(()=>[]),
+      sbGet('ma_vistorias','select=id').catch(()=>[]),
+      sbGet('ma_licenciamento','select=id').catch(()=>[]),
+      sbGet('ma_fauna','select=id').catch(()=>[]),
+      sbGet('ma_animais','select=id,tipo').catch(()=>[]),
+      sbGet('ma_educacao_ambiental','select=id,participantes').catch(()=>[]),
+      sbGet('ma_projetos','select=id,situacao').catch(()=>[]),
+      sbGet('ma_financeiro','select=id,tipo,valor').catch(()=>[]),
+      sbGet('ma_metas','select=id,situacao').catch(()=>[]),
+    ]);
+    const items=[
+      ['Resíduos coletados (toneladas)',res.reduce((s,r)=>s+(Number(r.quantidade_toneladas)||0),0)],['Rotas de coleta',col.length],
+      ['Árvores cadastradas',arv.length],['Mudas plantadas',plant.reduce((s,p)=>s+(Number(p.quantidade)||0),0)],
+      ['Nascentes/recursos hídricos',rec.length],['Protegidas',rec.filter(r=>r.protecao).length],
+      ['Denúncias/ocorrências',ocor.length],['Atendidas',ocor.filter(o=>o.situacao==='atendida').length],
+      ['Vistorias realizadas',vis.length],['Processos de licenciamento',lic.length],
+      ['Ocorrências de fauna',fau.length],['Animais castrados',ani.filter(a=>a.tipo==='castracao').length],
+      ['Ações de educação ambiental',edu.length],['Participantes em ações educativas',edu.reduce((s,e)=>s+(Number(e.participantes)||0),0)],
+      ['Projetos em andamento',proj.filter(p=>p.situacao==='em_andamento').length],
+      ['Despesas',moneyShort(fin.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+(Number(f.valor)||0),0))],
+      ['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+' de '+met.length],
+    ];
+    doc.autoTable({head:[['Indicador','Valor']],body:items,startY:y,styles:{fontSize:10},headStyles:{fillColor:[13,148,136]}});
+    doc.save('relatorio_mensal_meio_ambiente.pdf');
+    alert('Relatório mensal gerado!');
+  }catch(e){alert('Erro: '+e.message.slice(0,200));}
+}
+
+const LOADERS={dashboard_ma:loadDashboard,secretaria_ma:loadSec,mapa_ma:loadMapa,alertas_ma:loadAlertas,auditoria_ma:loadAuditoria,qualidade_ma:loadQualidade};
+Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>loadData(k);});
+</script>
+<div style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>

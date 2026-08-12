@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Assistência Social · Gabriel Oliveira</title>
+<meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#0E7490">
+<style>
+:root{--royal:#0E7490;--neon:#0891B2;--light:#67E8F9;--darkblue:#0F172A;--bg:#F8FAFC;--surface:#FFFFFF;--ink:#0F172A;--ink-soft:#475569;--line:rgba(15,23,42,.08);--ok:#059669;--danger:#DC2626;--warn:#D97706;--muted:#94A3B8;--radius:18px;--sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;--shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);}
+*{box-sizing:border-box;}body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}button{font-family:inherit;cursor:pointer;}select,input,textarea{font-family:inherit;}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(14,116,144,.4);}
+#login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+@media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+.login-brand{background:linear-gradient(150deg,var(--darkblue) 0%,#16265A 45%,var(--royal) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+.login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle,rgba(103,232,249,.25),transparent 70%);}
+.brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+.brand-name{font-size:19px;font-weight:800;}.brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+.brand-quote{position:relative;z-index:1;max-width:420px;}.brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;}.brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+.brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+.login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-form{width:100%;max-width:380px;}.login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+.field{margin-bottom:18px;}.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(14,116,144,.12);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(14,116,144,.35);}
+.btn-primary:hover{transform:translateY(-1px);}.btn-primary:disabled{opacity:.6;pointer-events:none;}
+.login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
+header{background:linear-gradient(150deg,var(--darkblue),#16265A);color:#E2E8F0;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.hd-left{display:flex;align-items:center;gap:12px;}.hd-left .name{font-size:16px;font-weight:800;}.hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+.hd-right{display:flex;align-items:center;gap:12px;font-size:12px;color:#B6C4DD;}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;}.btn-ghost:hover{border-color:var(--royal);color:var(--royal);}
+.btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 12px rgba(14,116,144,.35);}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;}.logout-btn:hover{border-color:var(--light);color:var(--light);}
+.back-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;text-decoration:none;}.back-btn:hover{border-color:var(--light);color:var(--light);}
+.app-body{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:240px;background:var(--darkblue);padding:12px 8px;overflow-y:auto;flex-shrink:0;}
+.sidebar::-webkit-scrollbar{width:4px;}.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+.nav-group-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:14px 10px 4px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:#B6C4DD;font-size:12px;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:background .15s;}
+.nav-item:hover{background:rgba(8,145,178,.12);}.nav-item.active{background:linear-gradient(90deg,rgba(14,116,144,.4),rgba(8,145,178,.15));color:#fff;font-weight:700;}
+main{flex:1;padding:28px 36px 60px;max-width:1300px;overflow-x:hidden;}
+@media(max-width:860px){.sidebar{display:none;}main{padding:20px;}}
+.view{display:none;}.view.active{display:block;}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.topbar h1{font-size:24px;margin:0 0 2px;font-weight:800;}.topbar .sub{font-size:12px;color:var(--muted);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:1000px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);transition:transform .2s;}.kpi:hover{transform:translateY(-2px);}
+.kpi .ico{font-size:10px;color:var(--royal);text-transform:uppercase;letter-spacing:.8px;font-weight:800;margin-bottom:6px;}
+.kpi .num{font-size:22px;color:var(--ink);font-weight:800;}.kpi .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.panel h3{font-size:15px;margin:0 0 4px;font-weight:800;}.panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 14px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+.field.span-2{grid-column:span 2;}.field.span-3{grid-column:span 3;}
+.form-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);font-weight:700;}
+td{padding:9px 8px;border-bottom:1px solid var(--line);}tr:last-child td{border-bottom:none;}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.status-ativa,.status-ativo,.status-atingida,.status-vigente,.status-aprovado,.status-atualizado,.status-concluido,.status-localizada,.status-encaminhada,.status-concedido{background:#D1FAE5;color:var(--ok);}
+.status-inativa,.status-inativo,.status-encerrada,.status-encerrado,.status-cancelada,.status-negado,.status-vencido,.status-abaixo,.status-desatualizado{background:#FEF2F2;color:var(--danger);}
+.status-em_andamento,.status-atencao,.status-pendente,.status-aberta,.status-em_analise,.status-solicitada,.status-solicitado,.status-em_acompanhamento,.status-identificada,.status-em_cotacao{background:#FEF3C7;color:var(--warn);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:1000px){.grid-2{grid-template-columns:1fr;}}
+.diag{padding:14px;border-radius:12px;font-size:12.5px;line-height:1.6;margin-bottom:8px;}
+.diag-ok{background:#D1FAE5;border:1px solid rgba(5,150,105,.25);color:#065F46;}
+.diag-warn{background:#FEF3C7;border:1px solid rgba(217,119,6,.25);color:#92400E;}
+.diag-danger{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
+.bars{display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:grid;grid-template-columns:160px 1fr 44px;align-items:center;gap:10px;font-size:12px;}
+.bar-track{background:#ECFEFF;border-radius:5px;height:8px;overflow:hidden;}.bar-fill{height:100%;border-radius:5px;}
+.bar-fill-royal{background:linear-gradient(90deg,var(--royal),var(--light));}
+.bar-fill-ok{background:linear-gradient(90deg,var(--ok),#34D399);}
+.bar-row .val{text-align:right;color:var(--ink-soft);font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name">Conecta Gestão<small>Assistência Social</small></div></div>
+    <div class="brand-quote"><h1>Central Municipal de Gestão Social.</h1><p>CRAS, CREAS, famílias, benefícios, acompanhamentos e indicadores sociais — dados protegidos, acesso restrito à equipe.</p></div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap"><div class="login-form">
+    <h2>Acessar</h2><p class="sub">Entre com sua conta institucional.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div></div>
+</div>
+<div id="app" style="display:none;">
+<header>
+  <div class="hd-left"><div class="logo">CG</div><div class="name">Conecta Gestão<small>Assistência Social</small></div></div>
+  <div class="hd-right"><span id="hd-role"></span><a class="back-btn" href="conecta-gestao-painel-admin.html">← Painel</a><button class="logout-btn" onclick="doLogout()">Sair</button></div>
+</header>
+<div class="app-body">
+<aside class="sidebar" id="sidebar-nav"></aside>
+<main id="main-content"></main>
+</div>
+</div>
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+let session=null;
+function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),senha=document.getElementById('login-senha').value,err=document.getElementById('login-error'),btn=document.getElementById('login-btn');
+  err.classList.remove('show');if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
+    session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    try{localStorage.setItem('cg_session',JSON.stringify(session));}catch(e){}
+    enterApp();
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+function doLogout(){session=null;try{localStorage.removeItem('cg_session');}catch(e){}document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+function tryAutoLogin(){
+  try{const s=JSON.parse(localStorage.getItem('cg_session'));if(!s||!s.access_token)return false;
+    const c=decodeJwt(s.access_token);if(!c.exp||c.exp*1000<Date.now())return false;
+    session={access_token:s.access_token,claims:c};enterApp();return true;
+  }catch(e){return false;}
+}
+function enterApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');buildNav();buildViews();navigateTo('dashboard_as');}
+window.addEventListener('DOMContentLoaded',()=>{tryAutoLogin();});
+
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPatch(t,q,d){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbDel(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'DELETE',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());}
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';}
+function moneyShort(v){if(!v)return'R$ 0';const n=Number(v);if(n>=1e6)return'R$ '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'R$ '+(n/1e3).toFixed(0)+'k';return'R$ '+n.toFixed(0);}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function pill(s,label){return'<span class="status-pill status-'+(s||'')+'">'+(label||s||'—')+'</span>';}
+function parseMoney(v){if(!v)return null;return parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));}
+function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-000000000001';}
+function semDados(){return '<p style="color:var(--muted);font-size:12px;">Dados insuficientes para cálculo.</p>';}
+
+const NAV_GROUPS=[
+  {label:'Geral',items:[['dashboard_as','Dashboard'],['secretaria_as','Secretaria']]},
+  {label:'Unidades',items:[['cras_as','CRAS'],['creas_as','CREAS'],['unidades_as','Unidades e Equipamentos']]},
+  {label:'Famílias e Pessoas',items:[['familias_as','Famílias'],['pessoas_as','Pessoas'],['cadastro_social_as','Cadastro Social'],['cadastro_unico_as','Cadastro Único']]},
+  {label:'Atendimento',items:[['atendimentos_as','Atendimentos'],['acompanhamentos_as','Acompanhamentos'],['visitas_as','Visitas Domiciliares'],['encaminhamentos_as','Encaminhamentos'],['busca_ativa_as','Busca Ativa']]},
+  {label:'Benefícios',items:[['beneficios_as','Benefícios'],['seguranca_alimentar_as','Segurança Alimentar e Cestas'],['estoque_as','Estoque']]},
+  {label:'Serviços e Grupos',items:[['servicos_as','Serviços Socioassistenciais'],['programas_as','Programas Sociais'],['grupos_as','Grupos'],['oficinas_as','Oficinas'],['cursos_as','Cursos e Capacitações']]},
+  {label:'Públicos Específicos',items:[['publico_especifico_as','Crianças, Idosos, PCD, Mulheres e Gestantes']]},
+  {label:'Direitos e Proteção',items:[['documentacao_pessoal_as','Documentação'],['trabalho_renda_as','Trabalho e Renda'],['habitacao_as','Habitação e Vulnerabilidade'],['violencias_as','Violências e Violações'],['rede_atendimento_as','Rede de Atendimento'],['conselho_tutelar_as','Conselho Tutelar (Encaminhamentos)']]},
+  {label:'Parcerias',items:[['convenios_as','Convênios'],['recursos_as','Recursos']]},
+  {label:'Financeiro',items:[['financeiro_as','Financeiro'],['compras_as','Compras'],['contratos_as','Contratos']]},
+  {label:'Gestão',items:[['metas_as','Metas'],['indicadores_as','Indicadores']]},
+  {label:'Sistema',items:[['relatorios_as','Relatórios'],['qualidade_as','Qualidade dos Dados'],['alertas_as','Alertas'],['documentos_as','Documentos'],['auditoria_as','Auditoria'],['config_as','Configurações']]},
+];
+let currentView='dashboard_as';
+function buildNav(){let h='';NAV_GROUPS.forEach(g=>{h+='<div class="nav-group-label">'+g.label+'</div>';g.items.forEach(([k,l])=>{h+='<button class="nav-item'+(k==='dashboard_as'?' active':'')+'" data-key="'+k+'" onclick="navigateTo(\''+k+'\')">'+l+'</button>';});});document.getElementById('sidebar-nav').innerHTML=h;}
+function navigateTo(key){currentView=key;document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.key===key));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+key));if(LOADERS[key])LOADERS[key]();}
+
+let caches={};
+const MODULES={
+  cras_as:{table:'as_cras',title:'CRAS',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
+    {id:'telefone',label:'Telefone'},{id:'email',label:'E-mail'},{id:'coordenador',label:'Coordenador(a)'},{id:'equipe',label:'Equipe',span:2},
+    {id:'horario',label:'Horário'},{id:'territorio_abrangencia',label:'Território de abrangência',span:2},{id:'capacidade',label:'Capacidade',type:'number'},
+    {id:'servicos_oferecidos',label:'Serviços oferecidos',span:3},
+    {id:'situacao_estrutura',label:'Situação da estrutura',type:'select',opts:[['boa','Boa'],['regular','Regular'],['precaria','Precária']]}
+  ],cols:['nome','bairro','coordenador','situacao_estrutura'],colLabels:['Nome','Bairro','Coordenador(a)','Estrutura'],
+  renderCol:(r,c)=>c==='situacao_estrutura'?pill(r.situacao_estrutura):(r[c]||'—')},
+
+  creas_as:{table:'as_creas',title:'CREAS',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'endereco',label:'Endereço',span:2},{id:'equipe',label:'Equipe',span:2},
+    {id:'servicos',label:'Serviços',span:2},{id:'rede_protecao',label:'Rede de proteção',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['nome','equipe','situacao'],colLabels:['Nome','Equipe','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  unidades_as:{table:'as_unidades',title:'Unidades e Equipamentos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['cras','CRAS'],['creas','CREAS'],['centro_convivencia','Centro de Convivência'],['abrigo','Abrigo'],['casa_acolhimento','Casa de Acolhimento'],['outro','Outro']]},
+    {id:'endereco',label:'Endereço',span:2},{id:'responsavel',label:'Responsável'},{id:'equipe',label:'Equipe',span:2},
+    {id:'capacidade',label:'Capacidade',type:'number'},{id:'servicos',label:'Serviços',span:2},{id:'horarios',label:'Horários'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['nome','tipo','responsavel','situacao'],colLabels:['Nome','Tipo','Responsável','Situação'],
+  renderCol:(r,c)=>c==='situacao'||c==='tipo'?pill(r[c]):(r[c]||'—')},
+
+  familias_as:{table:'as_familias',title:'Famílias',fields:[
+    {id:'identificador',label:'Identificador familiar'},{id:'responsavel_familiar',label:'Responsável familiar',span:2,required:true},
+    {id:'quantidade_membros',label:'Qtd. de membros',type:'number'},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro/localidade'},
+    {id:'telefone',label:'Telefone'},{id:'composicao_familiar',label:'Composição familiar',span:2},{id:'situacao_socioeconomica',label:'Situação socioeconômica',span:2},
+    {id:'em_acompanhamento',label:'Em acompanhamento',type:'checkbox'},{id:'situacao',label:'Situação',type:'select',opts:[['ativa','Ativa'],['inativa','Inativa']]}
+  ],cols:['responsavel_familiar','bairro','quantidade_membros','situacao'],colLabels:['Responsável familiar','Bairro','Membros','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  pessoas_as:{table:'as_pessoas',title:'Pessoas',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'data_nascimento',label:'Data de nascimento',type:'date'},{id:'sexo',label:'Sexo',type:'select',opts:[['M','Masculino'],['F','Feminino']]},
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'vinculo_familiar',label:'Vínculo familiar'},{id:'endereco',label:'Endereço',span:2},{id:'contato',label:'Contato'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
+  ],cols:['nome','vinculo_familiar','situacao'],colLabels:['Nome','Vínculo','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  cadastro_social_as:{table:'as_cadastro_social',title:'Cadastro Social',fields:[
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'renda',label:'Renda (R$)',type:'money'},{id:'situacao_habitacional',label:'Situação habitacional'},
+    {id:'trabalho',label:'Trabalho'},{id:'escolaridade',label:'Escolaridade'},{id:'acesso_servicos',label:'Acesso a serviços',span:2},
+    {id:'vulnerabilidades',label:'Vulnerabilidades',span:2},{id:'necessidades',label:'Necessidades',span:2},{id:'em_acompanhamento',label:'Em acompanhamento',type:'checkbox'}
+  ],cols:['renda','situacao_habitacional','em_acompanhamento'],colLabels:['Renda','Situação habit.','Em acompanh.'],
+  renderCol:(r,c)=>c==='renda'?money(r.renda):c==='em_acompanhamento'?(r.em_acompanhamento?'Sim':'Não'):(r[c]||'—')},
+
+  cadastro_unico_as:{table:'as_cadastro_unico',title:'Cadastro Único',fields:[
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'numero_nis',label:'Número NIS'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['atualizado','Atualizado'],['desatualizado','Desatualizado'],['pendente','Pendente']]},
+    {id:'data_ultima_atualizacao',label:'Última atualização',type:'date'},{id:'beneficios_vinculados',label:'Benefícios vinculados',span:2},{id:'pendencias',label:'Pendências',span:2}
+  ],cols:['numero_nis','data_ultima_atualizacao','situacao'],colLabels:['NIS','Última atualização','Situação'],
+  renderCol:(r,c)=>c==='data_ultima_atualizacao'?fmtDate(r.data_ultima_atualizacao):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  atendimentos_as:{table:'as_atendimentos',title:'Atendimentos',fields:[
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'pessoa_id',label:'Pessoa',type:'ref',ref:'pessoas_as'},
+    {id:'data',label:'Data',type:'date',required:true},{id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades_as'},{id:'profissional',label:'Profissional'},
+    {id:'motivo',label:'Motivo',span:2},{id:'servico',label:'Serviço'},{id:'orientacao',label:'Orientação',span:2},{id:'encaminhamento',label:'Encaminhamento',span:2},{id:'retorno',label:'Retorno',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['concluido','Concluído'],['pendente','Pendente']]}
+  ],cols:['data','profissional','motivo','situacao'],colLabels:['Data','Profissional','Motivo','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  acompanhamentos_as:{table:'as_acompanhamentos',title:'Acompanhamentos',fields:[
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'pessoa_id',label:'Pessoa',type:'ref',ref:'pessoas_as'},
+    {id:'profissional',label:'Profissional'},{id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades_as'},{id:'data_inicio',label:'Início',type:'date'},
+    {id:'motivo',label:'Motivo',span:2},{id:'objetivo',label:'Objetivo',span:2},{id:'plano_acompanhamento',label:'Plano de acompanhamento',span:3},
+    {id:'acoes',label:'Ações',span:2},{id:'encaminhamentos',label:'Encaminhamentos',span:2},{id:'data_encerramento',label:'Encerramento',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['encerrado','Encerrado']]}
+  ],cols:['data_inicio','profissional','motivo','situacao'],colLabels:['Início','Profissional','Motivo','Situação'],
+  renderCol:(r,c)=>c==='data_inicio'?fmtDate(r.data_inicio):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data_inicio.desc.nullslast'},
+
+  visitas_as:{table:'as_visitas',title:'Visitas Domiciliares',fields:[
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'endereco',label:'Endereço',span:2},{id:'profissional',label:'Profissional'},
+    {id:'data',label:'Data',type:'date'},{id:'motivo',label:'Motivo',span:2},{id:'situacao_encontrada',label:'Situação encontrada',span:2},
+    {id:'orientacao',label:'Orientação',span:2},{id:'encaminhamento',label:'Encaminhamento'},{id:'retorno_necessario',label:'Retorno necessário',type:'checkbox'}
+  ],cols:['data','profissional','motivo','retorno_necessario'],colLabels:['Data','Profissional','Motivo','Retorno?'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='retorno_necessario'?(r.retorno_necessario?'Sim':'Não'):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  encaminhamentos_as:{table:'as_encaminhamentos',title:'Encaminhamentos',fields:[
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'pessoa_id',label:'Pessoa',type:'ref',ref:'pessoas_as'},
+    {id:'origem',label:'Origem'},{id:'destino',label:'Destino',span:2,required:true},{id:'motivo',label:'Motivo',span:2},
+    {id:'data',label:'Data',type:'date'},{id:'responsavel',label:'Responsável'},{id:'prazo',label:'Prazo',type:'date'},{id:'retorno',label:'Retorno',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['pendente','Pendente'],['concluido','Concluído']]}
+  ],cols:['destino','data','responsavel','situacao'],colLabels:['Destino','Data','Responsável','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  busca_ativa_as:{table:'as_busca_ativa',title:'Busca Ativa',fields:[
+    {id:'territorio',label:'Território',span:2},{id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'motivo',label:'Motivo',span:2},
+    {id:'data',label:'Data',type:'date'},{id:'responsavel',label:'Responsável'},{id:'resultado',label:'Resultado',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['identificada','Identificada'],['localizada','Localizada'],['encaminhada','Encaminhada']]}
+  ],cols:['territorio','data','situacao'],colLabels:['Território','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  beneficios_as:{table:'as_beneficios',title:'Benefícios',fields:[
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'pessoa_id',label:'Pessoa',type:'ref',ref:'pessoas_as'},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['transferencia_renda','Transferência de renda'],['eventual','Benefício eventual'],['auxilio_natalidade','Auxílio natalidade'],['auxilio_funeral','Auxílio funeral'],['cesta','Cesta'],['auxilio_alimentacao','Auxílio alimentação'],['auxilio_documentacao','Auxílio documentação'],['outro','Outro']]},
+    {id:'beneficio',label:'Benefício',span:2,required:true},{id:'valor_quantidade',label:'Valor/Quantidade',type:'money'},{id:'motivo',label:'Motivo'},
+    {id:'programa',label:'Programa'},{id:'data',label:'Data',type:'date'},{id:'responsavel',label:'Responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitado','Solicitado'],['em_analise','Em análise'],['concedido','Concedido'],['negado','Negado']]}
+  ],cols:['beneficio','tipo','valor_quantidade','data','situacao'],colLabels:['Benefício','Tipo','Valor','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor_quantidade'?money(r.valor_quantidade):c==='situacao'||c==='tipo'?pill(r[c]):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  seguranca_alimentar_as:{table:'as_seguranca_alimentar',title:'Segurança Alimentar e Cestas',fields:[
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'tipo',label:'Tipo',type:'select',opts:[['cesta','Cesta'],['refeicao','Refeição'],['beneficio','Benefício']]},
+    {id:'composicao',label:'Composição',span:2},{id:'quantidade',label:'Quantidade',type:'number'},{id:'data',label:'Data',type:'date'},
+    {id:'fornecedor',label:'Fornecedor'},{id:'custo',label:'Custo (R$)',type:'money'},{id:'programa',label:'Programa'}
+  ],cols:['tipo','quantidade','data','custo'],colLabels:['Tipo','Qtd.','Data','Custo'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='custo'?money(r.custo):c==='tipo'?pill(r.tipo):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  estoque_as:{table:'as_estoque',title:'Estoque',fields:[
+    {id:'item',label:'Item',span:2,required:true},{id:'categoria',label:'Categoria',type:'select',opts:[['alimento','Alimento'],['material','Material'],['roupa','Roupa'],['cobertor','Cobertor'],['kit','Kit'],['higiene','Higiene'],['outro','Outro']]},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'estoque_minimo',label:'Estoque mínimo',type:'number'},{id:'validade',label:'Validade',type:'date'},
+    {id:'localizacao',label:'Localização'},{id:'fornecedor',label:'Fornecedor'}
+  ],cols:['item','categoria','quantidade','validade'],colLabels:['Item','Categoria','Qtd.','Validade'],
+  renderCol:(r,c)=>c==='validade'?fmtDate(r.validade):c==='categoria'?pill(r.categoria):(r[c]??'—')},
+
+  servicos_as:{table:'as_servicos',title:'Serviços Socioassistenciais',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades_as'},{id:'publico',label:'Público'},
+    {id:'equipe',label:'Equipe',span:2},{id:'capacidade',label:'Capacidade',type:'number'},{id:'horario',label:'Horário'},
+    {id:'quantidade_atendida',label:'Quantidade atendida',type:'number'},{id:'meta',label:'Meta',type:'number'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','publico','quantidade_atendida','capacidade'],colLabels:['Nome','Público','Atendidos','Capac.'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  programas_as:{table:'as_programas',title:'Programas Sociais',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'objetivo',label:'Objetivo',span:3},{id:'publico',label:'Público'},{id:'responsavel',label:'Responsável'},
+    {id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades_as'},{id:'periodo',label:'Período'},{id:'meta',label:'Meta',type:'number'},{id:'orcamento',label:'Orçamento (R$)',type:'money'},
+    {id:'participantes',label:'Participantes',type:'number'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','responsavel','participantes','orcamento'],colLabels:['Nome','Responsável','Particip.','Orçamento'],
+  renderCol:(r,c)=>c==='orcamento'?money(r.orcamento):(r[c]||'—')},
+
+  grupos_as:{table:'as_grupos',title:'Grupos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'servico_id',label:'Serviço',type:'ref',ref:'servicos_as'},{id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades_as'},
+    {id:'profissional',label:'Profissional'},{id:'publico',label:'Público'},{id:'data',label:'Data',type:'date'},{id:'horario',label:'Horário'},
+    {id:'participantes',label:'Participantes',type:'number'},{id:'frequencia',label:'Frequência (%)',type:'number'},{id:'atividades',label:'Atividades',span:2}
+  ],cols:['nome','publico','participantes','frequencia'],colLabels:['Nome','Público','Particip.','Freq.%'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  oficinas_as:{table:'as_oficinas',title:'Oficinas',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'tema',label:'Tema'},{id:'instrutor',label:'Instrutor'},{id:'local',label:'Local'},{id:'periodo',label:'Período'},
+    {id:'vagas',label:'Vagas',type:'number'},{id:'inscritos',label:'Inscritos',type:'number'},{id:'participantes',label:'Participantes',type:'number'},
+    {id:'frequencia',label:'Frequência (%)',type:'number'},{id:'resultado',label:'Resultado',span:3}
+  ],cols:['nome','inscritos','participantes','frequencia'],colLabels:['Nome','Inscritos','Particip.','Freq.%'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  cursos_as:{table:'as_cursos',title:'Cursos e Capacitações',fields:[
+    {id:'curso',label:'Curso',span:2,required:true},{id:'parceiro',label:'Parceiro'},{id:'instrutor',label:'Instrutor'},{id:'data',label:'Data',type:'date'},
+    {id:'carga_horaria',label:'Carga horária',type:'number'},{id:'vagas',label:'Vagas',type:'number'},{id:'inscritos',label:'Inscritos',type:'number'},
+    {id:'frequencia',label:'Frequência (%)',type:'number'},{id:'conclusao',label:'Concluintes',type:'number'},{id:'certificado',label:'Certificado',type:'checkbox'},{id:'custo',label:'Custo (R$)',type:'money'}
+  ],cols:['curso','data','inscritos','conclusao'],colLabels:['Curso','Data','Inscritos','Concluintes'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  publico_especifico_as:{table:'as_publico_especifico',title:'Crianças, Idosos, PCD, Mulheres e Gestantes',fields:[
+    {id:'pessoa_id',label:'Pessoa',type:'ref',ref:'pessoas_as'},
+    {id:'publico',label:'Público',type:'select',opts:[['crianca_adolescente','Criança/Adolescente'],['idoso','Idoso'],['pessoa_com_deficiencia','Pessoa com deficiência'],['mulher','Mulher'],['gestante','Gestante']]},
+    {id:'servico',label:'Serviço',span:2},{id:'participacao',label:'Participação',span:2},{id:'beneficio',label:'Benefício'},
+    {id:'encaminhamento',label:'Encaminhamento',span:2},{id:'acompanhamento',label:'Acompanhamento',span:2},{id:'data',label:'Data',type:'date'}
+  ],cols:['publico','servico','data'],colLabels:['Público','Serviço','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='publico'?pill(r.publico):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  documentacao_pessoal_as:{table:'as_documentacao_pessoal',title:'Documentação',fields:[
+    {id:'pessoa_id',label:'Pessoa',type:'ref',ref:'pessoas_as'},{id:'documento',label:'Documento',span:2,required:true},{id:'data',label:'Data',type:'date'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitado','Solicitado'],['encaminhado','Encaminhado'],['concluido','Concluído']]},{id:'encaminhamento',label:'Encaminhamento',span:2}
+  ],cols:['documento','data','situacao'],colLabels:['Documento','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  trabalho_renda_as:{table:'as_trabalho_renda',title:'Trabalho e Renda',fields:[
+    {id:'pessoa_id',label:'Pessoa',type:'ref',ref:'pessoas_as'},{id:'qualificacao',label:'Qualificação',span:2},{id:'profissao',label:'Profissão'},
+    {id:'interesse',label:'Interesse'},{id:'encaminhamento',label:'Encaminhamento',span:2},{id:'curso',label:'Curso'},{id:'vaga',label:'Vaga'},{id:'resultado',label:'Resultado',span:2}
+  ],cols:['profissao','interesse','resultado'],colLabels:['Profissão','Interesse','Resultado'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  habitacao_as:{table:'as_habitacao',title:'Habitação e Vulnerabilidade',fields:[
+    {id:'familia_id',label:'Família',type:'ref',ref:'familias_as'},{id:'demanda',label:'Demanda',span:2,required:true},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_analise','Em análise'],['encaminhado','Encaminhado'],['atendido','Atendido']]},
+    {id:'encaminhamento',label:'Encaminhamento',span:2},{id:'programa',label:'Programa'},{id:'documentacao',label:'Documentação'},{id:'resultado',label:'Resultado',span:2}
+  ],cols:['demanda','situacao'],colLabels:['Demanda','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  violencias_as:{table:'as_violencias',title:'Violências e Violações',fields:[
+    {id:'tipo',label:'Tipo',span:2,required:true},{id:'data',label:'Data',type:'date'},{id:'unidade_id',label:'Unidade',type:'ref',ref:'unidades_as'},
+    {id:'encaminhamento',label:'Encaminhamento',span:2},{id:'rede_atendimento',label:'Rede de atendimento',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['em_acompanhamento','Em acompanhamento'],['encerrado','Encerrado']]}
+  ],cols:['tipo','data','situacao'],colLabels:['Tipo','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  rede_atendimento_as:{table:'as_rede_atendimento',title:'Rede de Atendimento',fields:[
+    {id:'instituicao',label:'Instituição',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'responsavel',label:'Responsável'},{id:'contato',label:'Contato'},
+    {id:'endereco',label:'Endereço',span:2},{id:'servico',label:'Serviço'},{id:'tipo_encaminhamento',label:'Tipo de encaminhamento',span:2}
+  ],cols:['instituicao','tipo','responsavel'],colLabels:['Instituição','Tipo','Responsável'],
+  renderCol:(r,c)=>(r[c]||'—')},
+
+  conselho_tutelar_as:{table:'as_conselho_tutelar',title:'Conselho Tutelar (Encaminhamentos)',fields:[
+    {id:'data',label:'Data',type:'date'},{id:'origem',label:'Origem'},{id:'destino',label:'Destino'},{id:'motivo',label:'Motivo',span:2},
+    {id:'situacao',label:'Situação',type:'select',opts:[['encaminhado','Encaminhado'],['em_andamento','Em andamento'],['retorno_recebido','Retorno recebido']]}
+  ],cols:['data','origem','destino','situacao'],colLabels:['Data','Origem','Destino','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  convenios_as:{table:'as_convenios',title:'Convênios',fields:[
+    {id:'parceiro',label:'Parceiro',span:2,required:true},{id:'objeto',label:'Objeto',span:2},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'data_inicio',label:'Início',type:'date'},{id:'data_fim',label:'Término',type:'date'},{id:'contrapartida',label:'Contrapartida',span:2},{id:'responsavel',label:'Responsável'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['vencido','Vencido']]}
+  ],cols:['parceiro','valor','data_fim','situacao'],colLabels:['Parceiro','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data_fim.asc.nullslast'},
+
+  recursos_as:{table:'as_recursos',title:'Recursos',fields:[
+    {id:'origem',label:'Origem',span:2,required:true},{id:'programa',label:'Programa'},{id:'valor',label:'Valor (R$)',type:'money'},
+    {id:'finalidade',label:'Finalidade',span:2},{id:'executado',label:'Executado (R$)',type:'money'},{id:'saldo',label:'Saldo (R$)',type:'money'}
+  ],cols:['origem','valor','executado','saldo'],colLabels:['Origem','Valor','Executado','Saldo'],
+  renderCol:(r,c)=>['valor','executado','saldo'].includes(c)?money(r[c]):(r[c]||'—')},
+
+  financeiro_as:{table:'as_financeiro',title:'Financeiro',fields:[
+    {id:'tipo',label:'Tipo',type:'select',opts:[['receita','Receita'],['despesa','Despesa'],['empenho','Empenho'],['liquidacao','Liquidação'],['pagamento','Pagamento']],required:true},
+    {id:'descricao',label:'Descrição',span:2},{id:'valor',label:'Valor (R$)',type:'money'},{id:'programa',label:'Programa'},{id:'servico',label:'Serviço'},{id:'beneficio',label:'Benefício'},
+    {id:'fonte_recurso',label:'Fonte'},{id:'fornecedor',label:'Fornecedor'},{id:'contrato',label:'Contrato'},{id:'data',label:'Data',type:'date'}
+  ],cols:['data','tipo','descricao','valor'],colLabels:['Data','Tipo','Descrição','Valor'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  compras_as:{table:'as_compras',title:'Compras',fields:[
+    {id:'solicitacao',label:'Solicitação'},{id:'processo',label:'Processo'},{id:'item',label:'Item',span:2,required:true},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'cotacao',label:'Cotação (R$)',type:'money'},{id:'fornecedor',label:'Fornecedor'},
+    {id:'valor',label:'Valor (R$)',type:'money'},{id:'data',label:'Data',type:'date'},{id:'entrega',label:'Entrega',type:'date'},{id:'nota_fiscal',label:'Nota fiscal'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['solicitada','Solicitada'],['em_cotacao','Em cotação'],['empenhada','Empenhada'],['entregue','Entregue'],['cancelada','Cancelada']]}
+  ],cols:['item','fornecedor','valor','data','situacao'],colLabels:['Item','Fornecedor','Valor','Data','Situação'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data.desc.nullslast'},
+
+  contratos_as:{table:'as_contratos',title:'Contratos',fields:[
+    {id:'numero',label:'Nº contrato'},{id:'processo',label:'Processo'},{id:'fornecedor',label:'Fornecedor',required:true},{id:'cnpj',label:'CNPJ'},
+    {id:'objeto',label:'Objeto',span:3},{id:'valor',label:'Valor (R$)',type:'money'},{id:'data_inicio',label:'Início',type:'date'},{id:'data_fim',label:'Término',type:'date'},
+    {id:'fiscal',label:'Fiscal'},{id:'saldo',label:'Saldo (R$)',type:'money'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['vigente','Vigente'],['encerrado','Encerrado'],['aditado','Aditado'],['rescindido','Rescindido']]}
+  ],cols:['numero','fornecedor','valor','data_fim','situacao'],colLabels:['Nº','Fornecedor','Valor','Término','Situação'],
+  renderCol:(r,c)=>c==='data_fim'?fmtDate(r.data_fim):c==='valor'?money(r.valor):c==='situacao'?pill(r.situacao):(r[c]||'—')},
+
+  metas_as:{table:'as_metas',title:'Metas',fields:[
+    {id:'indicador',label:'Indicador',span:2,required:true},{id:'periodo',label:'Período'},{id:'meta_anual',label:'Meta anual',type:'number'},{id:'meta_mensal',label:'Meta mensal',type:'number'},
+    {id:'responsavel',label:'Responsável'},{id:'prazo',label:'Prazo',type:'date'},{id:'resultado',label:'Resultado',type:'number'},{id:'percentual',label:'% alcançado',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['atingida','Atingida'],['atencao','Atenção'],['abaixo','Abaixo da meta'],['em_andamento','Em andamento']]}
+  ],cols:['indicador','meta_mensal','resultado','percentual','situacao'],colLabels:['Indicador','Meta','Resultado','%','Situação'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao,{atingida:'Atingida',atencao:'Atenção',abaixo:'Abaixo',em_andamento:'Em andamento'}[r.situacao]):c==='percentual'?(r.percentual||0)+'%':(r[c]??'—')},
+
+  indicadores_as:{table:'as_indicadores',title:'Indicadores',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'descricao',label:'Descrição',span:3},{id:'formula',label:'Fórmula',span:2},{id:'fonte',label:'Fonte'},
+    {id:'periodicidade',label:'Periodicidade'},{id:'meta',label:'Meta',type:'number'},{id:'resultado',label:'Resultado',type:'number'},{id:'unidade_medida',label:'Unidade'},{id:'responsavel',label:'Responsável'}
+  ],cols:['nome','formula','periodicidade','meta','resultado'],colLabels:['Nome','Fórmula','Period.','Meta','Resultado'],
+  renderCol:(r,c)=>(r[c]??'—')},
+
+  documentos_as:{table:'as_documentos',title:'Documentos',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},{id:'descricao',label:'Descrição',span:2},
+    {id:'modulo',label:'Módulo'},{id:'url',label:'URL',span:2},{id:'data',label:'Data',type:'date'}
+  ],cols:['titulo','tipo','modulo','data'],colLabels:['Título','Tipo','Módulo','Data'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
+};
+
+const REF_TABLES={familias_as:'as_familias',pessoas_as:'as_pessoas',unidades_as:'as_unidades',servicos_as:'as_servicos'};
+const REF_LABEL_FIELD={familias_as:'responsavel_familiar',pessoas_as:'nome',unidades_as:'nome',servicos_as:'nome'};
+async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await sbGet(REF_TABLES[k],'select=id,'+REF_LABEL_FIELD[k]+'&order='+REF_LABEL_FIELD[k]+'.asc');caches[k]=d;return d;}catch(e){return[];}}
+
+function buildViews(){
+  let html='';
+  html+='<section class="view active" id="view-dashboard_as"><div class="topbar"><div><h1>Dashboard — Assistência Social</h1><div class="sub">Central Municipal de Gestão Social · dados agregados, nunca detalhes pessoais desnecessários</div></div><div><button class="btn-accent" onclick="gerarRelatorioMensal()">Gerar Relatório Mensal</button></div></div><div class="kpi-grid" id="dash-kpi"></div><div class="grid-2"><div class="panel"><h3>Benefícios por tipo</h3><div class="bars" id="dash-beneficios-bars"></div></div><div class="panel"><h3>Metas</h3><div id="dash-metas"></div></div></div><div class="grid-2"><div class="panel"><h3>O que está bom</h3><div id="dash-bom"></div></div><div class="panel"><h3>O que precisa de atenção</h3><div id="dash-atencao"></div></div></div><div class="grid-2"><div class="panel"><h3>CRAS</h3><div id="dash-cras"></div></div><div class="panel"><h3>Financeiro</h3><div id="dash-financeiro"></div></div></div><div class="panel"><h3>Alertas recentes</h3><div id="dash-alertas"></div></div></section>';
+  html+='<section class="view" id="view-secretaria_as"><div class="topbar"><div><h1>Secretaria de Assistência Social</h1></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="se-nome"></div><div class="field"><label>CNPJ</label><input id="se-cnpj"></div><div class="field"><label>Secretário(a)</label><input id="se-secretario"></div><div class="field"><label>Secretário(a) adjunto(a)</label><input id="se-secretario_adjunto"></div><div class="field"><label>Telefone</label><input id="se-telefone"></div><div class="field"><label>WhatsApp</label><input id="se-whatsapp"></div><div class="field"><label>E-mail</label><input id="se-email"></div><div class="field span-3"><label>Endereço</label><input id="se-endereco"></div><div class="field"><label>Horário</label><input id="se-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="se-orcamento" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="se-meta" inputmode="decimal"></div><div class="field span-3"><label>Responsáveis pelos setores</label><textarea id="se-responsaveis" rows="2"></textarea></div><div class="field span-3"><label>Observações</label><textarea id="se-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSec()" id="se-btn">Salvar</button></div></div></section>';
+  Object.keys(MODULES).forEach(key=>{const m=MODULES[key];
+    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
+    html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
+    html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="ft-'+key+'">Novo registro</h3><div class="form-grid">';
+    m.fields.forEach(f=>{const sp=f.span?'span-'+f.span:'';
+      if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" '+(f.default?'checked':'')+' style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
+      else if(f.type==='select'){html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'">';(f.opts||[]).forEach(([v,l])=>{html+='<option value="'+v+'">'+l+'</option>';});html+='</select></div>';}
+      else if(f.type==='ref')html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'"><option value="">Selecione...</option></select></div>';
+      else{const t=f.type==='money'?'text':f.type||'text';html+='<div class="field '+sp+'"><label>'+f.label+'</label><input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+(f.type==='money'?' inputmode="decimal"':'')+'></div>';}
+    });
+    html+='</div><div class="form-actions"><button class="btn-ghost" onclick="toggleForm(\''+key+'\')">Cancelar</button><button class="btn-accent" onclick="submitCrud(\''+key+'\')" id="sb-'+key+'">Salvar</button></div></div>';
+    html+='<div class="panel"><h3>Registros</h3><p class="panel-sub" id="cnt-'+key+'"></p><div style="overflow-x:auto;"><table><thead><tr>';
+    m.colLabels.forEach(l=>{html+='<th>'+l+'</th>';});
+    html+='<th></th></tr></thead><tbody id="tbl-'+key+'"></tbody></table></div></div></section>';
+  });
+  html+='<section class="view" id="view-relatorios_as"><div class="topbar"><div><h1>Relatórios</h1></div></div><div class="panel"><h3>Exportar relatórios</h3><p class="panel-sub">Relatórios com dados pessoais exigem permissões específicas — acesso já restrito à equipe da secretaria.</p><div class="form-grid">';
+  Object.keys(MODULES).forEach(k=>{html+='<div class="field"><button class="btn-ghost" style="width:100%;" onclick="exportPdf(\''+k+'\')">'+MODULES[k].title+' (PDF)</button></div>';});
+  html+='</div></div></section>';
+  html+='<section class="view" id="view-qualidade_as"><div class="topbar"><div><h1>Qualidade dos Dados</h1><div class="sub">Cadastros incompletos, pendências e indicadores sem dados suficientes — nada aqui é inventado</div></div></div><div class="panel"><div id="qualidade-lista"></div></div></section>';
+  html+='<section class="view" id="view-alertas_as"><div class="topbar"><div><h1>Alertas</h1></div></div><div id="alertas-list"></div></section>';
+  html+='<section class="view" id="view-auditoria_as"><div class="topbar"><div><h1>Auditoria</h1></div></div><div class="panel"><h3>Registros de auditoria</h3><p class="panel-sub" id="cnt-audit"></p><div style="overflow-x:auto;"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Módulo</th></tr></thead><tbody id="tbl-audit"></tbody></table></div></div></section>';
+  html+='<section class="view" id="view-config_as"><div class="topbar"><div><h1>Configurações</h1></div></div><div class="panel"><h3>Configurações do módulo</h3><p class="panel-sub">Configurações gerais em breve.</p></div></section>';
+  document.getElementById('main-content').innerHTML=html;
+}
+
+let editingId={};
+function toggleForm(k){const p=document.getElementById('form-'+k);const o=p.style.display==='none';p.style.display=o?'block':'none';if(o&&!editingId[k]){clearForm(k);document.getElementById('ft-'+k).textContent='Novo registro';document.getElementById('sb-'+k).textContent='Salvar';loadRefs(k);}if(!o)editingId[k]=null;}
+function clearForm(k){MODULES[k].fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!f.default;else if(f.type==='select')el.selectedIndex=0;else el.value='';});}
+async function loadRefs(k){for(const f of MODULES[k].fields){if(f.type!=='ref')continue;const sel=document.getElementById('cf-'+k+'-'+f.id);const opts=await loadRefOptions(f.ref);const lbl=REF_LABEL_FIELD[f.ref];sel.innerHTML='<option value="">Selecione...</option>'+opts.map(o=>'<option value="'+o.id+'">'+o[lbl]+'</option>').join('');}}
+async function submitCrud(k){const m=MODULES[k],data={tenant_id:tid()};m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;let v;if(f.type==='checkbox')v=el.checked;else if(f.type==='money')v=parseMoney(el.value);else if(f.type==='number')v=el.value?Number(el.value):null;else if(f.type==='ref')v=el.value||null;else v=el.value.trim()||null;data[f.id]=v;});const btn=document.getElementById('sb-'+k);btn.disabled=true;try{if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+async function editCrud(k,id){const m=MODULES[k];try{const rows=await sbGet(m.table,'id=eq.'+id);const r=rows[0];if(!r)return;editingId[k]=id;document.getElementById('form-'+k).style.display='block';document.getElementById('ft-'+k).textContent='Editar registro';document.getElementById('sb-'+k).textContent='Salvar alterações';await loadRefs(k);m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!r[f.id];else el.value=r[f.id]??'';});}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function deleteCrud(k,id){if(!confirm('Excluir?'))return;try{await sbDel(MODULES[k].table,'id=eq.'+id);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
+
+function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)return;const n=data.length;let h='<div class="kpi"><div class="ico">Total</div><div class="num">'+n+'</div><div class="lbl">registros</div></div>';
+  if(k==='familias_as'){const at=data.filter(r=>r.situacao==='ativa').length;const acomp=data.filter(r=>r.em_acompanhamento).length;h+='<div class="kpi"><div class="ico">Ativas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">famílias</div></div><div class="kpi"><div class="ico">Em acompanhamento</div><div class="num">'+acomp+'</div><div class="lbl">famílias</div></div>';}
+  else if(k==='beneficios_as'){const conc=data.filter(r=>r.situacao==='concedido').length;const val=data.reduce((s,r)=>s+(Number(r.valor_quantidade)||0),0);h+='<div class="kpi"><div class="ico">Concedidos</div><div class="num" style="color:var(--ok);">'+conc+'</div><div class="lbl">benefícios</div></div><div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">total</div></div>';}
+  else if(k==='atendimentos_as'){const conc=data.filter(r=>r.situacao==='concluido').length;h+='<div class="kpi"><div class="ico">Concluídos</div><div class="num" style="color:var(--ok);">'+conc+'</div><div class="lbl">atendimentos</div></div>';}
+  else if(k==='acompanhamentos_as'){const at=data.filter(r=>r.situacao==='ativo').length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">acompanhamentos</div></div>';}
+  else if(k==='encaminhamentos_as'){const pend=data.filter(r=>r.situacao==='pendente').length;h+='<div class="kpi"><div class="ico">Pendentes</div><div class="num" style="color:var(--warn);">'+pend+'</div><div class="lbl">encaminhamentos</div></div>';}
+  else if(k==='estoque_as'){const baixo=data.filter(r=>r.quantidade!=null&&r.estoque_minimo!=null&&Number(r.quantidade)<=Number(r.estoque_minimo)).length;h+='<div class="kpi"><div class="ico">Estoque baixo</div><div class="num" style="color:var(--danger);">'+baixo+'</div><div class="lbl">itens</div></div>';}
+  else if(k==='cadastro_unico_as'){const desat=data.filter(r=>r.situacao==='desatualizado').length;h+='<div class="kpi"><div class="ico">Desatualizados</div><div class="num" style="color:var(--warn);">'+desat+'</div><div class="lbl">cadastros</div></div>';}
+  else if(k==='metas_as'){const at=data.filter(r=>r.situacao==='atingida').length;const ab=data.filter(r=>r.situacao==='abaixo').length;h+='<div class="kpi"><div class="ico">Atingidas</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">metas</div></div><div class="kpi"><div class="ico">Abaixo</div><div class="num" style="color:var(--danger);">'+ab+'</div><div class="lbl">metas</div></div>';}
+  else if(k==='contratos_as'){const vig=data.filter(r=>r.situacao==='vigente').length;const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);h+='<div class="kpi"><div class="ico">Vigentes</div><div class="num">'+vig+'</div><div class="lbl">contratos</div></div><div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">total</div></div>';}
+  el.innerHTML=h;}
+
+async function loadDashboard(){try{
+  const [fam,pes,atend,acomp,vis,enc,ben,cras,fin,met,al]=await Promise.all([
+    sbGet('as_familias','select=id,situacao,em_acompanhamento').catch(()=>[]),
+    sbGet('as_pessoas','select=id,situacao').catch(()=>[]),
+    sbGet('as_atendimentos','select=id,situacao').catch(()=>[]),
+    sbGet('as_acompanhamentos','select=id,situacao').catch(()=>[]),
+    sbGet('as_visitas','select=id').catch(()=>[]),
+    sbGet('as_encaminhamentos','select=id,situacao').catch(()=>[]),
+    sbGet('as_beneficios','select=id,tipo,situacao,valor_quantidade').catch(()=>[]),
+    sbGet('as_cras','select=id').catch(()=>[]),
+    sbGet('as_financeiro','select=id,tipo,valor').catch(()=>[]),
+    sbGet('as_metas','select=id,situacao,indicador,percentual').catch(()=>[]),
+    sbGet('as_alertas','select=*&lido=eq.false&order=criado_em.desc&limit=10').catch(()=>[]),
+  ]);
+  const famAt=fam.filter(f=>f.situacao==='ativa').length;const famAcomp=fam.filter(f=>f.em_acompanhamento).length;
+  const pesAt=pes.filter(p=>p.situacao==='ativo').length;
+  const atendConc=atend.filter(a=>a.situacao==='concluido').length;
+  const acompAt=acomp.filter(a=>a.situacao==='ativo').length;
+  const encPend=enc.filter(e=>e.situacao==='pendente').length;
+  const benConc=ben.filter(b=>b.situacao==='concedido').length;
+  const despesa=fin.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+(Number(f.valor)||0),0);
+  document.getElementById('dash-kpi').innerHTML=[
+    ['Famílias atendidas',famAt,'ativas'],['Pessoas atendidas',pesAt,'ativas'],
+    ['Atendimentos',atendConc,'concluídos'],['Acompanhamentos',acompAt,'ativos'],
+    ['Visitas domiciliares',vis.length,'realizadas'],['Encaminhamentos pendentes',encPend,'aguardando'],
+    ['Benefícios concedidos',benConc,'no total'],['CRAS',cras.length,'unidades'],
+    ['Famílias em acompanhamento',famAcomp,'famílias'],['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+'/'+met.length,'metas'],
+  ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
+  const porTipo={};ben.forEach(b=>{if(!b.tipo)return;porTipo[b.tipo]=(porTipo[b.tipo]||0)+1;});
+  const maxT=Math.max(1,...Object.values(porTipo));
+  document.getElementById('dash-beneficios-bars').innerHTML=Object.keys(porTipo).length?Object.entries(porTipo).map(([t,v])=>'<div class="bar-row"><span>'+t+'</span><div class="bar-track"><div class="bar-fill bar-fill-royal" style="width:'+Math.round(v/maxT*100)+'%"></div></div><span class="val">'+v+'</span></div>').join(''):semDados();
+  document.getElementById('dash-metas').innerHTML=met.length?met.slice(0,8).map(m=>{const ico=m.situacao==='atingida'?'🟢':m.situacao==='atencao'?'🟡':'🔴';const cor=m.situacao==='atingida'?'ok':m.situacao==='atencao'?'warn':'danger';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;"><span>'+ico+'</span><span style="flex:1;">'+m.indicador+'</span><span style="font-weight:700;color:var(--'+cor+');">'+(m.percentual||0)+'%</span></div>';}).join(''):semDados();
+  const bom=[],atencao=[];
+  if(encPend===0&&enc.length)bom.push('Sem encaminhamentos pendentes');else if(encPend)atencao.push(encPend+' encaminhamentos pendentes');
+  if(met.filter(m=>m.situacao==='abaixo').length)atencao.push(met.filter(m=>m.situacao==='abaixo').length+' metas abaixo do esperado');else if(met.length)bom.push('Nenhuma meta abaixo do esperado');
+  document.getElementById('dash-bom').innerHTML=bom.length?bom.map(b=>'<div class="diag diag-ok">🟢 '+b+'</div>').join(''):semDados();
+  document.getElementById('dash-atencao').innerHTML=atencao.length?atencao.map(a=>'<div class="diag diag-warn">🟡 '+a+'</div>').join(''):'<div class="diag diag-ok">🟢 Tudo dentro do esperado.</div>';
+  document.getElementById('dash-cras').innerHTML=cras.length?('<div style="padding:10px;background:#ECFEFF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+cras.length+'</div><div style="font-size:11px;color:var(--ink-soft);">Unidades CRAS cadastradas</div></div>'):semDados();
+  document.getElementById('dash-financeiro').innerHTML=fin.length?('<div style="padding:10px;background:#FEF2F2;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--danger);">'+moneyShort(despesa)+'</div><div style="font-size:11px;color:var(--ink-soft);">Despesas no total</div></div>'):semDados();
+  document.getElementById('dash-alertas').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'">'+ico+' '+a.mensagem+'</div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum alerta.</p>';
+}catch(e){document.getElementById('dash-kpi').innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,200)+'</div>';}}
+
+let secId=null;
+async function loadSec(){try{const rows=await sbGet('as_secretaria','select=*&limit=1');if(rows.length){const s=rows[0];secId=s.id;['nome','cnpj','secretario','secretario_adjunto','telefone','whatsapp','email','endereco'].forEach(f=>{const el=document.getElementById('se-'+f);if(el)el.value=s[f]||'';});document.getElementById('se-horario').value=s.horario_atendimento||'';document.getElementById('se-orcamento').value=s.orcamento_anual||'';document.getElementById('se-meta').value=s.meta_anual||'';document.getElementById('se-responsaveis').value=s.responsaveis_setores||'';document.getElementById('se-obs').value=s.observacoes||'';}}catch(e){}}
+async function salvarSec(){const data={tenant_id:tid(),nome:document.getElementById('se-nome').value.trim()||'Secretaria Municipal de Assistência Social',cnpj:document.getElementById('se-cnpj').value.trim()||null,secretario:document.getElementById('se-secretario').value.trim()||null,secretario_adjunto:document.getElementById('se-secretario_adjunto').value.trim()||null,telefone:document.getElementById('se-telefone').value.trim()||null,whatsapp:document.getElementById('se-whatsapp').value.trim()||null,email:document.getElementById('se-email').value.trim()||null,endereco:document.getElementById('se-endereco').value.trim()||null,horario_atendimento:document.getElementById('se-horario').value.trim()||null,orcamento_anual:parseMoney(document.getElementById('se-orcamento').value),meta_anual:parseMoney(document.getElementById('se-meta').value),responsaveis_setores:document.getElementById('se-responsaveis').value.trim()||null,observacoes:document.getElementById('se-obs').value.trim()||null,atualizado_em:new Date().toISOString()};const btn=document.getElementById('se-btn');btn.disabled=true;try{if(secId){await sbPatch('as_secretaria','id=eq.'+secId,data);}else{const r=await sbPost('as_secretaria',data);secId=r[0].id;}alert('Salvo!');}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+
+async function loadAlertas(){try{const al=await sbGet('as_alertas','select=*&order=criado_em.desc');document.getElementById('alertas-list').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'" style="display:flex;justify-content:space-between;align-items:center;">'+ico+' '+a.mensagem+(a.lido?'':' <button class="btn-ghost" style="font-size:10px;padding:3px 8px;" onclick="marcarLido(\''+a.id+'\')">Lido</button>')+'</div>';}).join(''):'<div class="panel"><p style="color:var(--muted);text-align:center;padding:30px;">Nenhum alerta.</p></div>';}catch(e){}}
+async function marcarLido(id){try{await sbPatch('as_alertas','id=eq.'+id,{lido:true});loadAlertas();}catch(e){}}
+
+async function loadAuditoria(){try{const rows=await sbGet('as_auditoria','select=*&order=data.desc&limit=100');document.getElementById('cnt-audit').textContent=rows.length+' registro(s)';document.getElementById('tbl-audit').innerHTML=rows.length?rows.map(r=>'<tr><td>'+new Date(r.data).toLocaleString('pt-BR')+'</td><td>'+(r.usuario||'—')+'</td><td>'+(r.acao||'—')+'</td><td>'+(r.modulo||'—')+'</td></tr>').join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Sem registros.</td></tr>';}catch(e){}}
+
+async function loadQualidade(){
+  const el=document.getElementById('qualidade-lista');el.innerHTML='<p style="color:var(--muted);font-size:12px;">Carregando...</p>';
+  try{
+    const checks=[
+      ['Famílias sem endereço definido','as_familias','endereco=is.null'],
+      ['Pessoas sem família vinculada','as_pessoas','familia_id=is.null'],
+      ['Cadastros únicos desatualizados','as_cadastro_unico','situacao=eq.desatualizado'],
+      ['Encaminhamentos sem prazo definido','as_encaminhamentos','prazo=is.null'],
+      ['Contratos sem data de término','as_contratos','data_fim=is.null'],
+    ];
+    const results=await Promise.all(checks.map(([label,table,q])=>sbGet(table,'select=id&'+q).then(d=>[label,d.length]).catch(()=>[label,null])));
+    el.innerHTML='<table><thead><tr><th>Verificação</th><th>Pendências</th></tr></thead><tbody>'+
+      results.map(([label,n])=>'<tr><td>'+label+'</td><td>'+(n===null?'Dados insuficientes para cálculo':(n===0?'<span class="status-pill status-ativo">Ok</span>':'<span class="status-pill status-pendente">'+n+' pendente(s)</span>')) +'</td></tr>').join('')+
+      '</tbody></table>';
+  }catch(e){el.innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,150)+'</div>';}
+}
+
+function exportPdf(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFontSize(16);doc.text(m.title+' — Conecta Gestão Assistência Social',14,18);doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,26);const rows=data.map(r=>m.cols.map(c=>{const v=m.renderCol(r,c);return String(v).replace(/<[^>]+>/g,'');}));doc.autoTable({head:[m.colLabels],body:rows,startY:32,styles:{fontSize:9},headStyles:{fillColor:[14,116,144]}});doc.save(k+'_assistencia_social.pdf');}
+function exportXlsx(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const rows=data.map(r=>{const o={};m.cols.forEach((c,i)=>{o[m.colLabels[i]]=String(m.renderCol(r,c)).replace(/<[^>]+>/g,'');});return o;});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,m.title.slice(0,31));XLSX.writeFile(wb,k+'_assistencia_social.xlsx');}
+
+async function gerarRelatorioMensal(){
+  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');let y=20;
+  doc.setFontSize(18);doc.text('Relatório Mensal — Assistência Social',14,y);y+=10;
+  doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,y);y+=12;
+  try{
+    const [fam,pes,atend,cras,acomp,vis,ba,ben,prog,grp,ofc,enc,fin,met]=await Promise.all([
+      sbGet('as_familias','select=id,situacao,em_acompanhamento').catch(()=>[]),
+      sbGet('as_pessoas','select=id,situacao').catch(()=>[]),
+      sbGet('as_atendimentos','select=id,situacao').catch(()=>[]),
+      sbGet('as_cras','select=id').catch(()=>[]),
+      sbGet('as_acompanhamentos','select=id,situacao').catch(()=>[]),
+      sbGet('as_visitas','select=id').catch(()=>[]),
+      sbGet('as_busca_ativa','select=id').catch(()=>[]),
+      sbGet('as_beneficios','select=id,situacao').catch(()=>[]),
+      sbGet('as_programas','select=id').catch(()=>[]),
+      sbGet('as_grupos','select=id').catch(()=>[]),
+      sbGet('as_oficinas','select=id').catch(()=>[]),
+      sbGet('as_encaminhamentos','select=id,situacao').catch(()=>[]),
+      sbGet('as_financeiro','select=id,tipo,valor').catch(()=>[]),
+      sbGet('as_metas','select=id,situacao').catch(()=>[]),
+    ]);
+    const items=[
+      ['Famílias ativas',fam.filter(f=>f.situacao==='ativa').length],['Famílias em acompanhamento',fam.filter(f=>f.em_acompanhamento).length],
+      ['Pessoas ativas',pes.filter(p=>p.situacao==='ativo').length],['CRAS',cras.length],
+      ['Atendimentos concluídos',atend.filter(a=>a.situacao==='concluido').length],['Acompanhamentos ativos',acomp.filter(a=>a.situacao==='ativo').length],
+      ['Visitas domiciliares',vis.length],['Famílias identificadas na busca ativa',ba.length],
+      ['Benefícios concedidos',ben.filter(b=>b.situacao==='concedido').length],['Programas',prog.length],
+      ['Grupos',grp.length],['Oficinas',ofc.length],['Encaminhamentos pendentes',enc.filter(e=>e.situacao==='pendente').length],
+      ['Despesas',moneyShort(fin.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+(Number(f.valor)||0),0))],
+      ['Metas atingidas',met.filter(m=>m.situacao==='atingida').length+' de '+met.length],
+    ];
+    doc.autoTable({head:[['Indicador','Valor']],body:items,startY:y,styles:{fontSize:10},headStyles:{fillColor:[14,116,144]}});
+    doc.save('relatorio_mensal_assistencia_social.pdf');
+    alert('Relatório mensal gerado!');
+  }catch(e){alert('Erro: '+e.message.slice(0,200));}
+}
+
+const LOADERS={dashboard_as:loadDashboard,secretaria_as:loadSec,alertas_as:loadAlertas,auditoria_as:loadAuditoria,qualidade_as:loadQualidade};
+Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>loadData(k);});
+</script>
+<div style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>

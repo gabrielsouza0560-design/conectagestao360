@@ -968,6 +968,7 @@
               <option value="controladoria">Controladoria</option>
               <option value="vice_prefeito">Vice-Prefeito</option>
               <option value="prefeito">Prefeito</option>
+              <option value="chefe_de_gabinete">Chefe de Gabinete</option>
               <option value="admin_master">Administrador Master</option>
             </select>
           </div>
@@ -993,6 +994,7 @@
               <option value="controladoria">Controladoria</option>
               <option value="vice_prefeito">Vice-Prefeito</option>
               <option value="prefeito">Prefeito</option>
+              <option value="chefe_de_gabinete">Chefe de Gabinete</option>
               <option value="admin_master">Administrador Master</option>
             </select>
           </div>
@@ -1191,9 +1193,9 @@ function enterApp(){
   const perfil = session.claims.perfil;
   document.getElementById('role-display').textContent = perfil ? perfil.replace('_',' ') : 'perfil não definido';
 
-  const isAdmin = perfil === 'admin_master';
-  const canManagePromessas = ['admin_master','prefeito'].indexOf(perfil) !== -1;
-  const canSeeDashboardPrefeito = ['admin_master','prefeito','vice_prefeito','controladoria'].indexOf(perfil) !== -1;
+  const isAdmin = ['admin_master','prefeito','chefe_de_gabinete'].indexOf(perfil) !== -1;
+  const canManagePromessas = ['admin_master','prefeito','chefe_de_gabinete'].indexOf(perfil) !== -1;
+  const canSeeDashboardPrefeito = ['admin_master','prefeito','chefe_de_gabinete','vice_prefeito','controladoria'].indexOf(perfil) !== -1;
   const nav = document.getElementById('nav-container');
   nav.innerHTML = '<div class="nav-group"><div class="nav-group-label">Menu</div>' +
     '<button class="nav-item active" data-key="dashboard" onclick="navigateTo(\'dashboard\')"><span>Dashboard</span></button>' +
@@ -1205,9 +1207,7 @@ function enterApp(){
     '<button class="nav-item" data-key="galeria" onclick="navigateTo(\'galeria\')"><span>Galeria</span></button>' +
     '<button class="nav-item" data-key="importar" onclick="navigateTo(\'importar\')"><span>Importar Dados (PR)</span></button>' +
     (canManagePromessas ? '<button class="nav-item" data-key="promessas" onclick="navigateTo(\'promessas\')"><span>Plano de Governo</span></button>' : '') +
-    '<a class="nav-item" href="conecta-gestao-saude.html" target="_blank"><span>🏥 Saúde ↗</span></a>' +
-    '<a class="nav-item" href="conecta-gestao-industria-comercio.html" target="_blank"><span>🏭 Indústria e Comércio ↗</span></a>' +
-    '<a class="nav-item" href="conecta-gestao-educacao.html" target="_blank"><span>🎓 Educação ↗</span></a>' +
+    '<span id="nav-modulos-secretaria"></span>' +
     (canSeeDashboardPrefeito ? '<a class="nav-item" href="conecta-gestao-dashboard-prefeito.html" target="_blank"><span>Dashboard do Prefeito ↗</span></a>' : '') +
     (canSeeDashboardPrefeito ? '<button class="nav-item" data-key="livro" onclick="navigateTo(\'livro\')"><span>Livro da Gestão</span></button>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="secretarias" onclick="navigateTo(\'secretarias\')"><span>Secretarias</span></button>' : '') +
@@ -1242,7 +1242,38 @@ function enterApp(){
     loadAuditoria();
     loadIndicadores();
   }
+  carregarModulosSecretaria(perfil);
   navigateTo('dashboard');
+}
+
+// Módulos dedicados por secretaria: só aparecem pra Admin Master / Prefeito / Chefe de Gabinete
+// (acesso total) ou pra quem é da própria secretaria — cada link abre um app separado com login próprio.
+const MODULOS_SECRETARIA = [
+  { padrao: /sa[uú]de/i, href: 'conecta-gestao-saude.html', label: '🏥 Saúde ↗' },
+  { padrao: /ind[uú]stria/i, href: 'conecta-gestao-industria-comercio.html', label: '🏭 Indústria e Comércio ↗' },
+  { padrao: /educa[cç][aã]o/i, href: 'conecta-gestao-educacao.html', label: '🎓 Educação ↗' },
+  { padrao: /^esporte$/i, href: 'conecta-gestao-esporte.html', label: '⚽ Esporte ↗' },
+  { padrao: /agricultura/i, href: 'conecta-gestao-agricultura.html', label: '🌾 Agricultura ↗' },
+  { padrao: /^cultura$/i, href: 'conecta-gestao-cultura.html', label: '🎭 Cultura ↗' },
+  { padrao: /assist.ncia social/i, href: 'conecta-gestao-assistencia-social.html', label: '🤝 Assistência Social ↗' },
+  { padrao: /meio ambiente/i, href: 'conecta-gestao-meio-ambiente.html', label: '🌳 Meio Ambiente ↗' },
+];
+
+async function carregarModulosSecretaria(perfil){
+  const slot = document.getElementById('nav-modulos-secretaria');
+  if(!slot) return;
+  const gestaoTotal = ['admin_master','prefeito','chefe_de_gabinete'].indexOf(perfil) !== -1;
+  let minhaSecretariaNome = '';
+  if(!gestaoTotal && session.claims.secretaria_id){
+    try {
+      const secs = await sbGet('secretarias', 'select=nome&id=eq.' + session.claims.secretaria_id);
+      minhaSecretariaNome = (secs[0] && secs[0].nome) || '';
+    } catch (e) { minhaSecretariaNome = ''; }
+  }
+  slot.innerHTML = MODULOS_SECRETARIA
+    .filter(m => gestaoTotal || m.padrao.test(minhaSecretariaNome))
+    .map(m => '<a class="nav-item" href="' + m.href + '" target="_blank"><span>' + m.label + '</span></a>')
+    .join('');
 }
 
 let currentUsuarioId = null;
