@@ -17,16 +17,21 @@
 <script src="/pwa-register.js" defer></script>
 <style>
   :root{
-    --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0F172A;
+    --azul-escuro:#0B2A5B; --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0B2A5B;
+    --verde:#16A34A; --verde-claro:#4ADE80; --amarelo:#F5B400;
     --bg:#F8FAFC; --ink:#0F172A; --ink-soft:#475569; --line:rgba(15,23,42,.08);
-    --ok:#059669; --danger:#DC2626;
+    --ok:#059669; --danger:#DC2626; --radius-lg:24px;
+    --ease:cubic-bezier(.22,1,.36,1);
     --sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   }
   *{box-sizing:border-box;}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
   body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-  .card{width:100%;max-width:440px;background:#fff;border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.08);overflow:hidden;}
+  .card{width:100%;max-width:440px;background:#fff;border-radius:var(--radius-lg);box-shadow:0 8px 24px rgba(15,23,42,.08);overflow:hidden;}
   .head{background:linear-gradient(150deg,var(--darkblue),var(--royal));color:#fff;padding:32px;text-align:center;}
-  .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;margin:0 auto 14px;box-shadow:0 4px 14px rgba(37,99,235,.4);}
+  .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--royal),var(--verde));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;margin:0 auto 14px;box-shadow:0 4px 14px rgba(37,99,235,.4);}
+  .brand-conecta{color:var(--light);}
+  .brand-gestao{color:var(--verde-claro);}
   .head h1{font-size:19px;margin:0 0 6px;font-weight:800;}
   .head p{font-size:12.5px;color:#B6C4DD;margin:0;}
   .body{padding:28px;}
@@ -34,7 +39,8 @@
   .field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
   .field input, .field select{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;font-family:var(--sans);}
   .field input:focus, .field select:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
-  .btn{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;}
+  .btn{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;transition:transform .18s var(--ease),box-shadow .18s var(--ease);}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(37,99,235,.3);}
   .btn:disabled{opacity:.6;}
   .msg{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:12.5px;line-height:1.6;display:none;}
   .msg.show{display:block;}
@@ -48,7 +54,7 @@
 <div class="card">
   <div class="head">
     <div class="logo">CG</div>
-    <h1>Criar conta — Conecta Gestão</h1>
+    <h1>Criar conta — <span class="brand-conecta">Conecta</span> <span class="brand-gestao">Gestão</span></h1>
     <p>Cadastro de servidores da prefeitura</p>
   </div>
   <div class="body">

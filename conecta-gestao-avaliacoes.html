@@ -17,7 +17,7 @@
 <script src="/pwa-register.js" defer></script>
 <style>
   :root{
-    --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0F172A;
+    --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0B2A5B;--azul-escuro:#0B2A5B;--verde:#16A34A;--verde-claro:#4ADE80;--amarelo:#F5B400;--radius-lg:24px;--shadow-md:0 4px 14px rgba(15,23,42,.07), 0 1px 3px rgba(15,23,42,.05);--ease:cubic-bezier(.22,1,.36,1);
     --bg:#F8FAFC; --surface:#FFFFFF; --ink:#0F172A; --ink-soft:#475569; --line:rgba(15,23,42,.08);
     --ok:#059669; --danger:#DC2626; --muted:#94A3B8; --radius:18px;
     --sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -27,6 +27,9 @@
   *{box-sizing:border-box;}
   body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}
   button{font-family:inherit;cursor:pointer;}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
+  .brand-conecta{color:var(--light);}
+  .brand-gestao{color:var(--verde-claro);}
 
   .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4);}
 
@@ -47,7 +50,7 @@
 
   .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:26px;}
   @media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
-  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow-sm);}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow-sm);transition:transform .2s var(--ease),box-shadow .2s var(--ease);}.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
   .kpi .num{font-size:25px;color:var(--ink);font-weight:800;}
   .kpi .lbl{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
   .kpi.elogio .num{color:var(--ok);}
@@ -56,7 +59,7 @@
   .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;margin-bottom:22px;}
   @media(max-width:960px){.grid-2{grid-template-columns:1fr;}}
 
-  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:22px;box-shadow:var(--shadow-sm);}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px;margin-bottom:22px;box-shadow:var(--shadow-sm);transition:box-shadow .2s var(--ease);}
   .panel h3{font-size:16px;margin:0 0 4px;font-weight:800;}
   .panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 18px;}
 
@@ -102,7 +105,7 @@
 <header>
   <div class="hd-left">
     <div class="logo">CG</div>
-    <div class="name">Conecta Gestão<small>Painel Interno das Avaliações</small></div>
+    <div class="name"><span class="brand-conecta">Conecta</span> <span class="brand-gestao">Gestão</span><small>Painel Interno das Avaliações</small></div>
   </div>
   <div class="hd-role">Prefeito · Regina Salgado</div>
 </header>
