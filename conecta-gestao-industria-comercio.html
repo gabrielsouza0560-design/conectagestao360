@@ -116,6 +116,7 @@ const COMERCIO_SYNC={
   prestadores:{table:'prestadores',query:'select=id,nome,servico,whatsapp,status,endereco,descricao&status=eq.aprovado&order=criado_em.desc&limit=100',cols:['nome','servico','whatsapp','status'],labels:['Nome','Serviço','WhatsApp','Status']},
   vagas:{table:'vagas',query:'select=id,cargo,salario,cidade,status,requisitos&status=eq.aberta&order=criado_em.desc&limit=100',cols:['cargo','salario','cidade','status'],labels:['Cargo','Salário','Cidade','Status']},
   cursos:{table:'cursos',query:'select=id,titulo,origem,local,descricao&order=titulo.asc&limit=100',cols:['titulo','origem','local','descricao'],labels:['Título','Origem','Local','Descrição']},
+  eventos_ic:{table:'eventos_calendario',query:'select=id,titulo,tipo,data_inicio,local,descricao&order=data_inicio.desc&limit=100',cols:['titulo','tipo','data_inicio','local'],labels:['Título','Tipo','Data','Local']},
 };
 // Converte um registro do Conecta Comércio no formato de cadastro local (ic_*), pra virar editável com 1 clique.
 const COMERCIO_IMPORT_MAP={
@@ -123,6 +124,7 @@ const COMERCIO_IMPORT_MAP={
   prestadores:r=>({atividade:r.servico,responsavel:r.nome,endereco:r.endereco||null,telefone:r.whatsapp||null,situacao:'ativo'}),
   vagas:r=>({cargo:r.cargo,requisitos:r.requisitos||null,salario:parseMoney(r.salario)||null,situacao:r.status==='aberta'?'aberta':'preenchida'}),
   cursos:r=>({nome:r.titulo,categoria:r.origem||null,instituicao:r.origem||null,resultado:r.descricao||null}),
+  eventos_ic:r=>({nome:r.titulo,tipo:r.tipo||null,data:r.data_inicio||null,local:r.local||null,resultado:r.descricao||null}),
 };
 let comercioCache={};
 async function loadComercioSyncTable(key){
@@ -131,9 +133,48 @@ async function loadComercioSyncTable(key){
   try{
     const rows=await sbGetComercio(cfg.table,cfg.query);
     comercioCache[key]=rows;
-    tb.innerHTML=rows.length?rows.map((r,i)=>'<tr>'+cfg.cols.map(c=>'<td>'+(c==='data_evento'?fmtDate(r[c]):(r[c]||'—'))+'</td>').join('')+'<td><button class="btn-ghost" style="padding:4px 8px;font-size:11px;" id="imp-'+key+'-'+i+'" onclick="importarComercio(\''+key+'\','+i+')">Importar</button></td></tr>').join(''):'<tr><td colspan="'+(cfg.labels.length+1)+'" style="text-align:center;color:var(--muted);padding:16px;">Nada cadastrado no Conecta Comércio ainda.</td></tr>';
+    tb.innerHTML=rows.length?rows.map((r,i)=>'<tr>'+cfg.cols.map(c=>'<td>'+((c==='data_evento'||c==='data_inicio')?fmtDate(r[c]):(r[c]||'—'))+'</td>').join('')+'<td><button class="btn-ghost" style="padding:4px 8px;font-size:11px;" id="imp-'+key+'-'+i+'" onclick="importarComercio(\''+key+'\','+i+')">Importar</button></td></tr>').join(''):'<tr><td colspan="'+(cfg.labels.length+1)+'" style="text-align:center;color:var(--muted);padding:16px;">Nada cadastrado no Conecta Comércio ainda.</td></tr>';
   }catch(e){
     tb.innerHTML='<tr><td colspan="'+(cfg.labels.length+1)+'" style="color:var(--danger);">Não foi possível conectar ao Conecta Comércio.</td></tr>';
+  }
+}
+// Feira do Empreendedor, Sala do Empreendedor e Fomento Paraná não têm uma lista de registros
+// no Conecta Comércio pra importar linha a linha (só config/links públicos) — mostram como referência ao vivo.
+async function loadFeiraInfo(){
+  const el=document.getElementById('feira-comercio-info');
+  if(!el)return;
+  try{
+    const[cfg,feirantes]=await Promise.all([
+      sbGetComercio('feira_config','select=dia,horario,local&id=eq.1'),
+      sbGetComercio('feirantes','select=id&status=eq.aprovado'),
+    ]);
+    const c=cfg[0]||{};
+    el.innerHTML='<p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;">'+(c.dia||'—')+' · '+(c.horario||'—')+' · '+(c.local||'—')+' — '+feirantes.length+' feirante(s) aprovado(s) no Conecta Comércio</p><button class="btn-ghost" onclick="importarFeiraComercio()">Importar como nova feira</button>';
+  }catch(e){
+    el.innerHTML='<p style="color:var(--danger);font-size:12px;">Não foi possível conectar ao Conecta Comércio.</p>';
+  }
+}
+async function importarFeiraComercio(){
+  try{
+    const[cfg,feirantes]=await Promise.all([
+      sbGetComercio('feira_config','select=dia,horario,local&id=eq.1'),
+      sbGetComercio('feirantes','select=id&status=eq.aprovado'),
+    ]);
+    const c=cfg[0]||{};
+    await sbPost('ic_feiras',{tenant_id:tid(),nome:'Feira do Empreendedor',local:c.local||null,expositores:feirantes.length,resultado:'Importado do Conecta Comércio — '+(c.dia||'')+' das '+(c.horario||'')});
+    alert('Feira importada com '+feirantes.length+' expositor(es) aprovado(s).');
+    loadData('feiras');
+  }catch(e){alert('Erro ao importar: '+e.message.slice(0,200));}
+}
+async function loadServicosEmpreendedor(elId,filtroFn){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  try{
+    const servicos=await sbGetComercio('servicos_empreendedor','select=titulo,descricao,url&ativo=eq.true&order=ordem.asc');
+    const filtrados=filtroFn?servicos.filter(filtroFn):servicos;
+    el.innerHTML=filtrados.length?filtrados.map(s=>'<div style="padding:8px 0;border-bottom:1px solid var(--line);"><a href="'+s.url+'" target="_blank" style="font-weight:700;color:var(--royal);text-decoration:none;">'+s.titulo+' ↗</a><div style="font-size:11.5px;color:var(--muted);">'+(s.descricao||'')+'</div></div>').join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum serviço encontrado no Conecta Comércio.</p>';
+  }catch(e){
+    el.innerHTML='<p style="color:var(--danger);font-size:12px;">Não foi possível conectar ao Conecta Comércio.</p>';
   }
 }
 async function importarComercio(key,i){
@@ -507,6 +548,15 @@ function buildViews(){
       COMERCIO_SYNC[key].labels.forEach(l=>{html+='<th>'+l+'</th>';});
       html+='<th></th></tr></thead><tbody id="tbl-comercio-'+key+'"></tbody></table></div></div>';
     }
+    if(key==='feiras'){
+      html+='<div class="panel"><h3>🔄 Feira do Empreendedor (Conecta Comércio)</h3><p class="panel-sub">Config e feirantes aprovados no app público — sem lista de edições pra importar linha a linha, então importa como uma feira agregada.</p><div id="feira-comercio-info"><p style="color:var(--muted);font-size:12px;">Carregando...</p></div></div>';
+    }
+    if(key==='atendimentos_ic'){
+      html+='<div class="panel"><h3>🔄 Serviços ao Empreendedor (Conecta Comércio)</h3><p class="panel-sub">Links mostrados pra população no app — só referência, não tem atendimento individual pra importar.</p><div id="servicos-emp-sala"><p style="color:var(--muted);font-size:12px;">Carregando...</p></div></div>';
+    }
+    if(key==='fomento'){
+      html+='<div class="panel"><h3>🔄 Fomento Paraná (Conecta Comércio)</h3><p class="panel-sub">Link de crédito mostrado pra população no app — só referência, não tem solicitação individual pra importar.</p><div id="servicos-emp-fomento"><p style="color:var(--muted);font-size:12px;">Carregando...</p></div></div>';
+    }
     html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="ft-'+key+'">Novo registro</h3><div class="form-grid">';
     m.fields.forEach(f=>{const sp=f.span?'span-'+f.span:'';
       if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" '+(f.default?'checked':'')+' style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
@@ -675,7 +725,13 @@ function exportPdf(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data
 function exportXlsx(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const rows=data.map(r=>{const o={};m.cols.forEach((c,i)=>{o[m.colLabels[i]]=m.renderCol(r,c).replace(/<[^>]+>/g,'');});return o;});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,m.title.slice(0,31));XLSX.writeFile(wb,k+'_ic.xlsx');}
 
 const LOADERS={dashboard_ic:loadDashboard,secretaria_ic:loadSec,alertas_ic:loadAlertas,auditoria_ic:loadAuditoria};
-Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>{loadData(k);if(COMERCIO_SYNC[k])loadComercioSyncTable(k);};});
+Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>{
+  loadData(k);
+  if(COMERCIO_SYNC[k])loadComercioSyncTable(k);
+  if(k==='feiras')loadFeiraInfo();
+  if(k==='atendimentos_ic')loadServicosEmpreendedor('servicos-emp-sala',null);
+  if(k==='fomento')loadServicosEmpreendedor('servicos-emp-fomento',s=>/fomento/i.test((s.titulo||'')+' '+(s.descricao||'')+' '+(s.url||'')));
+};});
 </script>
 <div style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
 </body>
