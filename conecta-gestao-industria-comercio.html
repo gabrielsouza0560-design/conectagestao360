@@ -117,6 +117,8 @@ const COMERCIO_SYNC={
   vagas:{table:'vagas',query:'select=id,cargo,salario,cidade,status,requisitos&status=eq.aberta&order=criado_em.desc&limit=100',cols:['cargo','salario','cidade','status'],labels:['Cargo','Salário','Cidade','Status']},
   cursos:{table:'cursos',query:'select=id,titulo,origem,local,descricao&order=titulo.asc&limit=100',cols:['titulo','origem','local','descricao'],labels:['Título','Origem','Local','Descrição']},
   eventos_ic:{table:'eventos_calendario',query:'select=id,titulo,tipo,data_inicio,local,descricao&order=data_inicio.desc&limit=100',cols:['titulo','tipo','data_inicio','local'],labels:['Título','Tipo','Data','Local']},
+  meis:{table:'empresas',query:'select=id,nome,categoria,bairro,whatsapp,status,endereco,descricao&status=eq.aprovada&order=criado_em.desc&limit=100',cols:['nome','categoria','bairro','whatsapp','status'],labels:['Nome','Categoria','Bairro','WhatsApp','Status']},
+  comercios:{table:'empresas',query:'select=id,nome,categoria,bairro,whatsapp,status,endereco,descricao&status=eq.aprovada&order=criado_em.desc&limit=100',cols:['nome','categoria','bairro','whatsapp','status'],labels:['Nome','Categoria','Bairro','WhatsApp','Status']},
 };
 // Converte um registro do Conecta Comércio no formato de cadastro local (ic_*), pra virar editável com 1 clique.
 const COMERCIO_IMPORT_MAP={
@@ -125,7 +127,79 @@ const COMERCIO_IMPORT_MAP={
   vagas:r=>({cargo:r.cargo,requisitos:r.requisitos||null,salario:parseMoney(r.salario)||null,situacao:r.status==='aberta'?'aberta':'preenchida'}),
   cursos:r=>({nome:r.titulo,categoria:r.origem||null,instituicao:r.origem||null,resultado:r.descricao||null}),
   eventos_ic:r=>({nome:r.titulo,tipo:r.tipo||null,data:r.data_inicio||null,local:r.local||null,resultado:r.descricao||null}),
+  meis:r=>({nome:r.nome,atividade:r.categoria||null,endereco:r.endereco||null,bairro:r.bairro||null,whatsapp:r.whatsapp||null,situacao:'ativo',necessidades:r.descricao||null}),
+  comercios:r=>({segmento:r.categoria||r.nome,atividade:r.descricao||null,endereco:r.endereco||null,bairro:r.bairro||null,whatsapp:r.whatsapp||null,situacao:'ativo',conecta_comercio:true}),
 };
+
+// Anexar PDF e cadastrar direto: lê o texto do documento e preenche os campos conhecidos
+// automaticamente. O usuário confere e clica em Salvar — nada é gravado sem revisão.
+const PDF_AUTOFILL={
+  meis:{
+    nome:/(?:raz[aã]o social|nome(?: do mei)?)\s*[:\-]?\s*([^\n]{3,80})/i,
+    cnpj:/(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})/,
+    atividade:/(?:atividade|cnae)\s*[:\-]?\s*([^\n]{3,80})/i,
+    endereco:/endere[cç]o\s*[:\-]?\s*([^\n]{5,100})/i,
+    bairro:/bairro\s*[:\-]?\s*([^\n]{2,40})/i,
+    whatsapp:/(?:whatsapp|telefone|fone)\s*[:\-]?\s*(\(?\d{2}\)?\s?\d{4,5}-?\d{4})/i,
+  },
+  comercios:{
+    segmento:/(?:segmento|categoria|ramo)\s*[:\-]?\s*([^\n]{3,60})/i,
+    atividade:/(?:atividade|descri[cç][aã]o)\s*[:\-]?\s*([^\n]{3,80})/i,
+    endereco:/endere[cç]o\s*[:\-]?\s*([^\n]{5,100})/i,
+    bairro:/bairro\s*[:\-]?\s*([^\n]{2,40})/i,
+    whatsapp:/(?:whatsapp|telefone|fone)\s*[:\-]?\s*(\(?\d{2}\)?\s?\d{4,5}-?\d{4})/i,
+    responsavel:/respons[aá]vel\s*[:\-]?\s*([^\n]{3,60})/i,
+  },
+};
+let pdfPendente={};
+async function extrairTextoPdf(file){
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  let texto='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const content=await page.getTextContent();
+    texto+=content.items.map(it=>it.str).join(' ')+'\n';
+  }
+  return texto;
+}
+function buscarCampoPdf(texto,regex){const m=texto.match(regex);return m?m[1].trim():'';}
+async function importarPdfModulo(key,input){
+  const file=input.files[0];
+  if(!file)return;
+  const status=document.getElementById('pdfstatus-'+key);
+  if(status)status.textContent='Lendo PDF...';
+  try{
+    const texto=await extrairTextoPdf(file);
+    const mapa=PDF_AUTOFILL[key]||{};
+    document.getElementById('form-'+key).style.display='block';
+    document.getElementById('ft-'+key).textContent='Novo registro — preenchido a partir do PDF';
+    Object.keys(mapa).forEach(campo=>{
+      const el=document.getElementById('cf-'+key+'-'+campo);
+      if(!el)return;
+      const valor=buscarCampoPdf(texto,mapa[campo]);
+      if(valor)el.value=valor;
+    });
+    pdfPendente[key]={file,nome:file.name};
+    if(status)status.textContent='PDF lido — confira os campos preenchidos abaixo e clique em Salvar.';
+  }catch(e){
+    if(status)status.textContent='Não foi possível ler o PDF: '+e.message.slice(0,120);
+  }
+  input.value='';
+}
+async function anexarPdfPendenteModulo(key,nomeRegistro){
+  const pend=pdfPendente[key];
+  if(!pend)return;
+  try{
+    const path='ic-'+key+'/'+Date.now()+'-'+pend.file.name.replace(/[^a-zA-Z0-9.\-_]/g,'_');
+    const up=await fetch(SB_URL+'/storage/v1/object/documentos/'+path,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Type':pend.file.type||'application/pdf'},body:pend.file});
+    if(up.ok){
+      const url=SB_URL+'/storage/v1/object/documentos/'+path;
+      await sbPost('ic_documentos',{tenant_id:tid(),titulo:'PDF — '+(nomeRegistro||pend.nome),tipo:'PDF importado',descricao:pend.nome,modulo:key,url,data:new Date().toISOString().slice(0,10)});
+    }
+  }catch(e){}
+  delete pdfPendente[key];
+}
 let comercioCache={};
 async function loadComercioSyncTable(key){
   const cfg=COMERCIO_SYNC[key];const tb=document.getElementById('tbl-comercio-'+key);
@@ -551,7 +625,11 @@ function buildViews(){
   html+='<section class="view" id="view-secretaria_ic"><div class="topbar"><div><h1>Secretaria de Indústria e Comércio</h1></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Nome</label><input id="si-nome"></div><div class="field"><label>Secretário(a)</label><input id="si-secretario"></div><div class="field"><label>Telefone</label><input id="si-telefone"></div><div class="field"><label>WhatsApp</label><input id="si-whatsapp"></div><div class="field"><label>E-mail</label><input id="si-email"></div><div class="field span-3"><label>Endereço</label><input id="si-endereco"></div><div class="field"><label>Horário</label><input id="si-horario"></div><div class="field"><label>Orçamento anual (R$)</label><input id="si-orcamento" inputmode="decimal"></div><div class="field"><label>Meta anual (R$)</label><input id="si-meta" inputmode="decimal"></div><div class="field span-3"><label>Observações</label><textarea id="si-obs" rows="3"></textarea></div></div><div class="form-actions"><button class="btn-accent" onclick="salvarSec()" id="si-btn">Salvar</button></div></div></section>';
   // CRUD modules
   Object.keys(MODULES).forEach(key=>{const m=MODULES[key];
-    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
+    const temPdfAutofill=!!PDF_AUTOFILL[key];
+    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'+
+      (temPdfAutofill?'<label class="btn-ghost" style="margin:0;">📄 Anexar PDF e cadastrar<input type="file" accept="application/pdf" style="display:none;" onchange="importarPdfModulo(\''+key+'\',this)"></label>':'')+
+      '<button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
+    if(temPdfAutofill)html+='<p class="panel-sub" id="pdfstatus-'+key+'" style="margin:-10px 0 14px;"></p>';
     html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
     if(COMERCIO_SYNC[key]){
       html+='<div class="panel"><h3>🔄 Vindo do Conecta Comércio (ao vivo)</h3><p class="panel-sub">Atualiza sozinho sempre que essa tela abre. Clique em "Importar" pra trazer um registro e virar um cadastro editável aqui embaixo.</p><div style="overflow-x:auto;"><table><thead><tr>';
@@ -594,10 +672,10 @@ function buildViews(){
 
 // CRUD
 let editingId={};
-function toggleForm(k){const p=document.getElementById('form-'+k);const o=p.style.display==='none';p.style.display=o?'block':'none';if(o&&!editingId[k]){clearForm(k);document.getElementById('ft-'+k).textContent='Novo registro';document.getElementById('sb-'+k).textContent='Salvar';loadRefs(k);}if(!o)editingId[k]=null;}
+function toggleForm(k){const p=document.getElementById('form-'+k);const o=p.style.display==='none';p.style.display=o?'block':'none';if(o&&!editingId[k]){clearForm(k);document.getElementById('ft-'+k).textContent='Novo registro';document.getElementById('sb-'+k).textContent='Salvar';loadRefs(k);}if(!o){editingId[k]=null;delete pdfPendente[k];const status=document.getElementById('pdfstatus-'+k);if(status)status.textContent='';}}
 function clearForm(k){MODULES[k].fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!f.default;else if(f.type==='select')el.selectedIndex=0;else el.value='';});}
 async function loadRefs(k){for(const f of MODULES[k].fields){if(f.type!=='ref')continue;const sel=document.getElementById('cf-'+k+'-'+f.id);const opts=await loadRefOptions(f.ref);const lbl=REF_LABEL_FIELD[f.ref];sel.innerHTML='<option value="">Selecione...</option>'+opts.map(o=>'<option value="'+o.id+'">'+o[lbl]+'</option>').join('');}}
-async function submitCrud(k){const m=MODULES[k],data={tenant_id:tid()};m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;let v;if(f.type==='checkbox')v=el.checked;else if(f.type==='money')v=parseMoney(el.value);else if(f.type==='number')v=el.value?Number(el.value):null;else if(f.type==='ref')v=el.value||null;else v=el.value.trim()||null;data[f.id]=v;});const btn=document.getElementById('sb-'+k);btn.disabled=true;try{if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+async function submitCrud(k){const m=MODULES[k],data={tenant_id:tid()};m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;let v;if(f.type==='checkbox')v=el.checked;else if(f.type==='money')v=parseMoney(el.value);else if(f.type==='number')v=el.value?Number(el.value):null;else if(f.type==='ref')v=el.value||null;else v=el.value.trim()||null;data[f.id]=v;});const btn=document.getElementById('sb-'+k);btn.disabled=true;try{const isNovo=!editingId[k];if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}if(isNovo&&pdfPendente[k])await anexarPdfPendenteModulo(k,data.nome||data.razao_social||data.segmento||'');const status=document.getElementById('pdfstatus-'+k);if(status)status.textContent='';toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
 async function editCrud(k,id){const m=MODULES[k];try{const rows=await sbGet(m.table,'id=eq.'+id);const r=rows[0];if(!r)return;editingId[k]=id;document.getElementById('form-'+k).style.display='block';document.getElementById('ft-'+k).textContent='Editar registro';document.getElementById('sb-'+k).textContent='Salvar alterações';await loadRefs(k);m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!r[f.id];else el.value=r[f.id]||'';});}catch(e){alert('Erro: '+e.message.slice(0,200));}}
 async function deleteCrud(k,id){if(!confirm('Excluir?'))return;try{await sbDel(MODULES[k].table,'id=eq.'+id);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}}
 async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
@@ -607,7 +685,26 @@ function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)ret
   else if(k==='meis'){const at=data.filter(r=>r.situacao==='ativo').length;const enc=data.filter(r=>r.situacao==='encerrado').length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--ok);">'+at+'</div><div class="lbl">MEIs</div></div><div class="kpi"><div class="ico">Encerrados</div><div class="num" style="color:var(--danger);">'+enc+'</div><div class="lbl">MEIs</div></div>';}
   else if(k==='vagas'){const ab=data.filter(r=>r.situacao==='aberta').length;const pr=data.filter(r=>r.situacao==='preenchida').length;const tot=data.reduce((s,r)=>s+(Number(r.quantidade)||0),0);const cont=data.reduce((s,r)=>s+(Number(r.contratados)||0),0);h+='<div class="kpi"><div class="ico">Abertas</div><div class="num" style="color:var(--royal);">'+ab+'</div><div class="lbl">vagas</div></div><div class="kpi"><div class="ico">Preenchidas</div><div class="num" style="color:var(--ok);">'+pr+'</div><div class="lbl">vagas</div></div><div class="kpi"><div class="ico">Contratados</div><div class="num">'+cont+'</div><div class="lbl">pessoas</div></div>';}
   else if(k==='atendimentos_ic'){const ret=data.filter(r=>r.retorno_necessario).length;h+='<div class="kpi"><div class="ico">Com retorno</div><div class="num" style="color:var(--warn);">'+ret+'</div><div class="lbl">pendentes</div></div>';}
-  else if(k==='fomento'){const val=data.reduce((s,r)=>s+(Number(r.valor_contratado)||0),0);const aprov=data.filter(r=>r.situacao==='contratada').length;h+='<div class="kpi"><div class="ico">Contratados</div><div class="num" style="color:var(--ok);">'+aprov+'</div><div class="lbl">operações</div></div><div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">contratado</div></div>';}
+  else if(k==='fomento'){
+    const solicitado=data.reduce((s,r)=>s+(Number(r.valor_solicitado)||0),0);
+    const aprovadoVal=data.reduce((s,r)=>s+(Number(r.valor_aprovado)||0),0);
+    const contratadoVal=data.reduce((s,r)=>s+(Number(r.valor_contratado)||0),0);
+    const aprov=data.filter(r=>r.situacao==='aprovada'||r.situacao==='contratada').length;
+    const analise=data.filter(r=>r.situacao==='proposta'||r.situacao==='analise').length;
+    const negados=data.filter(r=>r.situacao==='negada'||r.situacao==='cancelada').length;
+    h+='<div class="kpi"><div class="ico">Aprovados</div><div class="num" style="color:var(--ok);">'+aprov+'</div><div class="lbl">de '+n+' pedidos</div></div>'+
+      '<div class="kpi"><div class="ico">Em análise</div><div class="num" style="color:var(--warn);">'+analise+'</div><div class="lbl">pedidos</div></div>'+
+      '<div class="kpi"><div class="ico">Negados</div><div class="num" style="color:var(--danger);">'+negados+'</div><div class="lbl">pedidos</div></div>'+
+      '<div class="kpi"><div class="ico">Valor solicitado</div><div class="num">'+moneyShort(solicitado)+'</div><div class="lbl">soma de todos</div></div>'+
+      '<div class="kpi"><div class="ico">Valor aprovado</div><div class="num" style="color:var(--ok);">'+moneyShort(aprovadoVal)+'</div><div class="lbl">soma dos aprovados</div></div>'+
+      (contratadoVal?'<div class="kpi"><div class="ico">Valor contratado</div><div class="num" style="color:var(--ok);">'+moneyShort(contratadoVal)+'</div><div class="lbl">já formalizado</div></div>':'');
+  }
+  else if(k==='atendimentos_mensal_ic'){
+    const somaTotal=data.reduce((s,r)=>s+(Number(r.total)||0),0);
+    const maisProcurado=data.length?data.slice().sort((a,b)=>(Number(b.total)||0)-(Number(a.total)||0))[0]:null;
+    h+='<div class="kpi"><div class="ico">Atendimentos no ano</div><div class="num">'+somaTotal+'</div><div class="lbl">soma de todos os serviços</div></div>'+
+      (maisProcurado?'<div class="kpi"><div class="ico">Serviço mais procurado</div><div class="num" style="font-size:14px;line-height:1.3;">'+maisProcurado.servico+'</div><div class="lbl">'+maisProcurado.total+' atendimentos em '+maisProcurado.ano+'</div></div>':'');
+  }
   else if(k==='capacitacoes'){const part=data.reduce((s,r)=>s+(Number(r.presenca)||0),0);const conc=data.reduce((s,r)=>s+(Number(r.conclusao)||0),0);h+='<div class="kpi"><div class="ico">Participantes</div><div class="num">'+part+'</div><div class="lbl">total</div></div><div class="kpi"><div class="ico">Concluintes</div><div class="num" style="color:var(--ok);">'+conc+'</div><div class="lbl">total</div></div>';}
   else if(k==='investimentos'){const val=data.reduce((s,r)=>s+(Number(r.valor_estimado)||0),0);const emp=data.reduce((s,r)=>s+(Number(r.empregos_previstos)||0),0);h+='<div class="kpi"><div class="ico">Valor total</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">estimado</div></div><div class="kpi"><div class="ico">Empregos</div><div class="num">'+emp+'</div><div class="lbl">previstos</div></div>';}
   else if(k==='incentivos'){const val=data.reduce((s,r)=>s+(Number(r.valor)||0),0);const emp=data.reduce((s,r)=>s+(Number(r.empregos_realizados)||0),0);h+='<div class="kpi"><div class="ico">Valor</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">em benefícios</div></div><div class="kpi"><div class="ico">Empregos</div><div class="num" style="color:var(--ok);">'+emp+'</div><div class="lbl">gerados</div></div>';}
@@ -655,12 +752,12 @@ async function loadDashboardFestas(){
 
 async function loadDashboard(){try{
   loadDashboardComercio();
-  const [emp,meis,vag,atend,fom,micro,cap,ev,fe,inv,inc,met,al,trab,cur,festasInfo]=await Promise.all([
+  const [emp,meis,vag,atend,fom,micro,cap,ev,fe,inv,inc,met,al,trab,cur,festasInfo,atendMensal]=await Promise.all([
     sbGet('ic_empresas','select=id,situacao,porte,bairro,numero_funcionarios').catch(()=>[]),
     sbGet('ic_meis','select=id,situacao').catch(()=>[]),
     sbGet('ic_vagas','select=id,situacao,quantidade,contratados').catch(()=>[]),
     sbGet('ic_atendimentos','select=id,servico').catch(()=>[]),
-    sbGet('ic_fomento','select=id,situacao,valor_contratado').catch(()=>[]),
+    sbGet('ic_fomento','select=id,situacao,valor_solicitado,valor_aprovado,valor_contratado').catch(()=>[]),
     sbGet('ic_microcredito','select=id,situacao,valor').catch(()=>[]),
     sbGet('ic_capacitacoes','select=id,presenca,conclusao').catch(()=>[]),
     sbGet('ic_eventos','select=id,quantidade_participantes,empresas_participantes').catch(()=>[]),
@@ -672,11 +769,16 @@ async function loadDashboard(){try{
     sbGet('ic_trabalhadores','select=id,situacao_emprego').catch(()=>[]),
     sbGet('ic_cursos','select=id,vagas').catch(()=>[]),
     loadDashboardFestas(),
+    sbGet('ic_atendimentos_mensal','select=id,total,ano').catch(()=>[]),
   ]);
   const empAt=emp.filter(e=>e.situacao==='ativa').length;const meisAt=meis.filter(m=>m.situacao==='ativo').length;
   const vagAb=vag.filter(v=>v.situacao==='aberta').length;const vagTot=vag.reduce((s,v)=>s+(Number(v.quantidade)||0),0);
   const contrat=vag.reduce((s,v)=>s+(Number(v.contratados)||0),0);
-  const fomVal=fom.reduce((s,f)=>s+(Number(f.valor_contratado)||0),0);
+  const fomSolicitado=fom.reduce((s,f)=>s+(Number(f.valor_solicitado)||0),0);
+  const fomAprovadoVal=fom.reduce((s,f)=>s+(Number(f.valor_aprovado)||0),0);
+  const fomContratadoVal=fom.reduce((s,f)=>s+(Number(f.valor_contratado)||0),0);
+  const fomAprovCount=fom.filter(f=>f.situacao==='aprovada'||f.situacao==='contratada').length;
+  const atendMensalTotal=atendMensal.reduce((s,r)=>s+(Number(r.total)||0),0);
   const capPart=cap.reduce((s,c)=>s+(Number(c.presenca)||0),0);
   const invVal=inv.reduce((s,i)=>s+(Number(i.valor_estimado)||0),0);
   const invEmp=inv.reduce((s,i)=>s+(Number(i.empregos_previstos)||0),0);
@@ -686,8 +788,8 @@ async function loadDashboard(){try{
   document.getElementById('dash-kpi').innerHTML=[
     ['Empresas ativas',empAt,'de '+emp.length+' cadastradas'],['MEIs',meisAt,'ativos'],
     ['Funcionários',funcTot,'registrados'],['Vagas abertas',vagAb,vagTot+' total'],
-    ['Contratados',contrat,'via vagas'],['Atendimentos',atend.length,'Sala do Empreendedor'],
-    ['Capacitados',capPart,'participantes'],['Crédito',moneyShort(fomVal),'Fomento contratado'],
+    ['Contratados',contrat,'via vagas'],['Atendimentos (ano)',atendMensalTotal||atend.length,'Sala do Empreendedor'],
+    ['Capacitados',capPart,'participantes'],['Fomento aprovado',moneyShort(fomAprovadoVal),fomAprovCount+' operação(ões)'],
     ['Eventos',ev.length,evPart+' participantes'],['Feiras',fe.length,fe.reduce((s,f)=>s+(Number(f.expositores)||0),0)+' expositores'],
     ['Investimentos',inv.length,moneyShort(invVal)+' estimado'],['Empregos previstos',invEmp+incEmp,'invest.+incentivos'],
     ['Metas',met.filter(m=>m.situacao==='atingida').length+'/'+met.length,'atingidas'],['Alertas',al.length,'não lidos'],
@@ -710,9 +812,10 @@ async function loadDashboard(){try{
   // Crédito
   const microVal=micro.reduce((s,m)=>s+(Number(m.valor)||0),0);
   document.getElementById('dash-credito').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
-    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--ok);">'+moneyShort(fomVal)+'</div><div style="font-size:11px;color:var(--ink-soft);">Fomento contratado</div></div>'+
+    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:17px;font-weight:800;color:var(--royal);">'+moneyShort(fomSolicitado)+'</div><div style="font-size:11px;color:var(--ink-soft);">Fomento Paraná solicitado</div></div>'+
+    '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:17px;font-weight:800;color:var(--ok);">'+moneyShort(fomAprovadoVal)+'</div><div style="font-size:11px;color:var(--ink-soft);">Fomento Paraná aprovado</div></div>'+
     '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--royal);">'+moneyShort(microVal)+'</div><div style="font-size:11px;color:var(--ink-soft);">Microcrédito</div></div>'+
-    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+atend.length+'</div><div style="font-size:11px;color:var(--ink-soft);">Atendimentos Sala</div></div>'+
+    '<div style="padding:10px;background:#EFF6FF;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--royal);">'+(atendMensalTotal||atend.length)+'</div><div style="font-size:11px;color:var(--ink-soft);">Atendimentos Sala (ano)</div></div>'+
     '<div style="padding:10px;background:#D1FAE5;border-radius:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ok);">'+capPart+'</div><div style="font-size:11px;color:var(--ink-soft);">Capacitados</div></div></div>';
   // Alertas
   document.getElementById('dash-alertas').innerHTML=al.length?al.map(a=>{const ico=a.severidade==='critico'?'🔴':a.severidade==='atencao'?'🟡':'🔵';const cls=a.severidade==='critico'?'danger':a.severidade==='atencao'?'warn':'ok';return'<div class="diag diag-'+cls+'">'+ico+' '+a.mensagem+'</div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum alerta.</p>';
