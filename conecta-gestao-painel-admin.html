@@ -1092,6 +1092,22 @@
         </table>
       </div>
     </section>
+
+    <section class="view" id="view-livro">
+      <div class="topbar">
+        <div><h1>Livro da Gestão</h1><div class="path">Painel Administrativo / Livro da Gestão</div></div>
+      </div>
+
+      <div class="panel">
+        <h3>Relatório consolidado do mandato</h3>
+        <p class="panel-sub">Reúne automaticamente todas as ações, obras, festas e promessas de campanha cadastradas — um retrato completo da gestão até hoje.</p>
+        <div class="kpi-grid" id="livro-kpi-grid"></div>
+        <div class="form-actions">
+          <button class="btn-accent" onclick="baixarPdfLivro()" id="pdf-livro-btn">⬇ Gerar PDF do Livro da Gestão</button>
+          <button class="btn-ghost" onclick="baixarExcelLivro()" id="xlsx-livro-btn">⬇ Gerar Excel</button>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -1165,6 +1181,7 @@ const NAV_ITEMS = {
   usuarios: { label: 'Usuários e Permissões', view: 'view-usuarios' },
   auditoria: { label: 'Auditoria', view: 'view-auditoria' },
   indicadores: { label: 'Indicadores', view: 'view-indicadores' },
+  livro: { label: 'Livro da Gestão', view: 'view-livro' },
 };
 
 function enterApp(){
@@ -1192,6 +1209,7 @@ function enterApp(){
     '<a class="nav-item" href="conecta-gestao-industria-comercio.html" target="_blank"><span>🏭 Indústria e Comércio ↗</span></a>' +
     '<a class="nav-item" href="conecta-gestao-educacao.html" target="_blank"><span>🎓 Educação ↗</span></a>' +
     (canSeeDashboardPrefeito ? '<a class="nav-item" href="conecta-gestao-dashboard-prefeito.html" target="_blank"><span>Dashboard do Prefeito ↗</span></a>' : '') +
+    (canSeeDashboardPrefeito ? '<button class="nav-item" data-key="livro" onclick="navigateTo(\'livro\')"><span>Livro da Gestão</span></button>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="secretarias" onclick="navigateTo(\'secretarias\')"><span>Secretarias</span></button>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="usuarios" onclick="navigateTo(\'usuarios\')"><span>Usuários e Permissões</span></button>' : '') +
     (isAdmin ? '<button class="nav-item" data-key="auditoria" onclick="navigateTo(\'auditoria\')"><span>Auditoria</span></button>' : '') +
@@ -1216,6 +1234,7 @@ function enterApp(){
   loadNotificacoes();
   loadImportados();
   if(canManagePromessas) loadPromessas();
+  if(canSeeDashboardPrefeito) loadLivro();
   if(isAdmin){
     loadSecretariasAdmin();
     loadUsuarios();
@@ -3885,6 +3904,186 @@ async function excluirIndicador(id){
     await loadIndicadores();
   } catch (e) {
     alert('Não foi possível excluir: ' + e.message.slice(0,200));
+  }
+}
+
+async function loadLivro(){
+  try {
+    const [acoes, promessas] = await Promise.all([
+      sbGet('acoes', 'select=id,status,valor_investido,eh_obra,eh_evento'),
+      sbGet('promessas_campanha', 'select=id,status'),
+    ]);
+    const obras = acoes.filter(a => a.eh_obra);
+    const festas = acoes.filter(a => a.eh_evento);
+    const investTotal = acoes.reduce((s,a) => s + (Number(a.valor_investido)||0), 0);
+    document.getElementById('livro-kpi-grid').innerHTML =
+      '<div class="kpi"><div class="num">' + acoes.length + '</div><div class="lbl">Ações cadastradas</div></div>' +
+      '<div class="kpi"><div class="num">' + money(investTotal) + '</div><div class="lbl">Investimento total</div></div>' +
+      '<div class="kpi"><div class="num">' + obras.length + '</div><div class="lbl">Obras (' + obras.filter(o=>o.status==='concluido').length + ' concluídas)</div></div>' +
+      '<div class="kpi"><div class="num">' + festas.length + '</div><div class="lbl">Festas e eventos</div></div>' +
+      '<div class="kpi"><div class="num">' + promessas.filter(p=>p.status==='cumprida').length + '/' + promessas.length + '</div><div class="lbl">Promessas cumpridas</div></div>';
+  } catch (e) {
+    document.getElementById('livro-kpi-grid').innerHTML = '<div class="kpi"><div class="num">—</div><div class="lbl">Não foi possível carregar (' + e.message.slice(0,80) + ')</div></div>';
+  }
+}
+
+async function baixarPdfLivro(){
+  const btn = document.getElementById('pdf-livro-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const [acoes, promessas] = await Promise.all([
+      sbGet('acoes', 'select=titulo,status,valor_investido,eh_obra,eh_evento,ano,data,bairro,contratada,percentual_execucao,publico_estimado,secretarias(nome)&order=criado_em.desc'),
+      sbGet('promessas_campanha', 'select=titulo,eixo,status,ano_previsto&order=eixo.asc'),
+    ]);
+    const obras = acoes.filter(a => a.eh_obra);
+    const festas = acoes.filter(a => a.eh_evento);
+    const acoesComuns = acoes.filter(a => !a.eh_obra && !a.eh_evento);
+    const investTotal = acoes.reduce((s,a) => s + (Number(a.valor_investido)||0), 0);
+    const bySec = {};
+    acoes.forEach(a => { const n = a.secretarias ? a.secretarias.nome : 'Sem secretaria'; if(!bySec[n]) bySec[n] = { qtd:0, valor:0 }; bySec[n].qtd++; bySec[n].valor += Number(a.valor_investido)||0; });
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 20;
+    const ensureSpace = (needed) => { if(y + needed > 280){ doc.addPage(); y = 20; } };
+    const secao = (titulo) => { ensureSpace(20); doc.setFontSize(13); doc.setTextColor(0); doc.text(titulo, 14, y); y += 5; };
+    const afterTable = () => { y = doc.lastAutoTable.finalY + 10; };
+    const paragrafo = (texto, tamanhoFonte) => {
+      doc.setFontSize(tamanhoFonte || 9); doc.setTextColor(60);
+      const linhas = doc.splitTextToSize(texto, 180);
+      const alturaLinha = (tamanhoFonte || 9) * 0.3528 * 1.15;
+      const alturaTotal = linhas.length * alturaLinha;
+      ensureSpace(alturaTotal + 4);
+      doc.text(linhas, 14, y);
+      y += alturaTotal + 4;
+    };
+
+    doc.setFontSize(22); doc.setTextColor(0); doc.text('Livro da Gestão', 14, y); y += 10;
+    doc.setFontSize(13); doc.setTextColor(80); doc.text('Prefeitura Municipal — Relatório Consolidado do Mandato', 14, y); y += 8;
+    doc.setFontSize(9); doc.setTextColor(100);
+    doc.text('Gerado em ' + new Date().toLocaleString('pt-BR') + ' por ' + (session.claims.perfil || '—'), 14, y); y += 14;
+
+    secao('Sumário Executivo');
+    doc.autoTable({
+      startY: y,
+      head: [['Indicador', 'Valor']],
+      body: [
+        ['Total de ações cadastradas', acoes.length],
+        ['Investimento total', moneyR(investTotal)],
+        ['Obras cadastradas', obras.length + ' (' + obras.filter(o=>o.status==='concluido').length + ' concluídas)'],
+        ['Festas e eventos realizados', festas.length],
+        ['Promessas de campanha', promessas.length + ' (' + promessas.filter(p=>p.status==='cumprida').length + ' cumpridas)'],
+      ],
+      styles: { fontSize: 9 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    secao('Ações por Secretaria');
+    doc.autoTable({
+      startY: y,
+      head: [['Secretaria', 'Ações', 'Investimento']],
+      body: Object.keys(bySec).length ? Object.entries(bySec).sort((a,b)=>b[1].valor-a[1].valor).map(([n,v]) => [n, v.qtd, moneyR(v.valor)]) : [['Nenhuma ação cadastrada','','']],
+      styles: { fontSize: 9 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    secao('Obras (' + obras.length + ')');
+    doc.autoTable({
+      startY: y,
+      head: [['Obra', 'Secretaria', 'Contratada', 'Execução', 'Status']],
+      body: obras.length ? obras.map(o => [o.titulo, o.secretarias?o.secretarias.nome:'—', o.contratada||'—', (o.percentual_execucao!=null?o.percentual_execucao+'%':'—'), statusPill(o.status).replace(/<[^>]+>/g,'')]) : [['Nenhuma obra cadastrada','','','','']],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    secao('Festas e Eventos (' + festas.length + ')');
+    doc.autoTable({
+      startY: y,
+      head: [['Festa/Evento', 'Secretaria', 'Data', 'Público estimado', 'Investimento']],
+      body: festas.length ? festas.map(f => [f.titulo, f.secretarias?f.secretarias.nome:'—', f.data?new Date(f.data).toLocaleDateString('pt-BR'):'—', f.publico_estimado!=null?f.publico_estimado:'—', moneyR(f.valor_investido)]) : [['Nenhuma festa cadastrada','','','','']],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    secao('Demais Ações (' + acoesComuns.length + ')');
+    doc.autoTable({
+      startY: y,
+      head: [['Ação', 'Secretaria', 'Bairro', 'Status', 'Investimento']],
+      body: acoesComuns.length ? acoesComuns.slice(0,80).map(a => [a.titulo, a.secretarias?a.secretarias.nome:'—', a.bairro||'—', statusPill(a.status).replace(/<[^>]+>/g,''), moneyR(a.valor_investido)]) : [['Nenhuma ação cadastrada','','','','']],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+    if(acoesComuns.length > 80){ doc.setFontSize(8); doc.setTextColor(100); doc.text('(mostrando as 80 mais recentes de ' + acoesComuns.length + ')', 14, y); y += 8; }
+
+    secao('Plano de Governo — Promessas de Campanha');
+    doc.autoTable({
+      startY: y,
+      head: [['Promessa', 'Eixo', 'Ano previsto', 'Status']],
+      body: promessas.length ? promessas.map(p => [p.titulo, p.eixo||'—', p.ano_previsto||'—', PROMESSA_STATUS_LABEL[p.status]||p.status]) : [['Nenhuma promessa cadastrada','','','']],
+      styles: { fontSize: 8 }, headStyles: { fillColor: [37,99,235] },
+    });
+    afterTable();
+
+    secao('Conclusão');
+    const pctPromessas = promessas.length ? Math.round(promessas.filter(p=>p.status==='cumprida').length/promessas.length*100) : 0;
+    const pctObras = obras.length ? Math.round(obras.filter(o=>o.status==='concluido').length/obras.length*100) : 0;
+    paragrafo('Este Livro da Gestão consolida ' + acoes.length + ' ação(ões) cadastrada(s) na plataforma, totalizando ' + moneyR(investTotal) + ' em investimentos, distribuídas entre ' + Object.keys(bySec).length + ' secretaria(s). Das ' + obras.length + ' obra(s) registrada(s), ' + pctObras + '% estão concluídas. Das ' + promessas.length + ' promessa(s) de campanha cadastrada(s) no Plano de Governo, ' + pctPromessas + '% já foram cumpridas. Foram realizados ' + festas.length + ' festa(s)/evento(s) municipais registrados na plataforma.');
+
+    const totalPaginas = doc.internal.getNumberOfPages();
+    for(let i = 1; i <= totalPaginas; i++){
+      doc.setPage(i);
+      doc.setFontSize(8); doc.setTextColor(150);
+      doc.text('Conecta Gestão — Livro da Gestão — gerado em ' + new Date().toLocaleDateString('pt-BR'), 14, 292);
+      doc.text('Página ' + i + ' de ' + totalPaginas, 180, 292);
+    }
+
+    await salvarRelatorioNaPlataforma(doc.output('blob'), 'Livro da Gestão — ' + new Date().toLocaleDateString('pt-BR'), 'livro_gestao', 'pdf');
+    doc.save('conecta-gestao-livro-da-gestao-' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch (e) {
+    alert('Não foi possível gerar o PDF: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Gerar PDF do Livro da Gestão';
+  }
+}
+
+async function baixarExcelLivro(){
+  const btn = document.getElementById('xlsx-livro-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    const [acoes, promessas] = await Promise.all([
+      sbGet('acoes', 'select=titulo,status,valor_investido,eh_obra,eh_evento,ano,data,bairro,contratada,percentual_execucao,publico_estimado,secretarias(nome)&order=criado_em.desc'),
+      sbGet('promessas_campanha', 'select=titulo,eixo,status,ano_previsto'),
+    ]);
+    const obras = acoes.filter(a => a.eh_obra);
+    const festas = acoes.filter(a => a.eh_evento);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acoes.map(a => ({
+      'Título': a.titulo, 'Secretaria': a.secretarias?a.secretarias.nome:'', 'Tipo': a.eh_obra?'Obra':(a.eh_evento?'Festa/Evento':'Ação'),
+      'Status': a.status, 'Ano': a.ano, 'Investimento (R$)': Number(a.valor_investido)||0,
+    }))), 'Todas as Ações');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(obras.map(o => ({
+      'Obra': o.titulo, 'Secretaria': o.secretarias?o.secretarias.nome:'', 'Contratada': o.contratada||'',
+      'Execução (%)': o.percentual_execucao!=null?o.percentual_execucao:'', 'Status': o.status, 'Investimento (R$)': Number(o.valor_investido)||0,
+    }))), 'Obras');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(festas.map(f => ({
+      'Festa/Evento': f.titulo, 'Secretaria': f.secretarias?f.secretarias.nome:'', 'Data': f.data||'',
+      'Público estimado': f.publico_estimado!=null?f.publico_estimado:'', 'Investimento (R$)': Number(f.valor_investido)||0,
+    }))), 'Festas e Eventos');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(promessas.map(p => ({
+      'Promessa': p.titulo, 'Eixo': p.eixo||'', 'Ano previsto': p.ano_previsto||'', 'Status': PROMESSA_STATUS_LABEL[p.status]||p.status,
+    }))), 'Plano de Governo');
+    const blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    await salvarRelatorioNaPlataforma(blob, 'Livro da Gestão — ' + new Date().toLocaleDateString('pt-BR'), 'livro_gestao', 'xlsx');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'conecta-gestao-livro-da-gestao-' + new Date().toISOString().slice(0,10) + '.xlsx';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Não foi possível gerar o Excel: ' + e.message.slice(0,200));
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Gerar Excel';
   }
 }
 
