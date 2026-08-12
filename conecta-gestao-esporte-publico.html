@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Esporte · Portal Público</title>
+<meta name="description" content="Competições, jogos, resultados, escolinhas e espaços esportivos da Secretaria de Esporte — atualizado em tempo real, sem login.">
+<link rel="canonical" href="https://conectagestao360.vercel.app/conecta-gestao-esporte-publico.html">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#16A34A">
+<link rel="icon" href="/icons/icon-192.png">
+<style>
+  :root{
+    --azul-escuro:#0B2A5B; --royal:#2563EB; --neon:#3B82F6; --light:#60A5FA; --darkblue:#0B2A5B;
+    --verde:#16A34A; --verde-escuro:#0F7A38; --verde-claro:#4ADE80;
+    --amarelo:#F5B400; --amarelo-escuro:#B45309;
+    --bg:#F8FAFC; --surface:#FFFFFF; --ink:#0F172A; --ink-soft:#475569; --line:rgba(15,23,42,.08);
+    --ok:#059669; --warn:#D97706; --danger:#DC2626; --muted:#94A3B8;
+    --radius:18px; --radius-lg:24px;
+    --sans:'Inter','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+    --shadow-md:0 4px 14px rgba(15,23,42,.07), 0 1px 3px rgba(15,23,42,.05);
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}
+  button{font-family:inherit;cursor:pointer;}
+  a{color:inherit;}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
+
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--verde),var(--verde-claro));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(22,163,74,.35);}
+  .brand-conecta{color:var(--light);}
+  .brand-gestao{color:var(--verde-claro);}
+
+  header.site{position:sticky;top:0;z-index:50;background:rgba(11,42,20,.9);backdrop-filter:blur(14px);color:#E2E8F0;}
+  .navbar{display:flex;align-items:center;justify-content:space-between;padding:14px 40px;gap:20px;flex-wrap:wrap;}
+  .nav-brand{display:flex;align-items:center;gap:11px;}
+  .nav-brand .name{font-size:15.5px;font-weight:700;}
+  .nav-brand .name small{display:block;font-family:var(--sans);font-size:10px;letter-spacing:1.5px;color:#A7D6B8;text-transform:uppercase;font-weight:500;}
+  .nav-links{display:flex;gap:2px;flex-wrap:wrap;}
+  .nav-links button{background:none;border:none;color:#BFE3CC;font-size:13px;padding:9px 12px;border-radius:9px;font-weight:600;transition:background .15s,color .15s;}
+  .nav-links button:hover{background:rgba(74,222,128,.14);color:#fff;}
+  .nav-links button.active{background:linear-gradient(135deg,var(--verde),var(--verde-claro));color:#fff;box-shadow:0 4px 12px rgba(22,163,74,.4);}
+
+  .mod-tabs{max-width:1180px;margin:0 auto;padding:14px 40px 0;display:flex;gap:8px;flex-wrap:wrap;}
+  @media(max-width:820px){.mod-tabs{padding:14px 20px 0;}}
+  .mod-tab{background:var(--surface);border:1.5px solid var(--line);color:var(--ink-soft);padding:8px 15px;border-radius:999px;font-size:12.5px;font-weight:700;transition:border-color .15s,color .15s,background .15s;}
+  .mod-tab:hover{border-color:var(--verde);}
+  .mod-tab.active{background:linear-gradient(135deg,var(--verde),var(--verde-claro));color:#fff;border-color:transparent;}
+
+  main{max-width:1180px;margin:0 auto;padding:0 40px 80px;}
+  @media(max-width:820px){main{padding:0 20px 60px;}}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .hero{background:linear-gradient(135deg,var(--darkblue) 0%, #0F7A38 55%, var(--verde) 100%);color:#fff;margin:0 -1000px;padding:56px 1000px 50px;position:relative;overflow:hidden;}
+  .hero::after{content:'';position:absolute;right:-120px;top:-120px;width:360px;height:360px;background:radial-gradient(circle, rgba(74,222,128,.28), transparent 70%);}
+  .hero-inner{max-width:1180px;margin:0 auto;padding:0 40px;position:relative;z-index:1;}
+  @media(max-width:820px){.hero-inner{padding:0 20px;}}
+  .hero h1{font-size:34px;line-height:1.25;max-width:640px;margin:0 0 14px;font-weight:800;letter-spacing:-.02em;}
+  .hero p{color:#CFE9D8;font-size:15px;max-width:560px;line-height:1.7;margin:0;}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:26px 0;}
+  @media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);transition:transform .2s var(--ease),box-shadow .2s var(--ease);}
+  .kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+  .kpi .num{font-size:26px;color:var(--verde);font-weight:800;}
+  .kpi .lbl{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+
+  .section-head{margin:44px 0 20px;}
+  .section-head .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--verde);font-weight:800;margin-bottom:6px;}
+  .section-head h2{font-size:22px;margin:0;font-weight:800;letter-spacing:-.01em;}
+  .section-head p{color:var(--ink-soft);font-size:13.5px;margin:6px 0 0;max-width:560px;}
+  main > .view > .section-head:first-child{margin-top:36px;}
+
+  .card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:900px){.card-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:620px){.card-grid{grid-template-columns:1fr;}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-sm);transition:transform .22s var(--ease),box-shadow .22s var(--ease);}
+  .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+  .card .tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--verde);font-weight:800;}
+  .card h3{font-size:15.5px;margin:8px 0 6px;line-height:1.4;font-weight:700;}
+  .card p{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin:0;}
+  .card .meta{margin-top:12px;font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+
+  .status-pill{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+  .status-planejada{background:#F1F5F9;color:#64748B;} .status-agendado{background:#F1F5F9;color:#64748B;}
+  .status-em_andamento{background:#FEF3C7;color:#B45309;}
+  .status-concluida{background:#D1FAE5;color:var(--ok);} .status-realizado{background:#D1FAE5;color:var(--ok);}
+  .status-cancelada{background:#FEE2E2;color:var(--danger);} .status-cancelado{background:#FEE2E2;color:var(--danger);}
+  .status-adiado{background:#FEE2E2;color:var(--danger);}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 12px 10px;border-bottom:1px solid var(--line);font-weight:700;}
+  td{padding:13px 12px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:22px;box-shadow:var(--shadow-sm);overflow-x:auto;}
+  .panel h3{margin:0 0 4px;font-size:16px;}
+  .panel .sub{font-size:12.5px;color:var(--muted);margin:0 0 16px;}
+  .field select{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:12.5px;background:#fff;min-width:240px;}
+  .empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:12.5px;}
+
+  footer{background:var(--darkblue);color:#93A5C4;padding:36px 40px;margin-top:60px;font-size:12px;text-align:center;}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="navbar">
+    <div class="nav-brand">
+      <div class="logo">CG</div>
+      <div class="name"><span class="brand-conecta">Conecta</span> <span class="brand-gestao">Gestão</span><small>Esporte · Portal Público</small></div>
+    </div>
+    <div class="nav-links" id="nav-links"></div>
+  </div>
+</header>
+<div class="mod-tabs" id="mod-tabs"></div>
+
+<main>
+
+  <section class="view active" id="view-inicio">
+    <div class="hero">
+      <div class="hero-inner">
+        <h1>Esporte em Ivatuba, acompanhado por qualquer pessoa.</h1>
+        <p>Competições, jogos, resultados, escolinhas e espaços esportivos da Secretaria de Esporte — dados reais, atualizados em tempo real.</p>
+      </div>
+    </div>
+    <div class="kpi-grid" id="kpi-inicio"></div>
+  </section>
+
+  <section class="view" id="view-competicoes">
+    <div class="section-head"><div class="eyebrow">Campeonatos</div><h2>Competições e Campeonatos</h2><p>Edição, modalidade, período e situação de cada competição organizada pela Secretaria.</p></div>
+    <div class="card-grid" id="lista-competicoes"></div>
+  </section>
+
+  <section class="view" id="view-jogos">
+    <div class="section-head"><div class="eyebrow">Agenda</div><h2>Jogos e Resultados</h2><p>Calendário de jogos com placar, quando já realizados.</p></div>
+    <div class="panel"><table><thead><tr><th>Data</th><th>Competição</th><th>Rodada</th><th>Mandante</th><th></th><th>Visitante</th><th>Local</th><th>Situação</th></tr></thead><tbody id="tbl-jogos"></tbody></table></div>
+  </section>
+
+  <section class="view" id="view-classificacao">
+    <div class="section-head"><div class="eyebrow">Tabela</div><h2>Classificação</h2><p>Ranking calculado automaticamente a partir dos jogos já realizados.</p></div>
+    <div class="panel">
+      <div class="field" style="margin-bottom:16px;"><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;">Competição</label><select id="cls-competicao" onchange="loadClassificacao()"><option value="">Selecione...</option></select></div>
+      <table><thead><tr><th>#</th><th>Equipe</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>Saldo</th></tr></thead><tbody id="tbl-classificacao"></tbody></table>
+    </div>
+  </section>
+
+  <section class="view" id="view-escolinhas">
+    <div class="section-head"><div class="eyebrow">Formação</div><h2>Escolinhas e Modalidades</h2><p>Onde treinar, com quem falar e como se inscrever.</p></div>
+    <div class="card-grid" id="lista-escolinhas"></div>
+    <div class="section-head"><div class="eyebrow">Infraestrutura</div><h2>Espaços Esportivos</h2><p>Ginásios, quadras, campos e centros esportivos do município.</p></div>
+    <div class="card-grid" id="lista-espacos"></div>
+  </section>
+
+  <section class="view" id="view-destaques">
+    <div class="section-head"><div class="eyebrow">Reconhecimento</div><h2>Equipes e Atletas de Destaque</h2><p>Equipes com títulos conquistados e atletas premiados em competições.</p></div>
+    <div class="panel"><h3>Equipes com títulos</h3><div id="lista-equipes-destaque"></div></div>
+    <div class="panel"><h3>Atletas premiados</h3><div id="lista-atletas-destaque"></div></div>
+  </section>
+
+</main>
+
+<footer>Conecta Gestão — Secretaria de Esporte · Prefeitura de Ivatuba — dados públicos, atualizados em tempo real</footer>
+
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co", SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function pill(s,label){return'<span class="status-pill status-'+(s||'')+'">'+(label||s||'—')+'</span>';}
+
+const VIEWS=[['inicio','Início'],['competicoes','Competições'],['jogos','Jogos'],['classificacao','Classificação'],['escolinhas','Escolinhas'],['destaques','Destaques']];
+let currentView='inicio', modalidadeAtual='';
+let caches={modalidades:[],equipes:[],competicoes:[]};
+
+function buildNav(){
+  document.getElementById('nav-links').innerHTML=VIEWS.map(([k,l])=>'<button class="nav-item'+(k===currentView?' active':'')+'" data-key="'+k+'" onclick="nav(\''+k+'\')">'+l+'</button>').join('');
+}
+function nav(key){
+  currentView=key;
+  document.querySelectorAll('.nav-links button').forEach(b=>b.classList.toggle('active',b.dataset.key===key));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+key));
+  render();
+}
+
+function renderModTabs(){
+  document.getElementById('mod-tabs').innerHTML=
+    '<button class="mod-tab'+(modalidadeAtual===''?' active':'')+'" onclick="filtrarModalidade(\'\')">Todas as modalidades</button>'+
+    caches.modalidades.map(m=>'<button class="mod-tab'+(modalidadeAtual===m.id?' active':'')+'" onclick="filtrarModalidade(\''+m.id+'\')">'+m.nome+'</button>').join('');
+}
+async function loadModalidades(){
+  try{ caches.modalidades=await sbGet('esporte_modalidades','select=id,nome&situacao=eq.ativa&order=nome.asc'); }catch(e){ caches.modalidades=[]; }
+  renderModTabs();
+}
+function filtrarModalidade(id){ modalidadeAtual=id; renderModTabs(); render(); }
+
+function render(){
+  if(currentView==='inicio')loadInicio();
+  else if(currentView==='competicoes')loadCompeticoes();
+  else if(currentView==='jogos')loadJogos();
+  else if(currentView==='classificacao')loadClassificacaoOpcoes();
+  else if(currentView==='escolinhas')loadEscolinhasEspacos();
+  else if(currentView==='destaques')loadDestaques();
+}
+
+async function loadInicio(){
+  const el=document.getElementById('kpi-inicio');
+  try{
+    const [comp,jog,esc,equ]=await Promise.all([
+      sbGet('esporte_competicoes','select=id,situacao'),
+      sbGet('esporte_jogos','select=id,situacao'),
+      sbGet('esporte_escolinhas','select=id,inscritos'),
+      sbGet('esporte_equipes','select=id,titulos'),
+    ]);
+    const andamento=comp.filter(c=>c.situacao==='em_andamento').length;
+    const agendados=jog.filter(j=>j.situacao==='agendado').length;
+    const inscritos=esc.reduce((s,e)=>s+(Number(e.inscritos)||0),0);
+    const titulos=equ.reduce((s,e)=>s+(Number(e.titulos)||0),0);
+    el.innerHTML=
+      '<div class="kpi"><div class="num">'+andamento+'</div><div class="lbl">competições em andamento</div></div>'+
+      '<div class="kpi"><div class="num">'+agendados+'</div><div class="lbl">jogos agendados</div></div>'+
+      '<div class="kpi"><div class="num">'+inscritos+'</div><div class="lbl">alunos nas escolinhas</div></div>'+
+      '<div class="kpi"><div class="num">'+titulos+'</div><div class="lbl">títulos conquistados</div></div>';
+  }catch(e){ el.innerHTML='<div class="empty">Não foi possível carregar os números agora.</div>'; }
+}
+
+async function loadCompeticoes(){
+  const el=document.getElementById('lista-competicoes');
+  el.innerHTML='<div class="empty">Carregando...</div>';
+  try{
+    let q='select=*&order=periodo_inicio.desc.nullslast';
+    if(modalidadeAtual)q+='&modalidade_id=eq.'+modalidadeAtual;
+    const data=await sbGet('esporte_competicoes',q);
+    caches.competicoes=data;
+    el.innerHTML=data.length?data.map(c=>
+      '<div class="card"><div class="tag">'+(c.tipo==='campeonato'?'Campeonato':'Competição')+(c.edicao?' · '+c.edicao:'')+'</div><h3>'+c.nome+'</h3>'+
+      '<p>'+(c.local||'Local a definir')+'</p>'+
+      '<div class="meta"><span>'+fmtDate(c.periodo_inicio)+(c.periodo_fim?' — '+fmtDate(c.periodo_fim):'')+'</span>'+pill(c.situacao,{planejada:'Planejada',em_andamento:'Em andamento',concluida:'Concluída',cancelada:'Cancelada'}[c.situacao])+'</div></div>'
+    ).join(''):'<div class="empty">Nenhuma competição cadastrada'+(modalidadeAtual?' para esta modalidade':'')+' no momento.</div>';
+  }catch(e){ el.innerHTML='<div class="empty">Erro ao carregar competições.</div>'; }
+}
+
+async function loadJogos(){
+  const tb=document.getElementById('tbl-jogos');
+  tb.innerHTML='<tr><td colspan="8" class="empty">Carregando...</td></tr>';
+  try{
+    const [equipes,competicoes]=await Promise.all([
+      sbGet('esporte_equipes','select=id,nome,modalidade_id'),
+      sbGet('esporte_competicoes','select=id,nome,modalidade_id'),
+    ]);
+    let equipeIds=equipes.map(e=>e.id);
+    let compIds=competicoes.map(c=>c.id);
+    if(modalidadeAtual){
+      equipeIds=equipes.filter(e=>e.modalidade_id===modalidadeAtual).map(e=>e.id);
+      compIds=competicoes.filter(c=>c.modalidade_id===modalidadeAtual).map(c=>c.id);
+    }
+    const nomeEquipe={};equipes.forEach(e=>nomeEquipe[e.id]=e.nome);
+    const nomeComp={};competicoes.forEach(c=>nomeComp[c.id]=c.nome);
+    let jogos=await sbGet('esporte_jogos','select=*&order=data.desc.nullslast&limit=200');
+    if(modalidadeAtual)jogos=jogos.filter(j=>compIds.includes(j.competicao_id));
+    tb.innerHTML=jogos.length?jogos.map(j=>
+      '<tr><td>'+fmtDate(j.data)+'</td><td>'+(nomeComp[j.competicao_id]||'—')+'</td><td>'+(j.rodada||'—')+'</td>'+
+      '<td>'+(nomeEquipe[j.equipe_mandante_id]||'—')+'</td>'+
+      '<td style="text-align:center;font-weight:700;">'+(j.placar_mandante!=null&&j.placar_visitante!=null?j.placar_mandante+' × '+j.placar_visitante:'×')+'</td>'+
+      '<td>'+(j.equipe_visitante_id?(nomeEquipe[j.equipe_visitante_id]||'—'):'<em>bye</em>')+'</td>'+
+      '<td>'+(j.local||'—')+'</td><td>'+pill(j.situacao,{agendado:'Agendado',realizado:'Realizado',cancelado:'Cancelado',adiado:'Adiado'}[j.situacao])+'</td></tr>'
+    ).join(''):'<tr><td colspan="8" class="empty">Nenhum jogo cadastrado'+(modalidadeAtual?' para esta modalidade':'')+'.</td></tr>';
+  }catch(e){ tb.innerHTML='<tr><td colspan="8" class="empty">Erro ao carregar jogos.</td></tr>'; }
+}
+
+async function loadClassificacaoOpcoes(){
+  try{
+    let comps=await sbGet('esporte_competicoes','select=id,nome,modalidade_id&order=nome.asc');
+    if(modalidadeAtual)comps=comps.filter(c=>c.modalidade_id===modalidadeAtual);
+    document.getElementById('cls-competicao').innerHTML='<option value="">Selecione...</option>'+comps.map(c=>'<option value="'+c.id+'">'+c.nome+'</option>').join('');
+    document.getElementById('tbl-classificacao').innerHTML='<tr><td colspan="8" class="empty">Selecione uma competição.</td></tr>';
+  }catch(e){}
+}
+async function loadClassificacao(){
+  const compId=document.getElementById('cls-competicao').value;
+  const tb=document.getElementById('tbl-classificacao');
+  if(!compId){ tb.innerHTML='<tr><td colspan="8" class="empty">Selecione uma competição.</td></tr>'; return; }
+  try{
+    const [jogos,equipes]=await Promise.all([
+      sbGet('esporte_jogos','select=*&competicao_id=eq.'+compId+'&situacao=eq.realizado'),
+      sbGet('esporte_equipes','select=id,nome'),
+    ]);
+    const nomeEquipe={};equipes.forEach(e=>nomeEquipe[e.id]=e.nome);
+    const tab={};
+    function ensure(id){ if(!tab[id])tab[id]={equipe:nomeEquipe[id]||'—',pts:0,j:0,v:0,e:0,d:0,gp:0,gc:0}; return tab[id]; }
+    jogos.forEach(j=>{
+      if(j.equipe_mandante_id==null||j.equipe_visitante_id==null||j.placar_mandante==null||j.placar_visitante==null)return;
+      const m=ensure(j.equipe_mandante_id), vv=ensure(j.equipe_visitante_id);
+      m.j++;vv.j++;m.gp+=j.placar_mandante;m.gc+=j.placar_visitante;vv.gp+=j.placar_visitante;vv.gc+=j.placar_mandante;
+      if(j.placar_mandante>j.placar_visitante){m.v++;m.pts+=3;vv.d++;}
+      else if(j.placar_mandante<j.placar_visitante){vv.v++;vv.pts+=3;m.d++;}
+      else{m.e++;vv.e++;m.pts++;vv.pts++;}
+    });
+    const rows=Object.values(tab).sort((a,b)=>b.pts-a.pts||(b.gp-b.gc)-(a.gp-a.gc));
+    tb.innerHTML=rows.length?rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+r.equipe+'</td><td><strong>'+r.pts+'</strong></td><td>'+r.j+'</td><td>'+r.v+'</td><td>'+r.e+'</td><td>'+r.d+'</td><td>'+(r.gp-r.gc)+'</td></tr>').join(''):'<tr><td colspan="8" class="empty">Ainda não há jogos realizados nesta competição.</td></tr>';
+  }catch(e){ tb.innerHTML='<tr><td colspan="8" class="empty">Erro ao calcular a classificação.</td></tr>'; }
+}
+
+async function loadEscolinhasEspacos(){
+  const elEsc=document.getElementById('lista-escolinhas');
+  const elEsp=document.getElementById('lista-espacos');
+  elEsc.innerHTML='<div class="empty">Carregando...</div>'; elEsp.innerHTML='<div class="empty">Carregando...</div>';
+  try{
+    let escolinhas=await sbGet('esporte_escolinhas','select=*&situacao=eq.ativa&order=nome.asc');
+    if(modalidadeAtual)escolinhas=escolinhas.filter(e=>e.modalidade_id===modalidadeAtual);
+    elEsc.innerHTML=escolinhas.length?escolinhas.map(e=>
+      '<div class="card"><div class="tag">Escolinha</div><h3>'+e.nome+'</h3><p>'+(e.local||'Local a definir')+(e.professor?' · Prof. '+e.professor:'')+'</p>'+
+      '<div class="meta"><span>'+(e.dias||'—')+' '+(e.horarios||'')+'</span><span>'+(e.capacidade?e.inscritos+'/'+e.capacidade+' vagas':(e.inscritos||0)+' inscritos')+'</span></div></div>'
+    ).join(''):'<div class="empty">Nenhuma escolinha ativa'+(modalidadeAtual?' para esta modalidade':'')+'.</div>';
+  }catch(e){ elEsc.innerHTML='<div class="empty">Erro ao carregar escolinhas.</div>'; }
+  try{
+    const espacos=await sbGet('esporte_espacos','select=*&situacao=eq.ativo&order=nome.asc');
+    elEsp.innerHTML=espacos.length?espacos.map(e=>
+      '<div class="card"><div class="tag">'+({ginasio:'Ginásio',quadra:'Quadra',campo:'Campo',estadio:'Estádio',pista:'Pista',centro_esportivo:'Centro esportivo',academia:'Academia',comunitario:'Espaço comunitário',outro:'Espaço'}[e.tipo]||'Espaço')+'</div><h3>'+e.nome+'</h3><p>'+(e.endereco||'Endereço não informado')+'</p>'+
+      '<div class="meta"><span>'+(e.horario_funcionamento||'Horário a confirmar')+'</span>'+(e.capacidade?'<span>Capacidade: '+e.capacidade+'</span>':'')+'</div></div>'
+    ).join(''):'<div class="empty">Nenhum espaço esportivo cadastrado.</div>';
+  }catch(e){ elEsp.innerHTML='<div class="empty">Erro ao carregar espaços.</div>'; }
+}
+
+async function loadDestaques(){
+  const elEqu=document.getElementById('lista-equipes-destaque');
+  const elAtl=document.getElementById('lista-atletas-destaque');
+  elEqu.innerHTML='<div class="empty">Carregando...</div>'; elAtl.innerHTML='<div class="empty">Carregando...</div>';
+  try{
+    let equipes=await sbGet('esporte_equipes','select=*&titulos=gt.0&order=titulos.desc');
+    if(modalidadeAtual)equipes=equipes.filter(e=>e.modalidade_id===modalidadeAtual);
+    elEqu.innerHTML=equipes.length?'<table><thead><tr><th>Equipe</th><th>Títulos</th><th>Vitórias</th><th>Empates</th><th>Derrotas</th></tr></thead><tbody>'+
+      equipes.map(e=>'<tr><td>'+e.nome+'</td><td><strong>'+e.titulos+'</strong></td><td>'+(e.vitorias||0)+'</td><td>'+(e.empates||0)+'</td><td>'+(e.derrotas||0)+'</td></tr>').join('')+'</tbody></table>'
+      :'<div class="empty">Nenhuma equipe com título registrado ainda.</div>';
+  }catch(e){ elEqu.innerHTML='<div class="empty">Erro ao carregar equipes.</div>'; }
+  try{
+    const [resultados,atletas]=await Promise.all([
+      sbGet('esporte_resultados','select=*&medalha=neq.&order=data.desc&limit=50'),
+      sbGet('esporte_atletas_publico','select=id,nome,modalidade_id'),
+    ]);
+    const nomeAtleta={};atletas.forEach(a=>nomeAtleta[a.id]=a.nome);
+    let lista=resultados.filter(r=>r.medalha);
+    if(modalidadeAtual)lista=lista.filter(r=>r.modalidade_id===modalidadeAtual);
+    elAtl.innerHTML=lista.length?'<table><thead><tr><th>Atleta</th><th>Medalha</th><th>Colocação</th><th>Data</th></tr></thead><tbody>'+
+      lista.map(r=>'<tr><td>'+(nomeAtleta[r.atleta_id]||'Atleta')+'</td><td>'+pill(r.medalha,{ouro:'🥇 Ouro',prata:'🥈 Prata',bronze:'🥉 Bronze'}[r.medalha])+'</td><td>'+(r.colocacao||'—')+'</td><td>'+fmtDate(r.data)+'</td></tr>').join('')+'</tbody></table>'
+      :'<div class="empty">Nenhum resultado premiado registrado ainda.</div>';
+  }catch(e){ elAtl.innerHTML='<div class="empty">Erro ao carregar atletas.</div>'; }
+}
+
+buildNav();
+loadModalidades().then(loadInicio);
+</script>
+</body>
+</html>
