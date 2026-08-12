@@ -148,7 +148,7 @@ const NAV_GROUPS=[
   {label:'Geral',items:[['dashboard_esp','Dashboard'],['secretaria_esp','Secretaria']]},
   {label:'Estrutura Esportiva',items:[['modalidades','Modalidades'],['categorias','Categorias'],['equipes','Equipes'],['profissionais','Professores e Técnicos'],['atletas','Atletas']]},
   {label:'Formação',items:[['escolinhas','Escolinhas'],['projetos_esp','Projetos Esportivos'],['treinamentos','Treinamentos']]},
-  {label:'Competições',items:[['competicoes','Competições e Campeonatos'],['jogos','Jogos'],['resultados','Resultados'],['classificacoes','Classificações'],['arbitragem','Arbitragem']]},
+  {label:'Competições',items:[['competicoes','Competições e Campeonatos'],['jogos','Jogos'],['jogo_eventos','Gols e Cartões'],['resultados','Resultados'],['classificacoes','Classificações'],['arbitragem','Arbitragem']]},
   {label:'Eventos',items:[['eventos_esp','Eventos Esportivos'],['inscricoes','Inscrições']]},
   {label:'Infraestrutura',items:[['espacos','Espaços Esportivos'],['reservas','Reservas'],['manutencao_esp','Manutenção']]},
   {label:'Materiais e Logística',items:[['materiais','Materiais Esportivos'],['uniformes','Uniformes'],['estoque_esp','Estoque'],['estoque_mov_esp','Movimentações Estoque'],['transporte_esp','Transporte'],['frota_esp','Frota'],['frota_abast_esp','Abastecimentos'],['frota_manut_esp','Manutenções Frota']]},
@@ -204,6 +204,7 @@ const MODULES={
     {id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},{id:'escola',label:'Escola'},{id:'bairro',label:'Bairro'},{id:'contato',label:'Contato'},
     {id:'responsavel_nome',label:'Responsável (se menor)'},{id:'responsavel_contato',label:'Contato do responsável'},
     {id:'nivel_esportivo',label:'Nível esportivo'},
+    {id:'posicao',label:'Posição',type:'select',opts:[['','Não informada'],['goleiro','Goleiro'],['defensor','Defensor'],['meio_campo','Meio-campo'],['atacante','Atacante'],['outro','Outro']]},
     {id:'situacao',label:'Situação',type:'select',opts:[['ativo','Ativo'],['inativo','Inativo']]}
   ],cols:['nome','bairro','nivel_esportivo','situacao'],colLabels:['Nome','Bairro','Nível','Situação'],
   renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]||'—')},
@@ -251,6 +252,14 @@ const MODULES={
     {id:'situacao',label:'Situação',type:'select',opts:[['agendado','Agendado'],['realizado','Realizado'],['cancelado','Cancelado'],['adiado','Adiado']]}
   ],cols:['data','rodada','local','placar_mandante','placar_visitante','situacao'],colLabels:['Data','Rodada','Local','Placar M.','Placar V.','Situação'],
   renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='situacao'?pill(r.situacao):(r[c]??'—'),query:'order=data.desc.nullslast'},
+
+  jogo_eventos:{table:'esporte_jogo_eventos',title:'Gols e Cartões',fields:[
+    {id:'jogo_id',label:'Jogo',type:'ref',ref:'jogos_esp',required:true},{id:'competicao_id',label:'Competição',type:'ref',ref:'competicoes_esp'},
+    {id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},{id:'atleta_id',label:'Atleta',type:'ref',ref:'atletas_esp'},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['gol','Gol'],['cartao_amarelo','Cartão amarelo'],['cartao_vermelho','Cartão vermelho (expulsão)']],required:true},
+    {id:'minuto',label:'Minuto',type:'number'}
+  ],cols:['tipo','minuto'],colLabels:['Tipo','Minuto'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo,{gol:'⚽ Gol',cartao_amarelo:'🟨 Amarelo',cartao_vermelho:'🟥 Vermelho'}[r.tipo]):(r[c]??'—'),query:'order=criado_em.desc'},
 
   resultados:{table:'esporte_resultados',title:'Resultados',fields:[
     {id:'atleta_id',label:'Atleta',type:'ref',ref:'atletas_esp'},{id:'equipe_id',label:'Equipe',type:'ref',ref:'equipes_esp'},
@@ -452,8 +461,8 @@ const MODULES={
   renderCol:(r,c)=>c==='data'?fmtDate(r.data):(r[c]||'—'),query:'order=data.desc.nullslast'},
 };
 
-const REF_TABLES={modalidades_esp:'esporte_modalidades',categorias_esp:'esporte_categorias',equipes_esp:'esporte_equipes',atletas_esp:'esporte_atletas',competicoes_esp:'esporte_competicoes',eventos_esp:'esporte_eventos',espacos_esp:'esporte_espacos',frota_esp:'esporte_frota',estoque_esp:'esporte_estoque'};
-const REF_LABEL_FIELD={modalidades_esp:'nome',categorias_esp:'nome',equipes_esp:'nome',atletas_esp:'nome',competicoes_esp:'nome',eventos_esp:'nome',espacos_esp:'nome',frota_esp:'veiculo',estoque_esp:'material'};
+const REF_TABLES={modalidades_esp:'esporte_modalidades',categorias_esp:'esporte_categorias',equipes_esp:'esporte_equipes',atletas_esp:'esporte_atletas',competicoes_esp:'esporte_competicoes',eventos_esp:'esporte_eventos',espacos_esp:'esporte_espacos',frota_esp:'esporte_frota',estoque_esp:'esporte_estoque',jogos_esp:'esporte_jogos'};
+const REF_LABEL_FIELD={modalidades_esp:'nome',categorias_esp:'nome',equipes_esp:'nome',atletas_esp:'nome',competicoes_esp:'nome',eventos_esp:'nome',espacos_esp:'nome',frota_esp:'veiculo',estoque_esp:'material',jogos_esp:'rodada'};
 async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await sbGet(REF_TABLES[k],'select=id,'+REF_LABEL_FIELD[k]+'&order='+REF_LABEL_FIELD[k]+'.asc');caches[k]=d;return d;}catch(e){return[];}}
 
 function buildViews(){
@@ -490,7 +499,10 @@ function buildViews(){
     m.colLabels.forEach(l=>{html+='<th>'+l+'</th>';});
     html+='<th></th></tr></thead><tbody id="tbl-'+key+'"></tbody></table></div></div></section>';
   });
-  html+='<section class="view" id="view-classificacoes"><div class="topbar"><div><h1>Classificações</h1><div class="sub">Ranking calculado automaticamente a partir dos jogos realizados</div></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Competição</label><select id="cls-competicao" onchange="loadClassificacoes()"><option value="">Selecione uma competição...</option></select></div></div><div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Equipe</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>Saldo</th></tr></thead><tbody id="tbl-classificacoes"></tbody></table></div></div></section>';
+  html+='<section class="view" id="view-classificacoes"><div class="topbar"><div><h1>Classificações</h1><div class="sub">Ranking, artilharia, cartões e relatório do campeonato — calculados a partir dos jogos realizados</div></div><div><button class="btn-ghost" onclick="gerarRelatorioCampeonato()">📄 Relatório do campeonato (PDF)</button></div></div><div class="panel"><div class="form-grid"><div class="field span-2"><label>Competição</label><select id="cls-competicao" onchange="loadClassificacoes()"><option value="">Selecione uma competição...</option></select></div></div><div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Equipe</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>Saldo</th></tr></thead><tbody id="tbl-classificacoes"></tbody></table></div></div>'+
+    '<div class="grid-2"><div class="panel"><h3>⚽ Artilharia</h3><p class="panel-sub" id="cls-artilheiros-sub">Selecione uma competição.</p><div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Atleta</th><th>Equipe</th><th>Gols</th></tr></thead><tbody id="tbl-artilheiros"></tbody></table></div></div>'+
+    '<div class="panel"><h3>🧤 Goleiro menos vazado</h3><p class="panel-sub" id="cls-goleiros-sub">Considera os jogos da equipe do goleiro na competição.</p><div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Goleiro</th><th>Equipe</th><th>Gols sofridos</th><th>Jogos</th></tr></thead><tbody id="tbl-goleiros"></tbody></table></div></div></div>'+
+    '<div class="panel"><h3>🟨🟥 Cartões e expulsões</h3><p class="panel-sub" id="cls-cartoes-sub">Cartão vermelho = expulsão.</p><div style="overflow-x:auto;"><table><thead><tr><th>Atleta</th><th>Equipe</th><th>Amarelos</th><th>Vermelhos (expulsões)</th></tr></thead><tbody id="tbl-cartoes"></tbody></table></div></div></section>';
   html+='<section class="view" id="view-relatorios_esp"><div class="topbar"><div><h1>Relatórios</h1></div></div><div class="panel"><h3>Exportar relatórios</h3><div class="form-grid">';
   Object.keys(MODULES).forEach(k=>{html+='<div class="field"><button class="btn-ghost" style="width:100%;" onclick="exportPdf(\''+k+'\')">'+MODULES[k].title+' (PDF)</button></div>';});
   html+='</div></div></section>';
@@ -589,28 +601,96 @@ function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)ret
   el.innerHTML=h;}
 
 async function loadClassificacoesOptions(){try{const comps=await sbGet('esporte_competicoes','select=id,nome&order=nome.asc');document.getElementById('cls-competicao').innerHTML='<option value="">Selecione uma competição...</option>'+comps.map(c=>'<option value="'+c.id+'">'+c.nome+'</option>').join('');}catch(e){}}
+async function calcularStatsCampeonato(compId){
+  const [jogos,equipes,atletas,eventos,comp]=await Promise.all([
+    sbGet('esporte_jogos','select=*&competicao_id=eq.'+compId+'&situacao=eq.realizado'),
+    sbGet('esporte_equipes','select=id,nome'),
+    sbGet('esporte_atletas','select=id,nome,equipe_id,posicao'),
+    sbGet('esporte_jogo_eventos','select=*&competicao_id=eq.'+compId),
+    sbGet('esporte_competicoes','select=nome&id=eq.'+compId),
+  ]);
+  const nomeEquipe={};equipes.forEach(e=>nomeEquipe[e.id]=e.nome);
+  const nomeAtleta={};const equipeAtleta={};const posicaoAtleta={};
+  atletas.forEach(a=>{nomeAtleta[a.id]=a.nome;equipeAtleta[a.id]=a.equipe_id;posicaoAtleta[a.id]=a.posicao;});
+
+  // Classificação
+  const tab={};
+  function ensure(id){if(!tab[id])tab[id]={equipe:nomeEquipe[id]||'—',pts:0,j:0,v:0,e:0,d:0,gp:0,gc:0};return tab[id];}
+  jogos.forEach(j=>{
+    if(j.equipe_mandante_id==null||j.equipe_visitante_id==null||j.placar_mandante==null||j.placar_visitante==null)return;
+    const m=ensure(j.equipe_mandante_id),vv=ensure(j.equipe_visitante_id);
+    m.j++;vv.j++;m.gp+=j.placar_mandante;m.gc+=j.placar_visitante;vv.gp+=j.placar_visitante;vv.gc+=j.placar_mandante;
+    if(j.placar_mandante>j.placar_visitante){m.v++;m.pts+=3;vv.d++;}
+    else if(j.placar_mandante<j.placar_visitante){vv.v++;vv.pts+=3;m.d++;}
+    else{m.e++;vv.e++;m.pts++;vv.pts++;}
+  });
+  const classificacao=Object.values(tab).sort((a,b)=>b.pts-a.pts||(b.gp-b.gc)-(a.gp-a.gc));
+
+  // Goleiro menos vazado: soma dos gols sofridos pela equipe do goleiro nos jogos realizados dessa competição
+  const golsSofridosEquipe={};
+  jogos.forEach(j=>{
+    if(j.equipe_mandante_id==null||j.equipe_visitante_id==null||j.placar_mandante==null||j.placar_visitante==null)return;
+    golsSofridosEquipe[j.equipe_mandante_id]=(golsSofridosEquipe[j.equipe_mandante_id]||0)+j.placar_visitante;
+    golsSofridosEquipe[j.equipe_visitante_id]=(golsSofridosEquipe[j.equipe_visitante_id]||0)+j.placar_mandante;
+  });
+  const goleiros=atletas.filter(a=>a.posicao==='goleiro'&&a.equipe_id&&tab[a.equipe_id]).map(a=>({
+    nome:a.nome,equipe:nomeEquipe[a.equipe_id]||'—',golsSofridos:golsSofridosEquipe[a.equipe_id]||0,jogos:tab[a.equipe_id]?tab[a.equipe_id].j:0,
+  })).sort((a,b)=>a.golsSofridos-b.golsSofridos||b.jogos-a.jogos);
+
+  // Artilharia e cartões, a partir dos eventos lançados jogo a jogo
+  const golsAtleta={},amarelosAtleta={},vermelhosAtleta={};
+  eventos.forEach(ev=>{
+    if(!ev.atleta_id)return;
+    if(ev.tipo==='gol')golsAtleta[ev.atleta_id]=(golsAtleta[ev.atleta_id]||0)+1;
+    else if(ev.tipo==='cartao_amarelo')amarelosAtleta[ev.atleta_id]=(amarelosAtleta[ev.atleta_id]||0)+1;
+    else if(ev.tipo==='cartao_vermelho')vermelhosAtleta[ev.atleta_id]=(vermelhosAtleta[ev.atleta_id]||0)+1;
+  });
+  const artilheiros=Object.keys(golsAtleta).map(id=>({nome:nomeAtleta[id]||'—',equipe:nomeEquipe[equipeAtleta[id]]||'—',gols:golsAtleta[id]})).sort((a,b)=>b.gols-a.gols);
+  const idsComCartao=new Set([...Object.keys(amarelosAtleta),...Object.keys(vermelhosAtleta)]);
+  const cartoes=[...idsComCartao].map(id=>({nome:nomeAtleta[id]||'—',equipe:nomeEquipe[equipeAtleta[id]]||'—',amarelos:amarelosAtleta[id]||0,vermelhos:vermelhosAtleta[id]||0})).sort((a,b)=>b.vermelhos-a.vermelhos||b.amarelos-a.amarelos);
+
+  return {nomeCompeticao:(comp[0]&&comp[0].nome)||'Competição',classificacao,artilheiros,goleiros,cartoes};
+}
+
 async function loadClassificacoes(){
   const compId=document.getElementById('cls-competicao').value;const tb=document.getElementById('tbl-classificacoes');
-  if(!compId){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Selecione uma competição.</td></tr>';return;}
+  const tbArt=document.getElementById('tbl-artilheiros'),tbGol=document.getElementById('tbl-goleiros'),tbCar=document.getElementById('tbl-cartoes');
+  if(!compId){
+    tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Selecione uma competição.</td></tr>';
+    tbArt.innerHTML=tbGol.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Selecione uma competição.</td></tr>';
+    tbCar.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Selecione uma competição.</td></tr>';
+    return;
+  }
   try{
-    const [jogos,equipes]=await Promise.all([
-      sbGet('esporte_jogos','select=*&competicao_id=eq.'+compId+'&situacao=eq.realizado'),
-      sbGet('esporte_equipes','select=id,nome'),
-    ]);
-    const nomeEquipe={};equipes.forEach(e=>nomeEquipe[e.id]=e.nome);
-    const tab={};
-    function ensure(id){if(!tab[id])tab[id]={equipe:nomeEquipe[id]||'—',pts:0,j:0,v:0,e:0,d:0,gp:0,gc:0};return tab[id];}
-    jogos.forEach(j=>{
-      if(j.equipe_mandante_id==null||j.equipe_visitante_id==null||j.placar_mandante==null||j.placar_visitante==null)return;
-      const m=ensure(j.equipe_mandante_id),vv=ensure(j.equipe_visitante_id);
-      m.j++;vv.j++;m.gp+=j.placar_mandante;m.gc+=j.placar_visitante;vv.gp+=j.placar_visitante;vv.gc+=j.placar_mandante;
-      if(j.placar_mandante>j.placar_visitante){m.v++;m.pts+=3;vv.d++;}
-      else if(j.placar_mandante<j.placar_visitante){vv.v++;vv.pts+=3;m.d++;}
-      else{m.e++;vv.e++;m.pts++;vv.pts++;}
-    });
-    const rows=Object.values(tab).sort((a,b)=>b.pts-a.pts||(b.gp-b.gc)-(a.gp-a.gc));
-    tb.innerHTML=rows.length?rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+r.equipe+'</td><td><strong>'+r.pts+'</strong></td><td>'+r.j+'</td><td>'+r.v+'</td><td>'+r.e+'</td><td>'+r.d+'</td><td>'+(r.gp-r.gc)+'</td></tr>').join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Dados insuficientes para cálculo — nenhum jogo realizado cadastrado para esta competição.</td></tr>';
+    const s=await calcularStatsCampeonato(compId);
+    tb.innerHTML=s.classificacao.length?s.classificacao.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+r.equipe+'</td><td><strong>'+r.pts+'</strong></td><td>'+r.j+'</td><td>'+r.v+'</td><td>'+r.e+'</td><td>'+r.d+'</td><td>'+(r.gp-r.gc)+'</td></tr>').join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Dados insuficientes para cálculo — nenhum jogo realizado cadastrado para esta competição.</td></tr>';
+    tbArt.innerHTML=s.artilheiros.length?s.artilheiros.slice(0,15).map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+r.nome+'</td><td>'+r.equipe+'</td><td><strong>'+r.gols+'</strong></td></tr>').join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Nenhum gol lançado em "Gols e Cartões" pra esta competição ainda.</td></tr>';
+    tbGol.innerHTML=s.goleiros.length?s.goleiros.slice(0,10).map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+r.nome+'</td><td>'+r.equipe+'</td><td><strong>'+r.golsSofridos+'</strong></td><td>'+r.jogos+'</td></tr>').join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Nenhum atleta cadastrado com posição "Goleiro" numa equipe com jogos nesta competição.</td></tr>';
+    tbCar.innerHTML=s.cartoes.length?s.cartoes.map(r=>'<tr><td>'+r.nome+'</td><td>'+r.equipe+'</td><td>'+r.amarelos+'</td><td>'+(r.vermelhos?'<strong style="color:var(--danger);">'+r.vermelhos+'</strong>':'0')+'</td></tr>').join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Nenhum cartão lançado em "Gols e Cartões" pra esta competição ainda.</td></tr>';
   }catch(e){tb.innerHTML='<tr><td colspan="8" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}
+}
+
+async function gerarRelatorioCampeonato(){
+  const compId=document.getElementById('cls-competicao').value;
+  if(!compId){alert('Selecione uma competição na tela de Classificações primeiro.');return;}
+  try{
+    const s=await calcularStatsCampeonato(compId);
+    const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');let y=20;
+    doc.setFontSize(18);doc.text('Relatório do Campeonato',14,y);y+=8;
+    doc.setFontSize(12);doc.text(s.nomeCompeticao,14,y);y+=6;
+    doc.setFontSize(9);doc.setTextColor(120);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,y);doc.setTextColor(0);y+=10;
+    function tabela(titulo,head,body){
+      if(y>260){doc.addPage();y=20;}
+      doc.setFontSize(13);doc.text(titulo,14,y);y+=4;
+      doc.autoTable({startY:y,head:[head],body,styles:{fontSize:8},margin:{left:14,right:14}});
+      y=doc.lastAutoTable.finalY+10;
+    }
+    tabela('Classificação',['#','Equipe','Pts','J','V','E','D','Saldo'],s.classificacao.map((r,i)=>[i+1,r.equipe,r.pts,r.j,r.v,r.e,r.d,r.gp-r.gc]));
+    tabela('Artilharia',['#','Atleta','Equipe','Gols'],s.artilheiros.length?s.artilheiros.slice(0,15).map((r,i)=>[i+1,r.nome,r.equipe,r.gols]):[['—','Nenhum gol lançado ainda','—','—']]);
+    tabela('Goleiro menos vazado',['#','Goleiro','Equipe','Gols sofridos','Jogos'],s.goleiros.length?s.goleiros.slice(0,10).map((r,i)=>[i+1,r.nome,r.equipe,r.golsSofridos,r.jogos]):[['—','Nenhum atleta com posição Goleiro cadastrado','—','—','—']]);
+    tabela('Cartões e expulsões',['Atleta','Equipe','Amarelos','Vermelhos (expulsões)'],s.cartoes.length?s.cartoes.map(r=>[r.nome,r.equipe,r.amarelos,r.vermelhos]):[['—','Nenhum cartão lançado ainda','—','—']]);
+    doc.save('relatorio_'+s.nomeCompeticao.replace(/[^a-zA-Z0-9]+/g,'_').toLowerCase()+'.pdf');
+  }catch(e){alert('Erro ao gerar relatório: '+e.message.slice(0,200));}
 }
 
 async function loadDashboard(){try{
