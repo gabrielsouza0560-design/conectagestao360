@@ -6,6 +6,8 @@
     { "source": "/saude", "destination": "/conecta-gestao-saude.html" },
     { "source": "/industria", "destination": "/conecta-gestao-industria-comercio.html" },
     { "source": "/educacao", "destination": "/conecta-gestao-educacao.html" },
-    { "source": "/esporte", "destination": "/conecta-gestao-esporte.html" }
+    { "source": "/esporte", "destination": "/conecta-gestao-esporte.html" },
+    { "source": "/defesa-civil", "destination": "/conecta-gestao-defesa-civil.html" },
+    { "source": "/ivatuba-protegida", "destination": "/conecta-gestao-ivatuba-protegida.html" }
   ]
 }

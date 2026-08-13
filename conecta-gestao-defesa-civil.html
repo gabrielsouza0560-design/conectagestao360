@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestão — Defesa Civil · Gabriel Oliveira</title>
+<meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#DC2626">
+<style>
+:root{--royal:#DC2626;--neon:#EF4444;--light:#F87171;--darkblue:#0F172A;--azul-escuro:#0F172A;--radius-lg:24px;--shadow-md:0 4px 14px rgba(15,23,42,.07),0 1px 3px rgba(15,23,42,.05);--ease:cubic-bezier(.22,1,.36,1);--bg:#F8FAFC;--surface:#FFFFFF;--ink:#0F172A;--ink-soft:#475569;--line:rgba(15,23,42,.08);--ok:#059669;--danger:#DC2626;--warn:#D97706;--muted:#94A3B8;--radius:18px;--sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;--shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);}
+*{box-sizing:border-box;}body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);}button{font-family:inherit;cursor:pointer;}select,input,textarea{font-family:inherit;}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--royal),var(--light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px rgba(220,38,38,.4);}
+#login-screen{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;}
+@media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+.login-brand{background:linear-gradient(150deg,var(--darkblue) 0%,#1E293B 45%,#7F1D1D 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:56px;position:relative;overflow:hidden;}
+.login-brand::after{content:'';position:absolute;right:-140px;bottom:-140px;width:420px;height:420px;background:radial-gradient(circle,rgba(248,113,113,.25),transparent 70%);}
+.brand-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+.brand-name{font-size:19px;font-weight:800;}.brand-name small{display:block;font-size:11px;letter-spacing:2px;color:#93A5C4;text-transform:uppercase;margin-top:2px;font-weight:600;}
+.brand-quote{position:relative;z-index:1;max-width:420px;}.brand-quote h1{font-weight:800;font-size:32px;line-height:1.28;margin:0 0 14px;}.brand-quote p{color:#B6C4DD;font-size:14.5px;line-height:1.7;margin:0;}
+.brand-foot{position:relative;z-index:1;font-size:12px;color:#7E93B8;}
+.login-form-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-form{width:100%;max-width:380px;}.login-form h2{font-size:25px;margin:0 0 6px;font-weight:800;}.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 28px;}
+.field{margin-bottom:18px;}.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:#fff;color:var(--ink);box-sizing:border-box;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(220,38,38,.12);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(220,38,38,.35);}
+.btn-primary:hover{transform:translateY(-1px);}.btn-primary:disabled{opacity:.6;pointer-events:none;}
+.login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}.login-error.show{display:block;}
+header{background:linear-gradient(150deg,var(--darkblue),#1E293B);color:#E2E8F0;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.hd-left{display:flex;align-items:center;gap:12px;}.hd-left .name{font-size:16px;font-weight:800;}.hd-left .name small{display:block;font-size:10px;letter-spacing:1.5px;color:#93A5C4;text-transform:uppercase;font-weight:600;}
+.hd-right{display:flex;align-items:center;gap:12px;font-size:12px;color:#B6C4DD;}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;}.btn-ghost:hover{border-color:var(--royal);color:var(--royal);}
+.btn-accent{background:linear-gradient(135deg,var(--royal),var(--neon));color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;box-shadow:0 4px 12px rgba(220,38,38,.35);}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;}.logout-btn:hover{border-color:var(--light);color:var(--light);}
+.back-btn{background:none;border:1px solid rgba(255,255,255,.25);color:#B6C4DD;padding:6px 12px;border-radius:8px;font-size:11.5px;text-decoration:none;}.back-btn:hover{border-color:var(--light);color:var(--light);}
+.app-body{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:240px;background:var(--darkblue);padding:12px 8px;overflow-y:auto;flex-shrink:0;}
+.sidebar::-webkit-scrollbar{width:4px;}.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+.nav-group-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:14px 10px 4px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:#B6C4DD;font-size:12px;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:background .15s;}
+.nav-item:hover{background:rgba(220,38,38,.12);}.nav-item.active{background:linear-gradient(90deg,rgba(220,38,38,.4),rgba(239,68,68,.15));color:#fff;font-weight:700;}
+main{flex:1;padding:28px 36px 60px;max-width:1300px;overflow-x:hidden;}
+@media(max-width:860px){.sidebar{display:none;}main{padding:20px;}}
+.view{display:none;}.view.active{display:block;}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.topbar h1{font-size:24px;margin:0 0 2px;font-weight:800;}.topbar .sub{font-size:12px;color:var(--muted);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:1000px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);transition:transform .2s var(--ease),box-shadow .2s var(--ease);}.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.kpi .ico{font-size:10px;color:var(--royal);text-transform:uppercase;letter-spacing:.8px;font-weight:800;margin-bottom:6px;}
+.kpi .num{font-size:22px;color:var(--ink);font-weight:800;}.kpi .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.panel h3{font-size:15px;margin:0 0 4px;font-weight:800;}.panel .panel-sub{font-size:12px;color:var(--muted);margin:0 0 14px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr;}}
+.field.span-2{grid-column:span 2;}.field.span-3{grid-column:span 3;}
+.form-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);font-weight:700;}
+td{padding:9px 8px;border-bottom:1px solid var(--line);}tr:last-child td{border-bottom:none;}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.status-ativa,.status-ativo,.status-disponivel,.status-resolvida,.status-encerrada_ok,.status-normal,.status-true{background:#D1FAE5;color:var(--ok);}
+.status-inativa,.status-inativo,.status-indisponivel,.status-falso,.status-false,.status-emergencia,.status-lotado{background:#FEF2F2;color:var(--danger);}
+.status-em_andamento,.status-atencao,.status-pendente,.status-aberta,.status-recebida,.status-em_analise,.status-equipe_acionada,.status-em_atendimento,.status-parcialmente_ocupado,.status-alerta{background:#FEF3C7;color:var(--warn);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:1000px){.grid-2{grid-template-columns:1fr;}}
+.diag{padding:14px;border-radius:12px;font-size:12.5px;line-height:1.6;margin-bottom:8px;}
+.diag-ok{background:#D1FAE5;border:1px solid rgba(5,150,105,.25);color:#065F46;}
+.diag-warn{background:#FEF3C7;border:1px solid rgba(217,119,6,.25);color:#92400E;}
+.diag-danger{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top"><div class="logo">CG</div><div class="brand-name"><span style="color:#F87171;">Conecta</span> <span style="color:#FCA5A5;">Gestão</span><small>Defesa Civil</small></div></div>
+    <div class="brand-quote"><h1>Ivatuba Protegida — Gestão da Defesa Civil.</h1><p>Alertas, ocorrências, abrigos, equipes, recursos e monitoramento climático — proteção inteligente para o município.</p></div>
+    <div class="brand-foot">CONECTA GESTÃO © 2026 — Uso restrito a servidores autorizados</div>
+  </div>
+  <div class="login-form-wrap"><div class="login-form">
+    <h2>Acessar</h2><p class="sub">Entre com sua conta institucional.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@prefeitura.gov.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="••••••••"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div></div>
+</div>
+<div id="app" style="display:none;">
+<header>
+  <div class="hd-left"><div class="logo">CG</div><div class="name"><span style="color:#F87171;">Conecta</span> <span style="color:#FCA5A5;">Gestão</span><small>Defesa Civil</small></div></div>
+  <div class="hd-right"><span id="hd-role"></span><a class="back-btn" href="conecta-gestao-painel-admin.html">← Painel</a><button class="logout-btn" onclick="doLogout()">Sair</button></div>
+</header>
+<div class="app-body">
+<aside class="sidebar" id="sidebar-nav"></aside>
+<main id="main-content"></main>
+</div>
+</div>
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+let session=null;
+function decodeJwt(t){try{const p=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join('')));}catch(e){return {};}}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),senha=document.getElementById('login-senha').value,err=document.getElementById('login-error'),btn=document.getElementById('login-btn');
+  err.classList.remove('show');if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json();if(!r.ok){err.textContent=d.error_description||'E-mail ou senha inválidos.';err.classList.add('show');return;}
+    session={access_token:d.access_token,claims:decodeJwt(d.access_token)};
+    try{localStorage.setItem('cg_session',JSON.stringify(session));}catch(e){}
+    enterApp();
+  }catch(e){err.textContent='Erro de conexão.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+function doLogout(){session=null;try{localStorage.removeItem('cg_session');}catch(e){}document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='grid';}
+function tryAutoLogin(){
+  try{const s=JSON.parse(localStorage.getItem('cg_session'));if(!s||!s.access_token)return false;
+    const c=decodeJwt(s.access_token);if(!c.exp||c.exp*1000<Date.now())return false;
+    session={access_token:s.access_token,claims:c};enterApp();return true;
+  }catch(e){return false;}
+}
+function enterApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('hd-role').textContent=(session.claims.perfil||'').replace('_',' ');buildNav();buildViews();navigateTo('dashboard_dc');}
+window.addEventListener('DOMContentLoaded',()=>{tryAutoLogin();});
+
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPost(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPatch(t,q,d){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbDel(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+q,{method:'DELETE',headers:{apikey:SB_KEY,Authorization:'Bearer '+session.access_token,'Content-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());}
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';}
+function moneyShort(v){if(!v)return'R$ 0';const n=Number(v);if(n>=1e6)return'R$ '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'R$ '+(n/1e3).toFixed(0)+'k';return'R$ '+n.toFixed(0);}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function fmtDateTime(d){if(!d)return'—';return new Date(d).toLocaleString('pt-BR');}
+function pill(s,label){return'<span class="status-pill status-'+(s||'')+'">'+(label||s||'—')+'</span>';}
+function parseMoney(v){if(!v)return null;return parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));}
+function tid(){return session.claims.tenant_id||'00000000-0000-0000-0000-000000000001';}
+function semDados(){return '<p style="color:var(--muted);font-size:12px;">Dados insuficientes.</p>';}
+
+const NAV_GROUPS=[
+  {label:'Geral',items:[['dashboard_dc','Dashboard'],['config_dc','Status do Município']]},
+  {label:'Emergência',items:[['telefones_dc','Telefones de Emergência'],['alertas_dc','Alertas Climáticos'],['ocorrencias_dc','Ocorrências'],['historico_oc','Histórico Ocorrências']]},
+  {label:'Infraestrutura',items:[['abrigos_dc','Abrigos'],['recursos_dc','Recursos e Materiais'],['equipes_dc','Equipes de Campo']]},
+  {label:'Comunicação',items:[['comunicados_dc','Comunicados'],['notificacoes_dc','Notificações']]},
+  {label:'Prevenção',items:[['pontos_risco','Pontos de Risco'],['eventos_hist','Eventos Históricos'],['preparacao_dc','Planos de Preparação']]},
+  {label:'Gestão',items:[['danos_dc','Avaliação de Danos'],['relatorios_dc','Relatórios'],['auditoria_dc','Auditoria']]},
+];
+let currentView='dashboard_dc';
+function buildNav(){let h='';NAV_GROUPS.forEach(g=>{h+='<div class="nav-group-label">'+g.label+'</div>';g.items.forEach(([k,l])=>{h+='<button class="nav-item'+(k==='dashboard_dc'?' active':'')+'" data-key="'+k+'" onclick="navigateTo(\''+k+'\')">'+l+'</button>';});});document.getElementById('sidebar-nav').innerHTML=h;}
+function navigateTo(key){currentView=key;document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.key===key));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+key));if(LOADERS[key])LOADERS[key]();}
+
+let caches={};
+const MODULES={
+  telefones_dc:{table:'dc_telefones',title:'Telefones de Emergência',fields:[
+    {id:'nome',label:'Nome / Serviço',span:2,required:true},{id:'numero',label:'Número',required:true},{id:'icone',label:'Ícone (emoji)'},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['emergencia','Emergência'],['utilidade','Utilidade'],['saude','Saúde'],['seguranca','Segurança'],['defesa_civil','Defesa Civil']]},
+    {id:'ordem',label:'Ordem de exibição',type:'number'},
+    {id:'ativo',label:'Ativo',type:'select',opts:[['true','Sim'],['false','Não']]}
+  ],cols:['nome','numero','tipo','ordem','ativo'],colLabels:['Nome','Número','Tipo','Ordem','Ativo'],
+  renderCol:(r,c)=>c==='ativo'?pill(String(r.ativo),r.ativo?'Sim':'Não'):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=ordem.asc.nullslast'},
+
+  alertas_dc:{table:'dc_alertas',title:'Alertas Climáticos',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},
+    {id:'nivel',label:'Nível',type:'select',opts:[['atencao','Atenção'],['alerta','Alerta'],['emergencia','Emergência']]},
+    {id:'descricao',label:'Descrição',span:3},{id:'recomendacoes',label:'Recomendações',span:3},
+    {id:'regiao_afetada',label:'Região afetada'},{id:'fonte',label:'Fonte'},
+    {id:'inicio',label:'Início',type:'datetime-local'},{id:'fim_previsto',label:'Fim previsto',type:'datetime-local'},
+    {id:'ativo',label:'Ativo',type:'select',opts:[['true','Sim'],['false','Não']]}
+  ],cols:['titulo','nivel','regiao_afetada','inicio','ativo'],colLabels:['Título','Nível','Região','Início','Ativo'],
+  renderCol:(r,c)=>c==='nivel'?pill(r.nivel):c==='inicio'?fmtDateTime(r.inicio):c==='ativo'?pill(String(r.ativo),r.ativo?'Sim':'Não'):(r[c]||'—'),query:'order=criado_em.desc'},
+
+  ocorrencias_dc:{table:'dc_ocorrencias',title:'Ocorrências',fields:[
+    {id:'protocolo',label:'Protocolo'},{id:'tipo',label:'Tipo',required:true},
+    {id:'status',label:'Status',type:'select',opts:[['recebida','Recebida'],['em_analise','Em análise'],['equipe_acionada','Equipe acionada'],['em_atendimento','Em atendimento'],['resolvida','Resolvida'],['encerrada','Encerrada']]},
+    {id:'prioridade',label:'Prioridade',type:'select',opts:[['baixa','Baixa'],['media','Média'],['alta','Alta'],['critica','Crítica']]},
+    {id:'descricao',label:'Descrição',span:3},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
+    {id:'solicitante_nome',label:'Solicitante'},{id:'solicitante_telefone',label:'Telefone'},{id:'solicitante_email',label:'E-mail'},
+    {id:'equipe_responsavel',label:'Equipe responsável'},{id:'conclusao',label:'Conclusão',span:3}
+  ],cols:['protocolo','tipo','status','prioridade','solicitante_nome'],colLabels:['Protocolo','Tipo','Status','Prioridade','Solicitante'],
+  renderCol:(r,c)=>c==='status'?pill(r.status):c==='prioridade'?pill(r.prioridade):(r[c]||'—'),query:'order=criado_em.desc'},
+
+  historico_oc:{table:'dc_ocorrencia_historico',title:'Histórico de Ocorrências',fields:[
+    {id:'ocorrencia_id',label:'Ocorrência',type:'ref',ref:'ocorrencias_dc',required:true},
+    {id:'status',label:'Status',type:'select',opts:[['recebida','Recebida'],['em_analise','Em análise'],['equipe_acionada','Equipe acionada'],['em_atendimento','Em atendimento'],['resolvida','Resolvida'],['encerrada','Encerrada']]},
+    {id:'observacao',label:'Observação',span:3},{id:'usuario',label:'Responsável'}
+  ],cols:['status','observacao','usuario'],colLabels:['Status','Observação','Responsável'],
+  renderCol:(r,c)=>c==='status'?pill(r.status):(r[c]||'—'),query:'order=criado_em.desc'},
+
+  abrigos_dc:{table:'dc_abrigos',title:'Abrigos',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'endereco',label:'Endereço',span:2},
+    {id:'capacidade',label:'Capacidade',type:'number'},{id:'vagas_disponiveis',label:'Vagas disponíveis',type:'number'},
+    {id:'situacao',label:'Situação',type:'select',opts:[['disponivel','Disponível'],['parcialmente_ocupado','Parcialmente ocupado'],['lotado','Lotado'],['indisponivel','Indisponível']]},
+    {id:'responsavel',label:'Responsável'},{id:'telefone',label:'Telefone'},
+    {id:'recursos_disponiveis',label:'Recursos disponíveis',span:3},{id:'observacoes',label:'Observações',span:3}
+  ],cols:['nome','capacidade','vagas_disponiveis','situacao','responsavel'],colLabels:['Nome','Capac.','Vagas','Situação','Responsável'],
+  renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
+
+  recursos_dc:{table:'dc_recursos',title:'Recursos e Materiais',fields:[
+    {id:'nome',label:'Nome',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['material','Material'],['equipamento','Equipamento'],['veiculo','Veículo'],['outro','Outro']]},
+    {id:'quantidade',label:'Quantidade',type:'number'},{id:'unidade',label:'Unidade'},{id:'estoque_minimo',label:'Estoque mínimo',type:'number'},
+    {id:'localizacao',label:'Localização'},{id:'responsavel',label:'Responsável'},
+    {id:'estado',label:'Estado',type:'select',opts:[['bom','Bom'],['regular','Regular'],['ruim','Ruim']]},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['nome','tipo','quantidade','estado','localizacao'],colLabels:['Nome','Tipo','Qtd.','Estado','Localização'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='estado'?pill(r.estado):(r[c]??'—')},
+
+  equipes_dc:{table:'dc_equipes',title:'Equipes de Campo',fields:[
+    {id:'nome',label:'Nome da equipe',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['resgate','Resgate'],['avaliacao','Avaliação'],['logistica','Logística'],['apoio','Apoio'],['outro','Outro']]},
+    {id:'lider',label:'Líder'},{id:'membros',label:'Membros',type:'number'},{id:'telefone',label:'Telefone'},
+    {id:'veiculo',label:'Veículo'},{id:'area_atuacao',label:'Área de atuação'},
+    {id:'disponivel',label:'Disponível',type:'select',opts:[['true','Sim'],['false','Não']]}
+  ],cols:['nome','tipo','lider','membros','disponivel'],colLabels:['Nome','Tipo','Líder','Membros','Disponível'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='disponivel'?pill(String(r.disponivel),r.disponivel?'Sim':'Não'):(r[c]||'—')},
+
+  comunicados_dc:{table:'dc_comunicados',title:'Comunicados',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['comunicado','Comunicado'],['alerta','Alerta'],['orientacao','Orientação'],['prevencao','Prevenção'],['encerramento','Encerramento'],['mudanca_situacao','Mudança de situação']]},
+    {id:'texto',label:'Texto',span:3},{id:'criado_por',label:'Responsável'},
+    {id:'ativo',label:'Ativo',type:'select',opts:[['true','Sim'],['false','Não']]}
+  ],cols:['titulo','tipo','criado_por','ativo'],colLabels:['Título','Tipo','Responsável','Ativo'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='ativo'?pill(String(r.ativo),r.ativo?'Sim':'Não'):(r[c]||'—'),query:'order=criado_em.desc'},
+
+  notificacoes_dc:{table:'dc_notificacoes',title:'Notificações',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'mensagem',label:'Mensagem',span:3},
+    {id:'tipo',label:'Tipo',type:'select',opts:[['alerta','Alerta'],['informacao','Informação'],['urgente','Urgente']]},
+    {id:'canal',label:'Canal',type:'select',opts:[['app','App'],['sms','SMS'],['email','E-mail'],['sirene','Sirene']]},
+    {id:'enviado',label:'Enviado',type:'select',opts:[['true','Sim'],['false','Não']]}
+  ],cols:['titulo','tipo','canal','enviado'],colLabels:['Título','Tipo','Canal','Enviado'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='canal'?pill(r.canal):c==='enviado'?pill(String(r.enviado),r.enviado?'Sim':'Não'):(r[c]||'—'),query:'order=criado_em.desc'},
+
+  pontos_risco:{table:'dc_pontos_risco',title:'Pontos de Risco',fields:[
+    {id:'nome',label:'Nome / Identificação',span:2,required:true},
+    {id:'tipo_risco',label:'Tipo de risco',type:'select',opts:[['alagamento','Alagamento'],['deslizamento','Deslizamento'],['inundacao','Inundação'],['erosao','Erosão'],['incendio','Incêndio'],['outro','Outro']]},
+    {id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
+    {id:'nivel_risco',label:'Nível de risco',type:'select',opts:[['baixo','Baixo'],['medio','Médio'],['alto','Alto'],['critico','Crítico']]},
+    {id:'descricao',label:'Descrição',span:3},{id:'acoes_preventivas',label:'Ações preventivas',span:3},
+    {id:'responsavel',label:'Responsável'},{id:'monitorado',label:'Monitorado',type:'select',opts:[['true','Sim'],['false','Não']]}
+  ],cols:['nome','tipo_risco','nivel_risco','bairro','monitorado'],colLabels:['Nome','Tipo','Nível','Bairro','Monitorado'],
+  renderCol:(r,c)=>c==='tipo_risco'?pill(r.tipo_risco):c==='nivel_risco'?pill(r.nivel_risco):c==='monitorado'?pill(String(r.monitorado),r.monitorado?'Sim':'Não'):(r[c]||'—')},
+
+  eventos_hist:{table:'dc_eventos_historico',title:'Eventos Históricos',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},
+    {id:'data_inicio',label:'Data início',type:'date'},{id:'data_fim',label:'Data fim',type:'date'},
+    {id:'descricao',label:'Descrição',span:3},{id:'area_afetada',label:'Área afetada'},{id:'pessoas_afetadas',label:'Pessoas afetadas',type:'number'},
+    {id:'danos_estimados',label:'Danos estimados (R$)',type:'money'},{id:'acoes_tomadas',label:'Ações tomadas',span:3},{id:'licoes_aprendidas',label:'Lições aprendidas',span:3}
+  ],cols:['titulo','tipo','data_inicio','pessoas_afetadas','danos_estimados'],colLabels:['Título','Tipo','Data','Pessoas','Danos (R$)'],
+  renderCol:(r,c)=>c==='data_inicio'?fmtDate(r.data_inicio):c==='danos_estimados'?money(r.danos_estimados):(r[c]??'—'),query:'order=data_inicio.desc.nullslast'},
+
+  preparacao_dc:{table:'dc_preparacao',title:'Planos de Preparação',fields:[
+    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['plano_contingencia','Plano de contingência'],['treinamento','Treinamento'],['simulado','Simulado'],['capacitacao','Capacitação'],['outro','Outro']]},
+    {id:'descricao',label:'Descrição',span:3},{id:'responsavel',label:'Responsável'},{id:'data_prevista',label:'Data prevista',type:'date'},
+    {id:'participantes',label:'Participantes',type:'number'},{id:'situacao',label:'Situação',type:'select',opts:[['planejado','Planejado'],['em_andamento','Em andamento'],['concluido','Concluído'],['cancelado','Cancelado']]},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['titulo','tipo','data_prevista','situacao','responsavel'],colLabels:['Título','Tipo','Data','Situação','Responsável'],
+  renderCol:(r,c)=>c==='data_prevista'?fmtDate(r.data_prevista):c==='tipo'?pill(r.tipo):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data_prevista.desc.nullslast'},
+
+  danos_dc:{table:'dc_danos',title:'Avaliação de Danos',fields:[
+    {id:'ocorrencia_id',label:'Ocorrência',type:'ref',ref:'ocorrencias_dc'},
+    {id:'tipo_dano',label:'Tipo de dano',type:'select',opts:[['estrutural','Estrutural'],['ambiental','Ambiental'],['humano','Humano'],['material','Material'],['outro','Outro']]},
+    {id:'descricao',label:'Descrição',span:3},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
+    {id:'pessoas_afetadas',label:'Pessoas afetadas',type:'number'},{id:'familias_desalojadas',label:'Famílias desalojadas',type:'number'},
+    {id:'valor_estimado',label:'Valor estimado (R$)',type:'money'},{id:'responsavel',label:'Avaliador'},
+    {id:'data_avaliacao',label:'Data avaliação',type:'date'},{id:'observacoes',label:'Observações',span:3}
+  ],cols:['tipo_dano','bairro','pessoas_afetadas','valor_estimado','data_avaliacao'],colLabels:['Tipo','Bairro','Pessoas','Valor (R$)','Data'],
+  renderCol:(r,c)=>c==='tipo_dano'?pill(r.tipo_dano):c==='valor_estimado'?money(r.valor_estimado):c==='data_avaliacao'?fmtDate(r.data_avaliacao):(r[c]??'—'),query:'order=data_avaliacao.desc.nullslast'},
+};
+
+const REF_TABLES={ocorrencias_dc:'dc_ocorrencias',abrigos_dc:'dc_abrigos',equipes_dc:'dc_equipes'};
+const REF_LABEL_FIELD={ocorrencias_dc:'protocolo',abrigos_dc:'nome',equipes_dc:'nome'};
+async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await sbGet(REF_TABLES[k],'select=id,'+REF_LABEL_FIELD[k]+'&order='+REF_LABEL_FIELD[k]+'.asc');caches[k]=d;return d;}catch(e){return[];}}
+
+function buildViews(){
+  let html='<section class="view active" id="view-dashboard_dc"><div class="topbar"><div><h1>🚨 Dashboard — Defesa Civil</h1><div class="sub">Visão geral da situação do município, ocorrências, alertas e recursos</div></div><div><button class="btn-ghost" onclick="gerarRelatorioGeral()">📄 Relatório Geral (PDF)</button></div></div>'+
+    '<div class="kpi-grid" id="dash-kpi"></div>'+
+    '<div class="grid-2"><div class="panel"><h3>📊 Status do Município</h3><div id="dash-status"></div></div><div class="panel"><h3>🌧️ Alertas Ativos</h3><div id="dash-alertas"></div></div></div>'+
+    '<div class="grid-2"><div class="panel"><h3>📍 Últimas Ocorrências</h3><div id="dash-ocorrencias"></div></div><div class="panel"><h3>🏠 Abrigos</h3><div id="dash-abrigos"></div></div></div>'+
+    '<div class="grid-2"><div class="panel"><h3>⚠️ Pontos de Atenção</h3><div id="dash-atencao"></div></div><div class="panel"><h3>👥 Equipes</h3><div id="dash-equipes"></div></div></div></section>';
+
+  html+='<section class="view" id="view-config_dc"><div class="topbar"><div><h1>🔴 Status do Município</h1><div class="sub">Gerencie o nível de alerta exibido para os cidadãos na página Ivatuba Protegida</div></div></div>'+
+    '<div class="panel"><h3>Alterar status geral</h3><p class="panel-sub">O status será exibido no topo da página pública.</p><div class="form-grid">'+
+    '<div class="field"><label>Status</label><select id="cfg-status"><option value="normal">🟢 Normal</option><option value="atencao">🟡 Atenção</option><option value="alerta">🟠 Alerta</option><option value="emergencia">🔴 Emergência</option></select></div>'+
+    '<div class="field span-2"><label>Mensagem personalizada</label><input id="cfg-msg" placeholder="Ex: Chuvas previstas para as próximas 48h"></div></div>'+
+    '<div class="form-actions"><button class="btn-accent" onclick="salvarConfig()" id="cfg-btn">Salvar status</button></div></div></section>';
+
+  Object.keys(MODULES).forEach(key=>{
+    const m=MODULES[key];
+    html+='<section class="view" id="view-'+key+'"><div class="topbar"><div><h1>'+m.title+'</h1></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn-ghost" onclick="exportPdf(\''+key+'\')">PDF</button><button class="btn-ghost" onclick="exportXlsx(\''+key+'\')">Excel</button><button class="btn-accent" onclick="toggleForm(\''+key+'\')">+ Novo</button></div></div>';
+    html+='<div class="kpi-grid" id="kpi-'+key+'"></div>';
+    html+='<div class="panel" id="form-'+key+'" style="display:none;"><h3 id="ft-'+key+'">Novo registro</h3><div class="form-grid">';
+    m.fields.forEach(f=>{const sp=f.span?'span-'+f.span:'';
+      if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
+      else if(f.type==='select'){html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'">';(f.opts||[]).forEach(([v,l])=>{html+='<option value="'+v+'">'+l+'</option>';});html+='</select></div>';}
+      else if(f.type==='ref')html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'"><option value="">Selecione...</option></select></div>';
+      else{const t=f.type==='money'?'text':(f.type==='datetime-local'?'datetime-local':f.type||'text');html+='<div class="field '+sp+'"><label>'+f.label+'</label>'+(f.id==='descricao'||f.id==='texto'||f.id==='observacoes'||f.id==='conclusao'||f.id==='recomendacoes'||f.id==='acoes_preventivas'||f.id==='acoes_tomadas'||f.id==='licoes_aprendidas'||f.id==='recursos_disponiveis'?'<textarea id="cf-'+key+'-'+f.id+'" rows="3"></textarea>':'<input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+(f.type==='money'?' inputmode="decimal"':'')+'>')+'</div>';}
+    });
+    html+='</div><div class="form-actions"><button class="btn-ghost" onclick="toggleForm(\''+key+'\')">Cancelar</button><button class="btn-accent" onclick="submitCrud(\''+key+'\')" id="sb-'+key+'">Salvar</button></div></div>';
+    html+='<div class="panel"><h3>Registros</h3><p class="panel-sub" id="cnt-'+key+'"></p><div style="overflow-x:auto;"><table><thead><tr>';
+    m.colLabels.forEach(l=>{html+='<th>'+l+'</th>';});
+    html+='<th></th></tr></thead><tbody id="tbl-'+key+'"></tbody></table></div></div></section>';
+  });
+
+  html+='<section class="view" id="view-relatorios_dc"><div class="topbar"><div><h1>Relatórios</h1></div></div><div class="panel"><h3>Exportar relatórios</h3><div class="form-grid">';
+  Object.keys(MODULES).forEach(k=>{html+='<div class="field"><button class="btn-ghost" style="width:100%;" onclick="exportPdf(\''+k+'\')">'+MODULES[k].title+' (PDF)</button></div>';});
+  html+='<div class="field"><button class="btn-accent" style="width:100%;" onclick="gerarRelatorioGeral()">Relatório Geral (PDF)</button></div>';
+  html+='</div></div></section>';
+
+  html+='<section class="view" id="view-auditoria_dc"><div class="topbar"><div><h1>Auditoria</h1></div></div><div class="panel"><h3>Registros de auditoria</h3><p class="panel-sub" id="cnt-audit"></p><div style="overflow-x:auto;"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Módulo</th><th>Detalhes</th></tr></thead><tbody id="tbl-audit"></tbody></table></div></div></section>';
+
+  document.getElementById('main-content').innerHTML=html;
+}
+
+let editingId={};
+function toggleForm(k){const p=document.getElementById('form-'+k);const o=p.style.display==='none';p.style.display=o?'block':'none';if(o&&!editingId[k]){clearForm(k);document.getElementById('ft-'+k).textContent='Novo registro';document.getElementById('sb-'+k).textContent='Salvar';loadRefs(k);}if(!o)editingId[k]=null;}
+function clearForm(k){MODULES[k].fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=false;else if(f.type==='select')el.selectedIndex=0;else el.value='';});}
+async function loadRefs(k){for(const f of MODULES[k].fields){if(f.type!=='ref')continue;const sel=document.getElementById('cf-'+k+'-'+f.id);const opts=await loadRefOptions(f.ref);const lbl=REF_LABEL_FIELD[f.ref];sel.innerHTML='<option value="">Selecione...</option>'+opts.map(o=>'<option value="'+o.id+'">'+o[lbl]+'</option>').join('');}}
+async function submitCrud(k){
+  const m=MODULES[k],data={tenant_id:tid()};
+  m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;let v;
+    if(f.type==='checkbox')v=el.checked;
+    else if(f.type==='money')v=parseMoney(el.value);
+    else if(f.type==='number')v=el.value?Number(el.value):null;
+    else if(f.type==='ref')v=el.value||null;
+    else if(f.type==='select'&&(f.id==='ativo'||f.id==='disponivel'||f.id==='monitorado'||f.id==='enviado'))v=el.value==='true';
+    else v=el.tagName==='TEXTAREA'?(el.value.trim()||null):(el.value.trim()||null);
+    data[f.id]=v;});
+  const btn=document.getElementById('sb-'+k);btn.disabled=true;
+  try{if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+async function editCrud(k,id){const m=MODULES[k];try{const rows=await sbGet(m.table,'id=eq.'+id);const r=rows[0];if(!r)return;editingId[k]=id;document.getElementById('form-'+k).style.display='block';document.getElementById('ft-'+k).textContent='Editar registro';document.getElementById('sb-'+k).textContent='Salvar alterações';await loadRefs(k);m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!r[f.id];else if(f.type==='select'&&(f.id==='ativo'||f.id==='disponivel'||f.id==='monitorado'||f.id==='enviado'))el.value=String(r[f.id]);else el.value=r[f.id]??'';});}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function deleteCrud(k,id){if(!confirm('Excluir?'))return;try{await sbDel(MODULES[k].table,'id=eq.'+id);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}}
+async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
+
+function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)return;const n=data.length;let h='<div class="kpi"><div class="ico">Total</div><div class="num">'+n+'</div><div class="lbl">registros</div></div>';
+  if(k==='ocorrencias_dc'){
+    const ab=data.filter(r=>r.status!=='resolvida'&&r.status!=='encerrada').length;
+    const res=data.filter(r=>r.status==='resolvida'||r.status==='encerrada').length;
+    const crit=data.filter(r=>r.prioridade==='critica'&&r.status!=='resolvida'&&r.status!=='encerrada').length;
+    h+='<div class="kpi"><div class="ico">Abertas</div><div class="num" style="color:var(--warn);">'+ab+'</div><div class="lbl">em andamento</div></div>';
+    h+='<div class="kpi"><div class="ico">Resolvidas</div><div class="num" style="color:var(--ok);">'+res+'</div><div class="lbl">encerradas</div></div>';
+    h+='<div class="kpi"><div class="ico">Críticas</div><div class="num" style="color:var(--danger);">'+crit+'</div><div class="lbl">ativas</div></div>';
+  }
+  else if(k==='alertas_dc'){const at=data.filter(r=>r.ativo).length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--danger);">'+at+'</div><div class="lbl">alertas</div></div>';}
+  else if(k==='abrigos_dc'){const disp=data.filter(r=>r.situacao==='disponivel').length;const vagas=data.reduce((s,r)=>s+(Number(r.vagas_disponiveis)||0),0);h+='<div class="kpi"><div class="ico">Disponíveis</div><div class="num" style="color:var(--ok);">'+disp+'</div><div class="lbl">abrigos</div></div><div class="kpi"><div class="ico">Vagas</div><div class="num">'+vagas+'</div><div class="lbl">disponíveis</div></div>';}
+  else if(k==='recursos_dc'){const baixo=data.filter(r=>r.quantidade!=null&&r.estoque_minimo!=null&&Number(r.quantidade)<=Number(r.estoque_minimo)).length;h+='<div class="kpi"><div class="ico">Estoque baixo</div><div class="num" style="color:var(--danger);">'+baixo+'</div><div class="lbl">itens</div></div>';}
+  else if(k==='equipes_dc'){const disp=data.filter(r=>r.disponivel).length;const membros=data.reduce((s,r)=>s+(Number(r.membros)||0),0);h+='<div class="kpi"><div class="ico">Disponíveis</div><div class="num" style="color:var(--ok);">'+disp+'</div><div class="lbl">equipes</div></div><div class="kpi"><div class="ico">Membros</div><div class="num">'+membros+'</div><div class="lbl">total</div></div>';}
+  else if(k==='pontos_risco'){const crit=data.filter(r=>r.nivel_risco==='critico'||r.nivel_risco==='alto').length;h+='<div class="kpi"><div class="ico">Alto/Crítico</div><div class="num" style="color:var(--danger);">'+crit+'</div><div class="lbl">pontos</div></div>';}
+  else if(k==='danos_dc'){const pes=data.reduce((s,r)=>s+(Number(r.pessoas_afetadas)||0),0);const val=data.reduce((s,r)=>s+(Number(r.valor_estimado)||0),0);h+='<div class="kpi"><div class="ico">Pessoas</div><div class="num">'+pes+'</div><div class="lbl">afetadas</div></div><div class="kpi"><div class="ico">Danos</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">estimados</div></div>';}
+  el.innerHTML=h;}
+
+let cfgId=null;
+async function loadConfig(){try{const rows=await sbGet('dc_config','select=*&tenant_id=eq.'+tid()+'&limit=1');if(rows.length){const c=rows[0];cfgId=c.id;document.getElementById('cfg-status').value=c.status_municipio||'normal';document.getElementById('cfg-msg').value=c.status_mensagem||'';}}catch(e){}}
+async function salvarConfig(){const btn=document.getElementById('cfg-btn');btn.disabled=true;const data={tenant_id:tid(),status_municipio:document.getElementById('cfg-status').value,status_mensagem:document.getElementById('cfg-msg').value.trim()||null,status_atualizado_em:new Date().toISOString()};try{if(cfgId)await sbPatch('dc_config','id=eq.'+cfgId,data);else{const r=await sbPost('dc_config',data);cfgId=r[0].id;}alert('Status atualizado!');}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+
+async function loadDashboard(){try{
+  const [cfg,al,oc,ab,eq,rec,pr,dan]=await Promise.all([
+    sbGet('dc_config','select=*&tenant_id=eq.'+tid()+'&limit=1').catch(()=>[]),
+    sbGet('dc_alertas','select=*&ativo=eq.true&order=criado_em.desc').catch(()=>[]),
+    sbGet('dc_ocorrencias','select=*&order=criado_em.desc&limit=20').catch(()=>[]),
+    sbGet('dc_abrigos','select=*').catch(()=>[]),
+    sbGet('dc_equipes','select=*').catch(()=>[]),
+    sbGet('dc_recursos','select=*').catch(()=>[]),
+    sbGet('dc_pontos_risco','select=*').catch(()=>[]),
+    sbGet('dc_danos','select=*').catch(()=>[]),
+  ]);
+  const ocAbertas=oc.filter(o=>o.status!=='resolvida'&&o.status!=='encerrada').length;
+  const ocTotal=oc.length;
+  const abDisp=ab.filter(a=>a.situacao==='disponivel').length;
+  const vagasTotal=ab.reduce((s,a)=>s+(Number(a.vagas_disponiveis)||0),0);
+  const eqDisp=eq.filter(e=>e.disponivel).length;
+  const recBaixo=rec.filter(r=>r.quantidade!=null&&r.estoque_minimo!=null&&Number(r.quantidade)<=Number(r.estoque_minimo)).length;
+  const prCrit=pr.filter(p=>p.nivel_risco==='critico'||p.nivel_risco==='alto').length;
+  const pesAf=dan.reduce((s,d)=>s+(Number(d.pessoas_afetadas)||0),0);
+
+  document.getElementById('dash-kpi').innerHTML=[
+    ['🚨 Alertas ativos',al.length,'alertas'],['📍 Ocorrências abertas',ocAbertas,'pendentes'],
+    ['🏠 Abrigos disponíveis',abDisp+'/'+ab.length,'abrigos'],['👥 Equipes disponíveis',eqDisp+'/'+eq.length,'equipes'],
+    ['📦 Recursos com estoque baixo',recBaixo,'itens'],['⚠️ Pontos de risco alto/crítico',prCrit,'pontos'],
+    ['👤 Pessoas afetadas',pesAf,'no total'],['🛏️ Vagas em abrigos',vagasTotal,'disponíveis'],
+  ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
+
+  const status=cfg[0]||{status_municipio:'normal'};
+  const statusIcos={normal:'🟢',atencao:'🟡',alerta:'🟠',emergencia:'🔴'};
+  const statusLabels={normal:'Normal — sem alertas',atencao:'Atenção — alerta ativo',alerta:'Alerta — condições adversas',emergencia:'Emergência — situação crítica'};
+  const statusCls={normal:'ok',atencao:'warn',alerta:'warn',emergencia:'danger'};
+  document.getElementById('dash-status').innerHTML='<div class="diag diag-'+statusCls[status.status_municipio]+'">'+(statusIcos[status.status_municipio]||'🟢')+' <strong>'+statusLabels[status.status_municipio]+'</strong>'+(status.status_mensagem?' — '+status.status_mensagem:'')+'</div>'+(status.status_atualizado_em?'<p style="font-size:11px;color:var(--muted);margin-top:6px;">Atualizado em '+fmtDateTime(status.status_atualizado_em)+'</p>':'');
+
+  document.getElementById('dash-alertas').innerHTML=al.length?al.slice(0,5).map(a=>{const ico={atencao:'🟡',alerta:'🟠',emergencia:'🔴'};const cls={atencao:'warn',alerta:'warn',emergencia:'danger'};return'<div class="diag diag-'+(cls[a.nivel]||'warn')+'">'+(ico[a.nivel]||'🟡')+' <strong>'+a.titulo+'</strong>'+(a.regiao_afetada?' — '+a.regiao_afetada:'')+'</div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum alerta ativo.</p>';
+
+  document.getElementById('dash-ocorrencias').innerHTML=oc.length?'<div style="overflow-x:auto;"><table><thead><tr><th>Protocolo</th><th>Tipo</th><th>Status</th><th>Prioridade</th></tr></thead><tbody>'+oc.slice(0,8).map(o=>'<tr><td>'+(o.protocolo||'—')+'</td><td>'+(o.tipo||'—')+'</td><td>'+pill(o.status)+'</td><td>'+pill(o.prioridade)+'</td></tr>').join('')+'</tbody></table></div>':'<p style="color:var(--muted);font-size:12px;">Nenhuma ocorrência registrada.</p>';
+
+  document.getElementById('dash-abrigos').innerHTML=ab.length?ab.map(a=>{const cls={disponivel:'ok',parcialmente_ocupado:'warn',lotado:'danger',indisponivel:'danger'};return'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px;"><span>'+a.nome+'</span><span>'+pill(a.situacao)+'</span></div>';}).join(''):'<p style="color:var(--muted);font-size:12px;">Nenhum abrigo cadastrado.</p>';
+
+  const atencaoItems=[];
+  if(ocAbertas)atencaoItems.push({cls:'warn',msg:ocAbertas+' ocorrência(s) ainda em aberto'});
+  if(recBaixo)atencaoItems.push({cls:'danger',msg:recBaixo+' recurso(s) com estoque abaixo do mínimo'});
+  if(prCrit)atencaoItems.push({cls:'danger',msg:prCrit+' ponto(s) de risco em nível alto ou crítico'});
+  const abLotado=ab.filter(a=>a.situacao==='lotado').length;
+  if(abLotado)atencaoItems.push({cls:'danger',msg:abLotado+' abrigo(s) lotado(s)'});
+  document.getElementById('dash-atencao').innerHTML=atencaoItems.length?atencaoItems.map(a=>'<div class="diag diag-'+a.cls+'">'+({ok:'🟢',warn:'🟡',danger:'🔴'}[a.cls])+' '+a.msg+'</div>').join(''):'<div class="diag diag-ok">🟢 Tudo dentro do esperado.</div>';
+
+  document.getElementById('dash-equipes').innerHTML=eq.length?eq.map(e=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px;"><span><strong>'+e.nome+'</strong>'+(e.lider?' — '+e.lider:'')+'</span><span>'+pill(String(e.disponivel),e.disponivel?'Disponível':'Indisponível')+'</span></div>').join(''):'<p style="color:var(--muted);font-size:12px;">Nenhuma equipe cadastrada.</p>';
+}catch(e){document.getElementById('dash-kpi').innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,200)+'</div>';}}
+
+async function loadAuditoria(){try{const rows=await sbGet('dc_auditoria','select=*&order=data.desc&limit=100');document.getElementById('cnt-audit').textContent=rows.length+' registro(s)';document.getElementById('tbl-audit').innerHTML=rows.length?rows.map(r=>'<tr><td>'+fmtDateTime(r.data)+'</td><td>'+(r.usuario||'—')+'</td><td>'+(r.acao||'—')+'</td><td>'+(r.modulo||'—')+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.detalhes||'—')+'</td></tr>').join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Sem registros.</td></tr>';}catch(e){}}
+
+function exportPdf(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFontSize(16);doc.text(m.title+' — Defesa Civil',14,18);doc.setFontSize(10);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,26);const rows=data.map(r=>m.cols.map(c=>{const v=m.renderCol(r,c);return String(v).replace(/<[^>]+>/g,'');}));doc.autoTable({head:[m.colLabels],body:rows,startY:32,styles:{fontSize:9},headStyles:{fillColor:[220,38,38]}});doc.save(k+'_defesa_civil.pdf');}
+function exportXlsx(k){const m=MODULES[k];if(!m)return;const data=caches[k+'_data']||[];const rows=data.map(r=>{const o={};m.cols.forEach((c,i)=>{o[m.colLabels[i]]=String(m.renderCol(r,c)).replace(/<[^>]+>/g,'');});return o;});const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,m.title.slice(0,31));XLSX.writeFile(wb,k+'_defesa_civil.xlsx');}
+
+async function gerarRelatorioGeral(){
+  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');let y=20;
+  doc.setFontSize(18);doc.text('Relatório Geral — Defesa Civil',14,y);y+=8;
+  doc.setFontSize(12);doc.text('Ivatuba Protegida',14,y);y+=6;
+  doc.setFontSize(9);doc.setTextColor(120);doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR'),14,y);doc.setTextColor(0);y+=10;
+  try{
+    const [al,oc,ab,eq,rec,pr,dan]=await Promise.all([
+      sbGet('dc_alertas','select=id,ativo').catch(()=>[]),
+      sbGet('dc_ocorrencias','select=id,status,prioridade').catch(()=>[]),
+      sbGet('dc_abrigos','select=id,situacao,vagas_disponiveis').catch(()=>[]),
+      sbGet('dc_equipes','select=id,disponivel').catch(()=>[]),
+      sbGet('dc_recursos','select=id,quantidade,estoque_minimo').catch(()=>[]),
+      sbGet('dc_pontos_risco','select=id,nivel_risco').catch(()=>[]),
+      sbGet('dc_danos','select=id,pessoas_afetadas,valor_estimado').catch(()=>[]),
+    ]);
+    const items=[
+      ['Alertas ativos',al.filter(a=>a.ativo).length],
+      ['Ocorrências total',oc.length],
+      ['Ocorrências abertas',oc.filter(o=>o.status!=='resolvida'&&o.status!=='encerrada').length],
+      ['Ocorrências críticas abertas',oc.filter(o=>o.prioridade==='critica'&&o.status!=='resolvida'&&o.status!=='encerrada').length],
+      ['Abrigos cadastrados',ab.length],
+      ['Abrigos disponíveis',ab.filter(a=>a.situacao==='disponivel').length],
+      ['Vagas em abrigos',ab.reduce((s,a)=>s+(Number(a.vagas_disponiveis)||0),0)],
+      ['Equipes cadastradas',eq.length],
+      ['Equipes disponíveis',eq.filter(e=>e.disponivel).length],
+      ['Recursos com estoque baixo',rec.filter(r=>r.quantidade!=null&&r.estoque_minimo!=null&&Number(r.quantidade)<=Number(r.estoque_minimo)).length],
+      ['Pontos de risco alto/crítico',pr.filter(p=>p.nivel_risco==='critico'||p.nivel_risco==='alto').length],
+      ['Pessoas afetadas (danos)',dan.reduce((s,d)=>s+(Number(d.pessoas_afetadas)||0),0)],
+      ['Danos estimados (R$)',money(dan.reduce((s,d)=>s+(Number(d.valor_estimado)||0),0))],
+    ];
+    doc.autoTable({head:[['Indicador','Valor']],body:items,startY:y,styles:{fontSize:10},headStyles:{fillColor:[220,38,38]}});
+    doc.save('relatorio_geral_defesa_civil.pdf');
+  }catch(e){alert('Erro: '+e.message.slice(0,200));}
+}
+
+const LOADERS={dashboard_dc:loadDashboard,config_dc:loadConfig,auditoria_dc:loadAuditoria,relatorios_dc:()=>{}};
+Object.keys(MODULES).forEach(k=>{LOADERS[k]=()=>loadData(k);});
+</script>
+<div style="position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;font-size:10.5px;color:rgba(71,85,105,.7);background:rgba(255,255,255,.7);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>

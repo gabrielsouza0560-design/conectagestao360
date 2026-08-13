@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ivatuba Protegida — Defesa Civil</title>
+<meta name="theme-color" content="#DC2626">
+<style>
+:root{--bg:#F0F4F8;--surface:#fff;--ink:#0F172A;--ink-soft:#475569;--muted:#94A3B8;--line:rgba(15,23,42,.08);--ok:#059669;--warn:#D97706;--alert:#EA580C;--danger:#DC2626;--royal:#2563EB;--radius:16px;--sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+a{text-decoration:none;color:inherit;}img{max-width:100%;}
+.container{max-width:900px;margin:0 auto;padding:0 16px;}
+header{background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);color:#fff;padding:16px 0;text-align:center;position:sticky;top:0;z-index:100;}
+header .logo{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#93A5C4;font-weight:700;}
+header h1{font-size:20px;font-weight:800;margin:4px 0 0;}header h1 span{color:#F87171;}
+.status-banner{padding:20px 16px;text-align:center;font-weight:800;font-size:18px;color:#fff;position:relative;}
+.status-normal{background:linear-gradient(135deg,#059669,#10B981);}.status-atencao{background:linear-gradient(135deg,#D97706,#F59E0B);}
+.status-alerta{background:linear-gradient(135deg,#EA580C,#F97316);}.status-emergencia{background:linear-gradient(135deg,#DC2626,#EF4444);}
+.status-banner .ico{font-size:32px;display:block;margin-bottom:6px;}.status-banner .sub{font-size:12px;font-weight:600;opacity:.85;margin-top:4px;}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 0;}
+@media(max-width:500px){.cards{grid-template-columns:1fr;}}
+.card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:0 2px 8px rgba(15,23,42,.06);cursor:pointer;transition:transform .15s,box-shadow .15s;border:1px solid var(--line);}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(15,23,42,.1);}
+.card .card-ico{font-size:28px;margin-bottom:8px;}.card h3{font-size:15px;font-weight:800;margin-bottom:4px;}.card p{font-size:12px;color:var(--ink-soft);line-height:1.5;}
+.card-emergency{background:linear-gradient(135deg,#DC2626,#EF4444);color:#fff;grid-column:span 2;text-align:center;padding:24px;}
+@media(max-width:500px){.card-emergency{grid-column:span 1;}}
+.card-emergency h3{font-size:18px;}.card-emergency p{color:rgba(255,255,255,.85);}
+.btn-emergency{display:inline-block;margin-top:12px;background:#fff;color:#DC2626;font-weight:800;font-size:14px;padding:12px 28px;border-radius:30px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);}
+.btn-emergency:hover{transform:scale(1.03);}
+.section{padding:20px 0;}.section h2{font-size:18px;font-weight:800;margin-bottom:14px;padding:0 4px;}
+.tel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:500px){.tel-grid{grid-template-columns:1fr;}}
+.tel-card{background:var(--surface);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;border:1px solid var(--line);box-shadow:0 1px 4px rgba(15,23,42,.04);}
+.tel-card .tel-ico{font-size:28px;flex-shrink:0;}.tel-card .tel-info{flex:1;}.tel-card .tel-nome{font-size:13px;font-weight:700;}.tel-card .tel-num{font-size:16px;font-weight:800;color:var(--royal);margin-top:2px;}
+.tel-card .btn-ligar{background:var(--ok);color:#fff;border:none;padding:8px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.tel-card .btn-ligar:hover{opacity:.9;}
+.alert-card{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;border-left:4px solid var(--warn);box-shadow:0 1px 4px rgba(15,23,42,.04);}
+.alert-card.nivel-alerta{border-left-color:var(--alert);}.alert-card.nivel-emergencia{border-left-color:var(--danger);}
+.alert-card .al-tipo{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:800;color:var(--warn);}.alert-card.nivel-alerta .al-tipo{color:var(--alert);}.alert-card.nivel-emergencia .al-tipo{color:var(--danger);}
+.alert-card h4{font-size:14px;font-weight:800;margin:4px 0;}.alert-card p{font-size:12px;color:var(--ink-soft);line-height:1.6;}
+.alert-card .al-meta{font-size:11px;color:var(--muted);margin-top:6px;}
+.comunicado-card{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;border:1px solid var(--line);box-shadow:0 1px 4px rgba(15,23,42,.04);}
+.comunicado-card .com-tipo{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:800;color:var(--royal);}.comunicado-card h4{font-size:14px;font-weight:800;margin:4px 0;}.comunicado-card p{font-size:12px;color:var(--ink-soft);line-height:1.6;}.comunicado-card .com-meta{font-size:11px;color:var(--muted);margin-top:6px;}
+.form-panel{background:var(--surface);border-radius:var(--radius);padding:20px;border:1px solid var(--line);box-shadow:0 2px 8px rgba(15,23,42,.06);}
+.form-panel h3{font-size:16px;font-weight:800;margin-bottom:14px;}
+.field{margin-bottom:14px;}.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);margin-bottom:5px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:var(--sans);background:#fff;color:var(--ink);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.btn-submit{background:linear-gradient(135deg,var(--royal),#3B82F6);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;width:100%;}
+.btn-submit:hover{opacity:.9;}.btn-submit:disabled{opacity:.5;}
+.protocolo-box{background:#EFF6FF;border:1px solid rgba(37,99,235,.2);border-radius:14px;padding:20px;text-align:center;margin-top:16px;}
+.protocolo-box .prot-num{font-size:22px;font-weight:800;color:var(--royal);margin:6px 0;}.protocolo-box p{font-size:12px;color:var(--ink-soft);}
+.consulta-box{background:var(--surface);border-radius:var(--radius);padding:20px;border:1px solid var(--line);margin-bottom:16px;}
+.consulta-box h3{font-size:14px;font-weight:800;margin-bottom:10px;}
+.status-timeline{margin-top:12px;}.status-step{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;color:var(--muted);}.status-step.active{color:var(--ink);font-weight:700;}.status-step .dot{width:12px;height:12px;border-radius:50%;background:var(--line);flex-shrink:0;}.status-step.active .dot{background:var(--ok);}.status-step.current .dot{background:var(--warn);}
+.abrigo-card{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;border:1px solid var(--line);}
+.abrigo-card h4{font-size:14px;font-weight:700;}.abrigo-card .ab-info{font-size:12px;color:var(--ink-soft);margin-top:4px;line-height:1.6;}
+.pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.pill-ok{background:#D1FAE5;color:var(--ok);}.pill-warn{background:#FEF3C7;color:var(--warn);}.pill-danger{background:#FEF2F2;color:var(--danger);}.pill-muted{background:#F1F5F9;color:var(--muted);}
+.empty{text-align:center;color:var(--muted);font-size:13px;padding:30px 0;}
+.view{display:none;}.view.active{display:block;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:100;box-shadow:0 -2px 10px rgba(15,23,42,.06);padding-bottom:env(safe-area-inset-bottom);}
+.bottom-nav button{flex:1;background:none;border:none;padding:8px 4px;text-align:center;cursor:pointer;font-size:9px;font-weight:700;color:var(--muted);font-family:var(--sans);}
+.bottom-nav button .bn-ico{font-size:20px;display:block;margin-bottom:2px;}.bottom-nav button.active{color:var(--royal);}
+body{padding-bottom:70px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:20px;padding:24px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:18px;font-weight:800;margin-bottom:14px;text-align:center;}.modal .close-modal{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;width:100%;margin-top:10px;}
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.help-item{background:var(--bg);border-radius:12px;padding:12px;text-align:center;cursor:pointer;border:2px solid transparent;transition:border .15s;font-size:12px;font-weight:600;}
+.help-item:hover,.help-item.selected{border-color:var(--royal);background:#EFF6FF;}
+.help-item .hi-ico{font-size:22px;display:block;margin-bottom:4px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">CONECTA GESTÃO</div>
+  <h1><span>🚨</span> IVATUBA PROTEGIDA</h1>
+  <div style="font-size:11px;color:#93A5C4;margin-top:2px;">Informação que protege. Prevenção que salva.</div>
+</header>
+
+<div id="status-banner" class="status-banner status-normal">
+  <span class="ico">🟢</span>
+  <span id="status-text">MUNICÍPIO SEM ALERTAS ATIVOS</span>
+  <div class="sub" id="status-update"></div>
+</div>
+
+<!-- VIEWS -->
+<div class="view active" id="view-inicio">
+<div class="container">
+  <div class="cards">
+    <div class="card card-emergency" onclick="showModal('ajuda')">
+      <div class="card-ico">🆘</div>
+      <h3>EMERGÊNCIA</h3>
+      <p>Acesse os telefones de emergência ou comunique uma ocorrência.</p>
+      <button class="btn-emergency">PRECISO DE AJUDA</button>
+    </div>
+    <div class="card" onclick="navTo('alertas')">
+      <div class="card-ico">🌧️</div>
+      <h3>Alertas Climáticos</h3>
+      <p>Veja alertas ativos e orientações.</p>
+    </div>
+    <div class="card" onclick="navTo('ocorrencia')">
+      <div class="card-ico">📍</div>
+      <h3>Comunicar Ocorrência</h3>
+      <p>Informe um problema à Defesa Civil.</p>
+    </div>
+    <div class="card" onclick="navTo('abrigos')">
+      <div class="card-ico">🏠</div>
+      <h3>Abrigos</h3>
+      <p>Locais de acolhimento disponíveis.</p>
+    </div>
+    <div class="card" onclick="navTo('comunicados')">
+      <div class="card-ico">📢</div>
+      <h3>Avisos Oficiais</h3>
+      <p>Comunicados da Prefeitura e Defesa Civil.</p>
+    </div>
+    <div class="card" onclick="navTo('telefones')">
+      <div class="card-ico">☎️</div>
+      <h3>Telefones</h3>
+      <p>Números de emergência e contatos.</p>
+    </div>
+    <div class="card" onclick="navTo('clima')">
+      <div class="card-ico">🌦️</div>
+      <h3>Clima e Prevenção</h3>
+      <p>El Niño, La Niña e preparação.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="view" id="view-alertas">
+<div class="container section">
+  <h2>🌧️ Alertas Climáticos</h2>
+  <div id="alertas-list"></div>
+</div>
+</div>
+
+<div class="view" id="view-telefones">
+<div class="container section">
+  <h2>☎️ Telefones de Emergência</h2>
+  <div class="tel-grid" id="telefones-list"></div>
+</div>
+</div>
+
+<div class="view" id="view-ocorrencia">
+<div class="container section">
+  <h2>📍 Comunicar Ocorrência</h2>
+  <div class="consulta-box">
+    <h3>Consultar ocorrência pelo protocolo</h3>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="consulta-protocolo" placeholder="Ex: OC-2026-000001" style="flex:1;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:14px;">
+      <button onclick="consultarOcorrencia()" style="background:var(--royal);color:#fff;border:none;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer;">Buscar</button>
+    </div>
+    <div id="consulta-resultado"></div>
+  </div>
+  <div class="form-panel" id="form-ocorrencia">
+    <h3>Registrar nova ocorrência</h3>
+    <div class="field"><label>Tipo da ocorrência</label>
+      <select id="oc-tipo">
+        <option value="">Selecione...</option>
+        <option>Emergência médica</option><option>Incêndio</option><option>Segurança</option>
+        <option>Alagamento</option><option>Enchente</option><option>Árvore caída</option>
+        <option>Estrada interditada</option><option>Problema elétrico</option><option>Risco em residência</option>
+        <option>Incêndio em área rural</option><option>Vendaval</option><option>Desabamento</option>
+        <option>Vazamento / alagamento</option><option>Outros</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field"><label>Data</label><input type="date" id="oc-data"></div>
+      <div class="field"><label>Horário</label><input type="time" id="oc-horario"></div>
+    </div>
+    <div class="field"><label>Endereço</label><input id="oc-endereco" placeholder="Rua, número..."></div>
+    <div class="field"><label>Bairro / Localidade</label><input id="oc-bairro"></div>
+    <div class="field"><label>Descrição</label><textarea id="oc-descricao" rows="3" placeholder="Descreva o que está acontecendo..."></textarea></div>
+    <div class="field"><label>Seu nome</label><input id="oc-nome"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field"><label>Telefone</label><input id="oc-telefone" type="tel"></div>
+      <div class="field"><label>E-mail (opcional)</label><input id="oc-email" type="email"></div>
+    </div>
+    <button class="btn-submit" id="oc-btn" onclick="enviarOcorrencia()">Enviar ocorrência</button>
+    <div id="oc-resultado"></div>
+  </div>
+</div>
+</div>
+
+<div class="view" id="view-comunicados">
+<div class="container section">
+  <h2>📢 Comunicados Oficiais</h2>
+  <div id="comunicados-list"></div>
+</div>
+</div>
+
+<div class="view" id="view-abrigos">
+<div class="container section">
+  <h2>🏠 Abrigos Temporários</h2>
+  <div id="abrigos-list"></div>
+</div>
+</div>
+
+<div class="view" id="view-clima">
+<div class="container section">
+  <h2>🌎 Clima e Prevenção</h2>
+  <div class="form-panel" style="margin-bottom:14px;">
+    <h3>🌡️ El Niño</h3>
+    <p style="font-size:13px;line-height:1.7;color:var(--ink-soft);">
+      O El Niño é um fenômeno climático caracterizado pelo aquecimento anormal das águas do Oceano Pacífico equatorial.
+      No Paraná e na região de Ivatuba, o El Niño <strong>pode</strong> estar associado a:<br>
+      • Chuvas acima da média, especialmente na primavera e verão<br>
+      • Possíveis alagamentos e enchentes em áreas vulneráveis<br>
+      • Impactos na agricultura (excesso de umidade, perdas em lavouras)<br>
+      • Riscos em estradas rurais e pontes<br><br>
+      <strong>Cuidados:</strong> Verificar bueiros e galerias, monitorar pontos de alagamento, preparar máquinas e equipes, acompanhar previsões oficiais.
+    </p>
+  </div>
+  <div class="form-panel" style="margin-bottom:14px;">
+    <h3>❄️ La Niña</h3>
+    <p style="font-size:13px;line-height:1.7;color:var(--ink-soft);">
+      A La Niña é o fenômeno oposto ao El Niño, com resfriamento das águas do Pacífico.
+      No Paraná, a La Niña <strong>pode</strong> estar associada a:<br>
+      • Chuvas abaixo da média e estiagem prolongada<br>
+      • Riscos de incêndios florestais e em áreas rurais<br>
+      • Baixa nos reservatórios e recursos hídricos<br>
+      • Geadas mais intensas no inverno<br><br>
+      <strong>Cuidados:</strong> Monitorar focos de incêndio, orientar produtores rurais, acompanhar nível de rios e reservatórios.
+    </p>
+  </div>
+  <div class="form-panel">
+    <h3>⚠️ Importante</h3>
+    <p style="font-size:13px;line-height:1.7;color:var(--ink-soft);">
+      As informações sobre El Niño e La Niña indicam <strong>tendências e possibilidades</strong>, não certezas.
+      A ocorrência de eventos depende de diversos fatores climáticos. Acompanhe sempre os canais oficiais de previsão do tempo e as orientações da Defesa Civil.
+    </p>
+  </div>
+</div>
+</div>
+
+<!-- Modal Preciso de Ajuda -->
+<div class="modal-overlay" id="modal-ajuda">
+<div class="modal">
+  <h3>🚨 Preciso de ajuda</h3>
+  <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin-bottom:14px;">Selecione o tipo de emergência:</p>
+  <div class="help-grid" id="help-grid"></div>
+  <div id="help-action" style="margin-top:14px;display:none;">
+    <p style="font-size:13px;font-weight:700;text-align:center;margin-bottom:10px;">Ligue agora ou registre uma ocorrência:</p>
+    <div style="display:flex;gap:8px;">
+      <a id="help-ligar" href="tel:190" style="flex:1;display:block;background:var(--danger);color:#fff;text-align:center;padding:12px;border-radius:10px;font-weight:700;font-size:14px;">📞 Ligar 190</a>
+      <button onclick="hideModal('ajuda');navTo('ocorrencia');" style="flex:1;background:var(--royal);color:#fff;border:none;padding:12px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;">📍 Ocorrência</button>
+    </div>
+  </div>
+  <button class="close-modal" onclick="hideModal('ajuda')">Fechar</button>
+</div>
+</div>
+
+<nav class="bottom-nav">
+  <button onclick="navTo('inicio')" id="bn-inicio" class="active"><span class="bn-ico">🏠</span>Início</button>
+  <button onclick="showModal('ajuda')" id="bn-emergencia"><span class="bn-ico">🚨</span>Emergência</button>
+  <button onclick="navTo('alertas')" id="bn-alertas"><span class="bn-ico">🌧️</span>Alertas</button>
+  <button onclick="navTo('ocorrencia')" id="bn-ocorrencia"><span class="bn-ico">📍</span>Ocorrência</button>
+  <button onclick="navTo('telefones')" id="bn-telefones"><span class="bn-ico">☎️</span>Contatos</button>
+</nav>
+
+<script>
+const SB_URL="https://kfvkembarvsbtveksiag.supabase.co",SB_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+const TID='00000000-0000-0000-0000-000000000001';
+async function sbGet(t,q){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+(q||''),{headers:{apikey:SB_KEY,'Accept-Profile':'gestao360'}});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbPostAnon(t,d){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{apikey:SB_KEY,'Content-Profile':'gestao360','Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+function fmtDate(d){if(!d)return'';return new Date(d).toLocaleDateString('pt-BR');}
+function fmtDateTime(d){if(!d)return'';return new Date(d).toLocaleString('pt-BR');}
+
+function navTo(v){document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));const bn=document.getElementById('bn-'+v);if(bn)bn.classList.add('active');window.scrollTo(0,0);if(LOADERS[v])LOADERS[v]();}
+function showModal(id){document.getElementById('modal-'+id).classList.add('show');}
+function hideModal(id){document.getElementById('modal-'+id).classList.remove('show');}
+
+const HELP_TYPES=[
+  ['🚑','Emergência médica','192'],['🚒','Incêndio','193'],['🚓','Segurança','190'],
+  ['🌧️','Alagamento','199'],['🌊','Enchente','199'],['🌳','Árvore caída','199'],
+  ['🛣️','Estrada interditada','199'],['⚡','Problema elétrico',''],['🏠','Risco em residência','199'],
+  ['🔥','Incêndio rural','193'],['🌪️','Vendaval','199'],['🧱','Desabamento','193'],
+  ['💧','Vazamento','199'],['📌','Outros','199']
+];
+function buildHelpGrid(){const g=document.getElementById('help-grid');g.innerHTML=HELP_TYPES.map(([ico,lbl,tel],i)=>'<div class="help-item" onclick="selectHelp('+i+')"><span class="hi-ico">'+ico+'</span>'+lbl+'</div>').join('');}
+function selectHelp(i){document.querySelectorAll('.help-item').forEach(el=>el.classList.remove('selected'));document.querySelectorAll('.help-item')[i].classList.add('selected');const[ico,lbl,tel]=HELP_TYPES[i];const act=document.getElementById('help-action');act.style.display='block';const link=document.getElementById('help-ligar');if(tel){link.href='tel:'+tel;link.textContent='📞 Ligar '+tel;link.style.display='block';}else{link.style.display='none';}}
+buildHelpGrid();
+
+async function loadStatus(){try{const rows=await sbGet('dc_config','select=*&tenant_id=eq.'+TID+'&limit=1');if(rows.length){const c=rows[0];const s=c.status_municipio||'normal';const banner=document.getElementById('status-banner');banner.className='status-banner status-'+s;const icos={normal:'🟢',atencao:'🟡',alerta:'🟠',emergencia:'🔴'};const txts={normal:'MUNICÍPIO SEM ALERTAS ATIVOS',atencao:'ATENÇÃO — Existe um alerta climático ativo',alerta:'ALERTA — Condições climáticas exigem atenção',emergencia:'EMERGÊNCIA — Situação de emergência registrada'};banner.querySelector('.ico').textContent=icos[s]||'🟢';document.getElementById('status-text').textContent=c.status_mensagem||txts[s]||'';document.getElementById('status-update').textContent=c.status_atualizado_em?'Atualizado em '+fmtDateTime(c.status_atualizado_em):'';}}catch(e){}}
+
+async function loadAlertas(){try{const al=await sbGet('dc_alertas','select=*&tenant_id=eq.'+TID+'&ativo=eq.true&order=criado_em.desc');const el=document.getElementById('alertas-list');if(!al.length){el.innerHTML='<div class="empty">🟢 Nenhum alerta climático ativo no momento.</div>';return;}el.innerHTML=al.map(a=>{const cls=a.nivel==='emergencia'?'nivel-emergencia':a.nivel==='alerta'?'nivel-alerta':'';const icos={atencao:'🟡',alerta:'🟠',emergencia:'🔴'};return'<div class="alert-card '+cls+'"><div class="al-tipo">'+(icos[a.nivel]||'🟡')+' '+a.tipo+'</div><h4>'+a.titulo+'</h4>'+(a.descricao?'<p>'+a.descricao+'</p>':'')+(a.recomendacoes?'<p style="margin-top:6px;"><strong>Recomendações:</strong> '+a.recomendacoes+'</p>':'')+'<div class="al-meta">'+(a.regiao_afetada?'Região: '+a.regiao_afetada+' · ':'')+fmtDateTime(a.inicio)+(a.fonte?' · Fonte: '+a.fonte:'')+'</div></div>';}).join('');}catch(e){document.getElementById('alertas-list').innerHTML='<div class="empty">Erro ao carregar alertas.</div>';}}
+
+async function loadTelefones(){try{const tel=await sbGet('dc_telefones','select=*&tenant_id=eq.'+TID+'&ativo=eq.true&order=ordem.asc');const el=document.getElementById('telefones-list');el.innerHTML=tel.length?tel.map(t=>{const isNum=/^\d+$/.test(t.numero);return'<div class="tel-card"><div class="tel-ico">'+(t.icone||'📞')+'</div><div class="tel-info"><div class="tel-nome">'+t.nome+'</div><div class="tel-num">'+t.numero+'</div></div>'+(isNum?'<a href="tel:'+t.numero+'" class="btn-ligar">LIGAR</a>':'')+'</div>';}).join(''):'<div class="empty">Nenhum telefone cadastrado.</div>';}catch(e){}}
+
+async function loadComunicados(){try{const com=await sbGet('dc_comunicados','select=*&tenant_id=eq.'+TID+'&ativo=eq.true&order=criado_em.desc&limit=20');const el=document.getElementById('comunicados-list');el.innerHTML=com.length?com.map(c=>{const icos={alerta:'🚨',comunicado:'📢',orientacao:'📋',prevencao:'🛡️',encerramento:'✅',mudanca_situacao:'🔄'};return'<div class="comunicado-card"><div class="com-tipo">'+(icos[c.tipo]||'📢')+' '+c.tipo+'</div><h4>'+c.titulo+'</h4>'+(c.texto?'<p>'+c.texto+'</p>':'')+'<div class="com-meta">'+fmtDateTime(c.criado_em)+(c.criado_por?' · '+c.criado_por:'')+'</div></div>';}).join(''):'<div class="empty">Nenhum comunicado publicado.</div>';}catch(e){}}
+
+async function loadAbrigos(){try{const ab=await sbGet('dc_abrigos','select=*&tenant_id=eq.'+TID+'&order=nome.asc');const el=document.getElementById('abrigos-list');const pills={disponivel:['Disponível','pill-ok'],parcialmente_ocupado:['Parcialmente ocupado','pill-warn'],lotado:['Lotado','pill-danger'],indisponivel:['Indisponível','pill-muted']};el.innerHTML=ab.length?ab.map(a=>{const[lbl,cls]=pills[a.situacao]||['—','pill-muted'];return'<div class="abrigo-card"><div style="display:flex;justify-content:space-between;align-items:center;"><h4>'+a.nome+'</h4><span class="pill '+cls+'">'+lbl+'</span></div><div class="ab-info">'+(a.endereco?'📍 '+a.endereco+'<br>':'')+(a.capacidade?'👥 Capacidade: '+a.capacidade+(a.vagas_disponiveis!=null?' · Vagas: '+a.vagas_disponiveis:'')+'<br>':'')+(a.telefone?'📞 '+a.telefone+'<br>':'')+(a.responsavel?'👤 '+a.responsavel:'')+'</div></div>';}).join(''):'<div class="empty">Nenhum abrigo cadastrado pela Prefeitura.</div>';}catch(e){}}
+
+function gerarProtocolo(){const now=new Date();const y=now.getFullYear();const n=String(Math.floor(Math.random()*999999)).padStart(6,'0');return'OC-'+y+'-'+n;}
+
+async function enviarOcorrencia(){const tipo=document.getElementById('oc-tipo').value;if(!tipo){alert('Selecione o tipo da ocorrência.');return;}const btn=document.getElementById('oc-btn');btn.disabled=true;btn.textContent='Enviando...';const prot=gerarProtocolo();try{await sbPostAnon('dc_ocorrencias',{tenant_id:TID,protocolo:prot,tipo,descricao:document.getElementById('oc-descricao').value.trim()||null,endereco:document.getElementById('oc-endereco').value.trim()||null,bairro:document.getElementById('oc-bairro').value.trim()||null,solicitante_nome:document.getElementById('oc-nome').value.trim()||null,solicitante_telefone:document.getElementById('oc-telefone').value.trim()||null,solicitante_email:document.getElementById('oc-email').value.trim()||null,status:'recebida'});document.getElementById('oc-resultado').innerHTML='<div class="protocolo-box"><p style="font-weight:700;">Ocorrência registrada com sucesso!</p><div class="prot-num">'+prot+'</div><p>Guarde este protocolo para acompanhar o andamento.</p></div>';document.getElementById('form-ocorrencia').querySelectorAll('input,select,textarea').forEach(el=>{if(el.type==='select-one')el.selectedIndex=0;else el.value='';});}catch(e){document.getElementById('oc-resultado').innerHTML='<div style="color:var(--danger);margin-top:10px;font-size:13px;">Erro ao enviar: '+e.message.slice(0,120)+'</div>';}finally{btn.disabled=false;btn.textContent='Enviar ocorrência';}}
+
+async function consultarOcorrencia(){const prot=document.getElementById('consulta-protocolo').value.trim();if(!prot){alert('Informe o protocolo.');return;}const el=document.getElementById('consulta-resultado');el.innerHTML='<p style="color:var(--muted);font-size:12px;margin-top:10px;">Buscando...</p>';try{const rows=await sbGet('dc_ocorrencias','select=*&tenant_id=eq.'+TID+'&protocolo=eq.'+encodeURIComponent(prot));if(!rows.length){el.innerHTML='<p style="color:var(--danger);font-size:13px;margin-top:10px;">Nenhuma ocorrência encontrada com este protocolo.</p>';return;}const o=rows[0];const steps=['recebida','em_analise','equipe_acionada','em_atendimento','resolvida','encerrada'];const labels={recebida:'Recebida',em_analise:'Em análise',equipe_acionada:'Equipe acionada',em_atendimento:'Em atendimento',resolvida:'Resolvida',encerrada:'Encerrada'};const idx=steps.indexOf(o.status);el.innerHTML='<div style="margin-top:14px;"><p style="font-weight:700;font-size:14px;">'+o.protocolo+' — '+o.tipo+'</p><p style="font-size:12px;color:var(--ink-soft);margin-top:4px;">'+fmtDateTime(o.criado_em)+(o.endereco?' · '+o.endereco:'')+'</p><div class="status-timeline">'+steps.map((s,i)=>{const cls=i<idx?'active':(i===idx?'active current':'');return'<div class="status-step '+cls+'"><div class="dot"></div>'+labels[s]+'</div>';}).join('')+'</div>'+(o.conclusao?'<p style="margin-top:10px;font-size:13px;background:#D1FAE5;padding:10px;border-radius:10px;">'+o.conclusao+'</p>':'')+'</div>';}catch(e){el.innerHTML='<p style="color:var(--danger);font-size:13px;margin-top:10px;">Erro: '+e.message.slice(0,100)+'</p>';}}
+
+const LOADERS={inicio:()=>{loadStatus();loadAlertas();},alertas:loadAlertas,telefones:loadTelefones,comunicados:loadComunicados,abrigos:loadAbrigos};
+document.addEventListener('DOMContentLoaded',()=>{loadStatus();loadAlertas();loadTelefones();});
+</script>
+<div style="text-align:center;padding:16px;font-size:10px;color:var(--muted);">Desenvolvido por <strong>Gabriel Oliveira</strong> · Tecnologia e Manutenção</div>
+</body>
+</html>
