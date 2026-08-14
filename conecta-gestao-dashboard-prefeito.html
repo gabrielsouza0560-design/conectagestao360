@@ -270,7 +270,7 @@ tr:hover td{background:rgba(0,87,168,.015);}
 
 /* ===== FOOTER ===== */
 .app-footer{background:var(--azul-dark);color:rgba(255,255,255,.5);padding:48px 40px 32px;margin-top:40px;}
-.footer-inner{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;}
+.footer-inner{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:40px;}
 @media(max-width:900px){.footer-inner{grid-template-columns:1fr 1fr;}}
 @media(max-width:500px){.footer-inner{grid-template-columns:1fr;}}
 .footer-brand{font-size:17px;font-weight:800;color:#fff;margin-bottom:12px;}
@@ -557,6 +557,27 @@ tr:hover td{background:rgba(0,87,168,.015);}
   </div>
 </div>
 
+<!-- PORTAIS PUBLICOS -->
+<div class="section" id="sec-portais">
+  <div class="section-header">
+    <div><div class="section-title">Portais Publicos</div><div class="section-sub">Paginas acessiveis pela populacao — sem login</div></div>
+  </div>
+  <div class="qa-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="qa-item" onclick="window.open('conecta-gestao-ivatuba-protegida.html','_blank')" style="border-left:3px solid var(--danger);">
+      <div class="qa-icon" style="background:rgba(220,38,38,.08);">&#x1F6A8;</div>
+      <div class="qa-label">Ivatuba Protegida<br><small style="color:var(--muted);font-weight:500;">Defesa Civil — alertas e ocorrencias</small></div>
+    </div>
+    <div class="qa-item" onclick="window.open('conecta-gestao-esporte-publico.html','_blank')" style="border-left:3px solid var(--ok);">
+      <div class="qa-icon" style="background:rgba(5,150,105,.08);">&#x26BD;</div>
+      <div class="qa-label">Portal do Esporte<br><small style="color:var(--muted);font-weight:500;">Eventos, resultados e inscricoes</small></div>
+    </div>
+    <div class="qa-item" onclick="window.open('conecta-gestao-avaliar-evento.html','_blank')" style="border-left:3px solid var(--azul-dest);">
+      <div class="qa-icon" style="background:rgba(0,87,168,.08);">&#x2B50;</div>
+      <div class="qa-label">Avaliar Evento<br><small style="color:var(--muted);font-weight:500;">Pesquisa de satisfacao publica</small></div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /app-main -->
 
 <!-- FOOTER -->
@@ -579,6 +600,12 @@ tr:hover td{background:rgba(0,87,168,.015);}
       <a href="conecta-gestao-educacao.html">Educacao</a>
       <a href="conecta-gestao-agricultura.html">Agricultura</a>
       <a href="conecta-gestao-esporte.html">Esporte</a>
+    </div>
+    <div class="footer-col">
+      <h4>Portais Publicos</h4>
+      <a href="conecta-gestao-ivatuba-protegida.html">Ivatuba Protegida</a>
+      <a href="conecta-gestao-esporte-publico.html">Portal do Esporte</a>
+      <a href="conecta-gestao-avaliar-evento.html">Avaliar Evento</a>
     </div>
     <div class="footer-col">
       <h4>Contato</h4>
