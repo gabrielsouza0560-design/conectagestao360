@@ -153,18 +153,19 @@ let caches={};
 const MODULES={
   telefones_dc:{table:'dc_telefones',title:'Telefones de Emergência',fields:[
     {id:'nome',label:'Nome / Serviço',span:2,required:true},{id:'numero',label:'Número',required:true},{id:'icone',label:'Ícone (emoji)'},
-    {id:'tipo',label:'Tipo',type:'select',opts:[['emergencia','Emergência'],['utilidade','Utilidade'],['saude','Saúde'],['seguranca','Segurança'],['defesa_civil','Defesa Civil']]},
+    {id:'categoria',label:'Categoria',type:'select',opts:[['emergencia','Emergência'],['utilidade','Utilidade'],['saude','Saúde'],['seguranca','Segurança'],['defesa_civil','Defesa Civil']]},
+    {id:'descricao',label:'Descrição',span:2},
     {id:'ordem',label:'Ordem de exibição',type:'number'},
     {id:'ativo',label:'Ativo',type:'select',opts:[['true','Sim'],['false','Não']]}
-  ],cols:['nome','numero','tipo','ordem','ativo'],colLabels:['Nome','Número','Tipo','Ordem','Ativo'],
-  renderCol:(r,c)=>c==='ativo'?pill(String(r.ativo),r.ativo?'Sim':'Não'):c==='tipo'?pill(r.tipo):(r[c]||'—'),query:'order=ordem.asc.nullslast'},
+  ],cols:['nome','numero','categoria','ordem','ativo'],colLabels:['Nome','Número','Categoria','Ordem','Ativo'],
+  renderCol:(r,c)=>c==='ativo'?pill(String(r.ativo),r.ativo?'Sim':'Não'):c==='categoria'?pill(r.categoria):(r[c]||'—'),query:'order=ordem.asc.nullslast'},
 
   alertas_dc:{table:'dc_alertas',title:'Alertas Climáticos',fields:[
     {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},
     {id:'nivel',label:'Nível',type:'select',opts:[['atencao','Atenção'],['alerta','Alerta'],['emergencia','Emergência']]},
     {id:'descricao',label:'Descrição',span:3},{id:'recomendacoes',label:'Recomendações',span:3},
     {id:'regiao_afetada',label:'Região afetada'},{id:'fonte',label:'Fonte'},
-    {id:'inicio',label:'Início',type:'datetime-local'},{id:'fim_previsto',label:'Fim previsto',type:'datetime-local'},
+    {id:'inicio',label:'Início',type:'datetime-local'},{id:'termino',label:'Término',type:'datetime-local'},
     {id:'ativo',label:'Ativo',type:'select',opts:[['true','Sim'],['false','Não']]}
   ],cols:['titulo','nivel','regiao_afetada','inicio','ativo'],colLabels:['Título','Nível','Região','Início','Ativo'],
   renderCol:(r,c)=>c==='nivel'?pill(r.nivel):c==='inicio'?fmtDateTime(r.inicio):c==='ativo'?pill(String(r.ativo),r.ativo?'Sim':'Não'):(r[c]||'—'),query:'order=criado_em.desc'},
@@ -175,98 +176,113 @@ const MODULES={
     {id:'prioridade',label:'Prioridade',type:'select',opts:[['baixa','Baixa'],['media','Média'],['alta','Alta'],['critica','Crítica']]},
     {id:'descricao',label:'Descrição',span:3},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
     {id:'solicitante_nome',label:'Solicitante'},{id:'solicitante_telefone',label:'Telefone'},{id:'solicitante_email',label:'E-mail'},
-    {id:'equipe_responsavel',label:'Equipe responsável'},{id:'conclusao',label:'Conclusão',span:3}
+    {id:'responsavel',label:'Responsável'},{id:'observacoes',label:'Observações',span:3},{id:'conclusao',label:'Conclusão',span:3}
   ],cols:['protocolo','tipo','status','prioridade','solicitante_nome'],colLabels:['Protocolo','Tipo','Status','Prioridade','Solicitante'],
   renderCol:(r,c)=>c==='status'?pill(r.status):c==='prioridade'?pill(r.prioridade):(r[c]||'—'),query:'order=criado_em.desc'},
 
   historico_oc:{table:'dc_ocorrencia_historico',title:'Histórico de Ocorrências',fields:[
     {id:'ocorrencia_id',label:'Ocorrência',type:'ref',ref:'ocorrencias_dc',required:true},
-    {id:'status',label:'Status',type:'select',opts:[['recebida','Recebida'],['em_analise','Em análise'],['equipe_acionada','Equipe acionada'],['em_atendimento','Em atendimento'],['resolvida','Resolvida'],['encerrada','Encerrada']]},
-    {id:'observacao',label:'Observação',span:3},{id:'usuario',label:'Responsável'}
-  ],cols:['status','observacao','usuario'],colLabels:['Status','Observação','Responsável'],
-  renderCol:(r,c)=>c==='status'?pill(r.status):(r[c]||'—'),query:'order=criado_em.desc'},
+    {id:'status_anterior',label:'Status anterior',type:'select',opts:[['recebida','Recebida'],['em_analise','Em análise'],['equipe_acionada','Equipe acionada'],['em_atendimento','Em atendimento'],['resolvida','Resolvida'],['encerrada','Encerrada']]},
+    {id:'status_novo',label:'Novo status',type:'select',opts:[['recebida','Recebida'],['em_analise','Em análise'],['equipe_acionada','Equipe acionada'],['em_atendimento','Em atendimento'],['resolvida','Resolvida'],['encerrada','Encerrada']]},
+    {id:'descricao',label:'Descrição',span:3},{id:'usuario',label:'Responsável'}
+  ],cols:['status_anterior','status_novo','descricao','usuario'],colLabels:['Status Anterior','Novo Status','Descrição','Responsável'],
+  renderCol:(r,c)=>c==='status_anterior'?pill(r.status_anterior):c==='status_novo'?pill(r.status_novo):(r[c]||'—'),query:'order=criado_em.desc'},
 
   abrigos_dc:{table:'dc_abrigos',title:'Abrigos',fields:[
-    {id:'nome',label:'Nome',span:2,required:true},{id:'endereco',label:'Endereço',span:2},
+    {id:'nome',label:'Nome',span:2,required:true},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
     {id:'capacidade',label:'Capacidade',type:'number'},{id:'vagas_disponiveis',label:'Vagas disponíveis',type:'number'},
     {id:'situacao',label:'Situação',type:'select',opts:[['disponivel','Disponível'],['parcialmente_ocupado','Parcialmente ocupado'],['lotado','Lotado'],['indisponivel','Indisponível']]},
     {id:'responsavel',label:'Responsável'},{id:'telefone',label:'Telefone'},
-    {id:'recursos_disponiveis',label:'Recursos disponíveis',span:3},{id:'observacoes',label:'Observações',span:3}
+    {id:'acessibilidade',label:'Acessibilidade',type:'select',opts:[['true','Sim'],['false','Não']]},
+    {id:'banheiros',label:'Banheiros',type:'select',opts:[['true','Sim'],['false','Não']]},
+    {id:'cozinha',label:'Cozinha',type:'select',opts:[['true','Sim'],['false','Não']]},
+    {id:'gerador',label:'Gerador',type:'select',opts:[['true','Sim'],['false','Não']]},
+    {id:'observacoes',label:'Observações',span:3}
   ],cols:['nome','capacidade','vagas_disponiveis','situacao','responsavel'],colLabels:['Nome','Capac.','Vagas','Situação','Responsável'],
   renderCol:(r,c)=>c==='situacao'?pill(r.situacao):(r[c]??'—')},
 
   recursos_dc:{table:'dc_recursos',title:'Recursos e Materiais',fields:[
-    {id:'nome',label:'Nome',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['material','Material'],['equipamento','Equipamento'],['veiculo','Veículo'],['outro','Outro']]},
-    {id:'quantidade',label:'Quantidade',type:'number'},{id:'unidade',label:'Unidade'},{id:'estoque_minimo',label:'Estoque mínimo',type:'number'},
+    {id:'nome',label:'Nome',span:2,required:true},
+    {id:'categoria',label:'Categoria',type:'select',opts:[['material','Material'],['equipamento','Equipamento'],['veiculo','Veículo'],['outro','Outro']]},
+    {id:'quantidade',label:'Quantidade',type:'number'},
     {id:'localizacao',label:'Localização'},{id:'responsavel',label:'Responsável'},
-    {id:'estado',label:'Estado',type:'select',opts:[['bom','Bom'],['regular','Regular'],['ruim','Ruim']]},
+    {id:'situacao',label:'Situação',type:'select',opts:[['bom','Bom'],['regular','Regular'],['ruim','Ruim']]},
     {id:'observacoes',label:'Observações',span:3}
-  ],cols:['nome','tipo','quantidade','estado','localizacao'],colLabels:['Nome','Tipo','Qtd.','Estado','Localização'],
-  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='estado'?pill(r.estado):(r[c]??'—')},
+  ],cols:['nome','categoria','quantidade','situacao','localizacao'],colLabels:['Nome','Categoria','Qtd.','Situação','Localização'],
+  renderCol:(r,c)=>c==='categoria'?pill(r.categoria):c==='situacao'?pill(r.situacao):(r[c]??'—')},
 
   equipes_dc:{table:'dc_equipes',title:'Equipes de Campo',fields:[
-    {id:'nome',label:'Nome da equipe',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['resgate','Resgate'],['avaliacao','Avaliação'],['logistica','Logística'],['apoio','Apoio'],['outro','Outro']]},
-    {id:'lider',label:'Líder'},{id:'membros',label:'Membros',type:'number'},{id:'telefone',label:'Telefone'},
-    {id:'veiculo',label:'Veículo'},{id:'area_atuacao',label:'Área de atuação'},
-    {id:'disponivel',label:'Disponível',type:'select',opts:[['true','Sim'],['false','Não']]}
-  ],cols:['nome','tipo','lider','membros','disponivel'],colLabels:['Nome','Tipo','Líder','Membros','Disponível'],
-  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='disponivel'?pill(String(r.disponivel),r.disponivel?'Sim':'Não'):(r[c]||'—')},
+    {id:'nome',label:'Nome da equipe',span:2,required:true},
+    {id:'funcao',label:'Função',type:'select',opts:[['resgate','Resgate'],['avaliacao','Avaliação'],['logistica','Logística'],['apoio','Apoio'],['outro','Outro']]},
+    {id:'secretaria',label:'Secretaria'},{id:'responsavel',label:'Responsável'},{id:'telefone',label:'Telefone'},
+    {id:'integrantes',label:'Integrantes',span:2},
+    {id:'disponibilidade',label:'Disponibilidade',type:'select',opts:[['disponivel','Disponível'],['indisponivel','Indisponível'],['em_campo','Em campo']]},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['nome','funcao','responsavel','telefone','disponibilidade'],colLabels:['Nome','Função','Responsável','Telefone','Disponibilidade'],
+  renderCol:(r,c)=>c==='funcao'?pill(r.funcao):c==='disponibilidade'?pill(r.disponibilidade):(r[c]||'—')},
 
   comunicados_dc:{table:'dc_comunicados',title:'Comunicados',fields:[
     {id:'titulo',label:'Título',span:2,required:true},
     {id:'tipo',label:'Tipo',type:'select',opts:[['comunicado','Comunicado'],['alerta','Alerta'],['orientacao','Orientação'],['prevencao','Prevenção'],['encerramento','Encerramento'],['mudanca_situacao','Mudança de situação']]},
-    {id:'texto',label:'Texto',span:3},{id:'criado_por',label:'Responsável'},
+    {id:'texto',label:'Texto',span:3},
+    {id:'prioridade',label:'Prioridade',type:'select',opts:[['baixa','Baixa'],['media','Média'],['alta','Alta'],['urgente','Urgente']]},
+    {id:'publico_alvo',label:'Público-alvo'},{id:'validade',label:'Validade',type:'datetime-local'},
+    {id:'criado_por',label:'Responsável'},
     {id:'ativo',label:'Ativo',type:'select',opts:[['true','Sim'],['false','Não']]}
-  ],cols:['titulo','tipo','criado_por','ativo'],colLabels:['Título','Tipo','Responsável','Ativo'],
-  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='ativo'?pill(String(r.ativo),r.ativo?'Sim':'Não'):(r[c]||'—'),query:'order=criado_em.desc'},
+  ],cols:['titulo','tipo','prioridade','criado_por','ativo'],colLabels:['Título','Tipo','Prioridade','Responsável','Ativo'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='prioridade'?pill(r.prioridade):c==='ativo'?pill(String(r.ativo),r.ativo?'Sim':'Não'):(r[c]||'—'),query:'order=criado_em.desc'},
 
   notificacoes_dc:{table:'dc_notificacoes',title:'Notificações',fields:[
     {id:'titulo',label:'Título',span:2,required:true},{id:'mensagem',label:'Mensagem',span:3},
     {id:'tipo',label:'Tipo',type:'select',opts:[['alerta','Alerta'],['informacao','Informação'],['urgente','Urgente']]},
-    {id:'canal',label:'Canal',type:'select',opts:[['app','App'],['sms','SMS'],['email','E-mail'],['sirene','Sirene']]},
-    {id:'enviado',label:'Enviado',type:'select',opts:[['true','Sim'],['false','Não']]}
-  ],cols:['titulo','tipo','canal','enviado'],colLabels:['Título','Tipo','Canal','Enviado'],
-  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='canal'?pill(r.canal):c==='enviado'?pill(String(r.enviado),r.enviado?'Sim':'Não'):(r[c]||'—'),query:'order=criado_em.desc'},
+    {id:'lida',label:'Lida',type:'select',opts:[['true','Sim'],['false','Não']]}
+  ],cols:['titulo','tipo','lida'],colLabels:['Título','Tipo','Lida'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='lida'?pill(String(r.lida),r.lida?'Sim':'Não'):(r[c]||'—'),query:'order=criado_em.desc'},
 
   pontos_risco:{table:'dc_pontos_risco',title:'Pontos de Risco',fields:[
     {id:'nome',label:'Nome / Identificação',span:2,required:true},
-    {id:'tipo_risco',label:'Tipo de risco',type:'select',opts:[['alagamento','Alagamento'],['deslizamento','Deslizamento'],['inundacao','Inundação'],['erosao','Erosão'],['incendio','Incêndio'],['outro','Outro']]},
+    {id:'tipo',label:'Tipo de risco',type:'select',opts:[['alagamento','Alagamento'],['deslizamento','Deslizamento'],['inundacao','Inundação'],['erosao','Erosão'],['incendio','Incêndio'],['outro','Outro']]},
     {id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
     {id:'nivel_risco',label:'Nível de risco',type:'select',opts:[['baixo','Baixo'],['medio','Médio'],['alto','Alto'],['critico','Crítico']]},
-    {id:'descricao',label:'Descrição',span:3},{id:'acoes_preventivas',label:'Ações preventivas',span:3},
-    {id:'responsavel',label:'Responsável'},{id:'monitorado',label:'Monitorado',type:'select',opts:[['true','Sim'],['false','Não']]}
-  ],cols:['nome','tipo_risco','nivel_risco','bairro','monitorado'],colLabels:['Nome','Tipo','Nível','Bairro','Monitorado'],
-  renderCol:(r,c)=>c==='tipo_risco'?pill(r.tipo_risco):c==='nivel_risco'?pill(r.nivel_risco):c==='monitorado'?pill(String(r.monitorado),r.monitorado?'Sim':'Não'):(r[c]||'—')},
+    {id:'descricao',label:'Descrição',span:3},{id:'historico',label:'Histórico',span:3},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['nome','tipo','nivel_risco','bairro'],colLabels:['Nome','Tipo','Nível','Bairro'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='nivel_risco'?pill(r.nivel_risco):(r[c]||'—')},
 
   eventos_hist:{table:'dc_eventos_historico',title:'Eventos Históricos',fields:[
-    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo'},
-    {id:'data_inicio',label:'Data início',type:'date'},{id:'data_fim',label:'Data fim',type:'date'},
-    {id:'descricao',label:'Descrição',span:3},{id:'area_afetada',label:'Área afetada'},{id:'pessoas_afetadas',label:'Pessoas afetadas',type:'number'},
-    {id:'danos_estimados',label:'Danos estimados (R$)',type:'money'},{id:'acoes_tomadas',label:'Ações tomadas',span:3},{id:'licoes_aprendidas',label:'Lições aprendidas',span:3}
-  ],cols:['titulo','tipo','data_inicio','pessoas_afetadas','danos_estimados'],colLabels:['Título','Tipo','Data','Pessoas','Danos (R$)'],
-  renderCol:(r,c)=>c==='data_inicio'?fmtDate(r.data_inicio):c==='danos_estimados'?money(r.danos_estimados):(r[c]??'—'),query:'order=data_inicio.desc.nullslast'},
+    {id:'data',label:'Data',type:'date',required:true},{id:'tipo',label:'Tipo',required:true},
+    {id:'intensidade',label:'Intensidade',type:'select',opts:[['leve','Leve'],['moderada','Moderada'],['forte','Forte'],['severa','Severa']]},
+    {id:'local',label:'Local',span:2},{id:'descricao',label:'Descrição',span:3},
+    {id:'danos',label:'Danos',span:3},{id:'pessoas_afetadas',label:'Pessoas afetadas',type:'number'},
+    {id:'equipamentos_utilizados',label:'Equipamentos utilizados',span:3},{id:'equipes',label:'Equipes envolvidas',span:3},
+    {id:'relatorio',label:'Relatório',span:3}
+  ],cols:['data','tipo','intensidade','local','pessoas_afetadas'],colLabels:['Data','Tipo','Intensidade','Local','Pessoas'],
+  renderCol:(r,c)=>c==='data'?fmtDate(r.data):c==='intensidade'?pill(r.intensidade):(r[c]??'—'),query:'order=data.desc.nullslast'},
 
   preparacao_dc:{table:'dc_preparacao',title:'Planos de Preparação',fields:[
-    {id:'titulo',label:'Título',span:2,required:true},{id:'tipo',label:'Tipo',type:'select',opts:[['plano_contingencia','Plano de contingência'],['treinamento','Treinamento'],['simulado','Simulado'],['capacitacao','Capacitação'],['outro','Outro']]},
-    {id:'descricao',label:'Descrição',span:3},{id:'responsavel',label:'Responsável'},{id:'data_prevista',label:'Data prevista',type:'date'},
-    {id:'participantes',label:'Participantes',type:'number'},{id:'situacao',label:'Situação',type:'select',opts:[['planejado','Planejado'],['em_andamento','Em andamento'],['concluido','Concluído'],['cancelado','Cancelado']]},
+    {id:'item',label:'Item',span:2,required:true},
+    {id:'fase',label:'Fase',type:'select',opts:[['planejamento','Planejamento'],['execucao','Execução'],['verificacao','Verificação'],['finalizacao','Finalização']]},
+    {id:'responsavel',label:'Responsável'},{id:'evento_ref',label:'Evento de referência'},
+    {id:'concluido',label:'Concluído',type:'select',opts:[['true','Sim'],['false','Não']]},
+    {id:'data_conclusao',label:'Data de conclusão',type:'datetime-local'},
     {id:'observacoes',label:'Observações',span:3}
-  ],cols:['titulo','tipo','data_prevista','situacao','responsavel'],colLabels:['Título','Tipo','Data','Situação','Responsável'],
-  renderCol:(r,c)=>c==='data_prevista'?fmtDate(r.data_prevista):c==='tipo'?pill(r.tipo):c==='situacao'?pill(r.situacao):(r[c]||'—'),query:'order=data_prevista.desc.nullslast'},
+  ],cols:['item','fase','responsavel','concluido','data_conclusao'],colLabels:['Item','Fase','Responsável','Concluído','Data Conclusão'],
+  renderCol:(r,c)=>c==='fase'?pill(r.fase):c==='concluido'?pill(String(r.concluido),r.concluido?'Sim':'Não'):c==='data_conclusao'?fmtDateTime(r.data_conclusao):(r[c]||'—'),query:'order=criado_em.desc'},
 
   danos_dc:{table:'dc_danos',title:'Avaliação de Danos',fields:[
     {id:'ocorrencia_id',label:'Ocorrência',type:'ref',ref:'ocorrencias_dc'},
-    {id:'tipo_dano',label:'Tipo de dano',type:'select',opts:[['estrutural','Estrutural'],['ambiental','Ambiental'],['humano','Humano'],['material','Material'],['outro','Outro']]},
-    {id:'descricao',label:'Descrição',span:3},{id:'endereco',label:'Endereço',span:2},{id:'bairro',label:'Bairro'},
-    {id:'pessoas_afetadas',label:'Pessoas afetadas',type:'number'},{id:'familias_desalojadas',label:'Famílias desalojadas',type:'number'},
-    {id:'valor_estimado',label:'Valor estimado (R$)',type:'money'},{id:'responsavel',label:'Avaliador'},
-    {id:'data_avaliacao',label:'Data avaliação',type:'date'},{id:'observacoes',label:'Observações',span:3}
-  ],cols:['tipo_dano','bairro','pessoas_afetadas','valor_estimado','data_avaliacao'],colLabels:['Tipo','Bairro','Pessoas','Valor (R$)','Data'],
-  renderCol:(r,c)=>c==='tipo_dano'?pill(r.tipo_dano):c==='valor_estimado'?money(r.valor_estimado):c==='data_avaliacao'?fmtDate(r.data_avaliacao):(r[c]??'—'),query:'order=data_avaliacao.desc.nullslast'},
+    {id:'evento_id',label:'Evento',type:'ref',ref:'eventos_hist'},
+    {id:'tipo',label:'Tipo de dano',type:'select',opts:[['estrutural','Estrutural'],['ambiental','Ambiental'],['humano','Humano'],['material','Material'],['outro','Outro']]},
+    {id:'descricao',label:'Descrição',span:3},{id:'local',label:'Local',span:2},{id:'bairro',label:'Bairro'},
+    {id:'pessoas_afetadas',label:'Pessoas afetadas',type:'number'},{id:'familias_afetadas',label:'Famílias afetadas',type:'number'},
+    {id:'valor_estimado',label:'Valor estimado (R$)',type:'money'},
+    {id:'observacoes',label:'Observações',span:3}
+  ],cols:['tipo','local','bairro','pessoas_afetadas','valor_estimado'],colLabels:['Tipo','Local','Bairro','Pessoas','Valor (R$)'],
+  renderCol:(r,c)=>c==='tipo'?pill(r.tipo):c==='valor_estimado'?money(r.valor_estimado):(r[c]??'—'),query:'order=criado_em.desc'},
 };
 
-const REF_TABLES={ocorrencias_dc:'dc_ocorrencias',abrigos_dc:'dc_abrigos',equipes_dc:'dc_equipes'};
-const REF_LABEL_FIELD={ocorrencias_dc:'protocolo',abrigos_dc:'nome',equipes_dc:'nome'};
+const REF_TABLES={ocorrencias_dc:'dc_ocorrencias',abrigos_dc:'dc_abrigos',equipes_dc:'dc_equipes',eventos_hist:'dc_eventos_historico'};
+const REF_LABEL_FIELD={ocorrencias_dc:'protocolo',abrigos_dc:'nome',equipes_dc:'nome',eventos_hist:'tipo'};
 async function loadRefOptions(k){if(caches[k])return caches[k];try{const d=await sbGet(REF_TABLES[k],'select=id,'+REF_LABEL_FIELD[k]+'&order='+REF_LABEL_FIELD[k]+'.asc');caches[k]=d;return d;}catch(e){return[];}}
 
 function buildViews(){
@@ -291,7 +307,7 @@ function buildViews(){
       if(f.type==='checkbox')html+='<div class="field '+sp+'"><label style="text-transform:none;letter-spacing:0;font-weight:600;padding-top:20px;"><input type="checkbox" id="cf-'+key+'-'+f.id+'" style="width:auto;margin-right:8px;vertical-align:middle;"> '+f.label+'</label></div>';
       else if(f.type==='select'){html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'">';(f.opts||[]).forEach(([v,l])=>{html+='<option value="'+v+'">'+l+'</option>';});html+='</select></div>';}
       else if(f.type==='ref')html+='<div class="field '+sp+'"><label>'+f.label+'</label><select id="cf-'+key+'-'+f.id+'"><option value="">Selecione...</option></select></div>';
-      else{const t=f.type==='money'?'text':(f.type==='datetime-local'?'datetime-local':f.type||'text');html+='<div class="field '+sp+'"><label>'+f.label+'</label>'+(f.id==='descricao'||f.id==='texto'||f.id==='observacoes'||f.id==='conclusao'||f.id==='recomendacoes'||f.id==='acoes_preventivas'||f.id==='acoes_tomadas'||f.id==='licoes_aprendidas'||f.id==='recursos_disponiveis'?'<textarea id="cf-'+key+'-'+f.id+'" rows="3"></textarea>':'<input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+(f.type==='money'?' inputmode="decimal"':'')+'>')+'</div>';}
+      else{const t=f.type==='money'?'text':(f.type==='datetime-local'?'datetime-local':f.type||'text');const isTa=f.span>=2&&(f.id==='descricao'||f.id==='texto'||f.id==='observacoes'||f.id==='conclusao'||f.id==='recomendacoes'||f.id==='historico'||f.id==='relatorio'||f.id==='danos'||f.id==='equipamentos_utilizados'||f.id==='equipes'||f.id==='integrantes');html+='<div class="field '+sp+'"><label>'+f.label+'</label>'+(isTa?'<textarea id="cf-'+key+'-'+f.id+'" rows="3"></textarea>':'<input id="cf-'+key+'-'+f.id+'" type="'+t+'"'+(f.type==='money'?' inputmode="decimal"':'')+'>')+'</div>';}
     });
     html+='</div><div class="form-actions"><button class="btn-ghost" onclick="toggleForm(\''+key+'\')">Cancelar</button><button class="btn-accent" onclick="submitCrud(\''+key+'\')" id="sb-'+key+'">Salvar</button></div></div>';
     html+='<div class="panel"><h3>Registros</h3><p class="panel-sub" id="cnt-'+key+'"></p><div style="overflow-x:auto;"><table><thead><tr>';
@@ -373,8 +389,8 @@ function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)ret
   }
   else if(k==='alertas_dc'){const at=data.filter(r=>r.ativo).length;h+='<div class="kpi"><div class="ico">Ativos</div><div class="num" style="color:var(--danger);">'+at+'</div><div class="lbl">alertas</div></div>';}
   else if(k==='abrigos_dc'){const disp=data.filter(r=>r.situacao==='disponivel').length;const vagas=data.reduce((s,r)=>s+(Number(r.vagas_disponiveis)||0),0);h+='<div class="kpi"><div class="ico">Disponíveis</div><div class="num" style="color:var(--ok);">'+disp+'</div><div class="lbl">abrigos</div></div><div class="kpi"><div class="ico">Vagas</div><div class="num">'+vagas+'</div><div class="lbl">disponíveis</div></div>';}
-  else if(k==='recursos_dc'){const baixo=data.filter(r=>r.quantidade!=null&&r.estoque_minimo!=null&&Number(r.quantidade)<=Number(r.estoque_minimo)).length;h+='<div class="kpi"><div class="ico">Estoque baixo</div><div class="num" style="color:var(--danger);">'+baixo+'</div><div class="lbl">itens</div></div>';}
-  else if(k==='equipes_dc'){const disp=data.filter(r=>r.disponivel).length;const membros=data.reduce((s,r)=>s+(Number(r.membros)||0),0);h+='<div class="kpi"><div class="ico">Disponíveis</div><div class="num" style="color:var(--ok);">'+disp+'</div><div class="lbl">equipes</div></div><div class="kpi"><div class="ico">Membros</div><div class="num">'+membros+'</div><div class="lbl">total</div></div>';}
+  else if(k==='recursos_dc'){const total=data.length;const ruim=data.filter(r=>r.situacao==='ruim').length;h+='<div class="kpi"><div class="ico">Total</div><div class="num">'+total+'</div><div class="lbl">recursos</div></div>';if(ruim)h+='<div class="kpi"><div class="ico">Em estado ruim</div><div class="num" style="color:var(--danger);">'+ruim+'</div><div class="lbl">itens</div></div>';}
+  else if(k==='equipes_dc'){const disp=data.filter(r=>r.disponibilidade==='disponivel').length;h+='<div class="kpi"><div class="ico">Disponíveis</div><div class="num" style="color:var(--ok);">'+disp+'</div><div class="lbl">equipes</div></div><div class="kpi"><div class="ico">Total</div><div class="num">'+data.length+'</div><div class="lbl">cadastradas</div></div>';}
   else if(k==='pontos_risco'){const crit=data.filter(r=>r.nivel_risco==='critico'||r.nivel_risco==='alto').length;h+='<div class="kpi"><div class="ico">Alto/Crítico</div><div class="num" style="color:var(--danger);">'+crit+'</div><div class="lbl">pontos</div></div>';}
   else if(k==='danos_dc'){const pes=data.reduce((s,r)=>s+(Number(r.pessoas_afetadas)||0),0);const val=data.reduce((s,r)=>s+(Number(r.valor_estimado)||0),0);h+='<div class="kpi"><div class="ico">Pessoas</div><div class="num">'+pes+'</div><div class="lbl">afetadas</div></div><div class="kpi"><div class="ico">Danos</div><div class="num">'+moneyShort(val)+'</div><div class="lbl">estimados</div></div>';}
   el.innerHTML=h;}
@@ -398,15 +414,15 @@ async function loadDashboard(){try{
   const ocTotal=oc.length;
   const abDisp=ab.filter(a=>a.situacao==='disponivel').length;
   const vagasTotal=ab.reduce((s,a)=>s+(Number(a.vagas_disponiveis)||0),0);
-  const eqDisp=eq.filter(e=>e.disponivel).length;
-  const recBaixo=rec.filter(r=>r.quantidade!=null&&r.estoque_minimo!=null&&Number(r.quantidade)<=Number(r.estoque_minimo)).length;
+  const eqDisp=eq.filter(e=>e.disponibilidade==='disponivel').length;
+  const recRuim=rec.filter(r=>r.situacao==='ruim').length;
   const prCrit=pr.filter(p=>p.nivel_risco==='critico'||p.nivel_risco==='alto').length;
   const pesAf=dan.reduce((s,d)=>s+(Number(d.pessoas_afetadas)||0),0);
 
   document.getElementById('dash-kpi').innerHTML=[
     ['🚨 Alertas ativos',al.length,'alertas'],['📍 Ocorrências abertas',ocAbertas,'pendentes'],
     ['🏠 Abrigos disponíveis',abDisp+'/'+ab.length,'abrigos'],['👥 Equipes disponíveis',eqDisp+'/'+eq.length,'equipes'],
-    ['📦 Recursos com estoque baixo',recBaixo,'itens'],['⚠️ Pontos de risco alto/crítico',prCrit,'pontos'],
+    ['📦 Recursos em estado ruim',recRuim,'itens'],['⚠️ Pontos de risco alto/crítico',prCrit,'pontos'],
     ['👤 Pessoas afetadas',pesAf,'no total'],['🛏️ Vagas em abrigos',vagasTotal,'disponíveis'],
   ].map(([i,n,l])=>'<div class="kpi"><div class="ico">'+i+'</div><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>').join('');
 
@@ -424,13 +440,13 @@ async function loadDashboard(){try{
 
   const atencaoItems=[];
   if(ocAbertas)atencaoItems.push({cls:'warn',msg:ocAbertas+' ocorrência(s) ainda em aberto'});
-  if(recBaixo)atencaoItems.push({cls:'danger',msg:recBaixo+' recurso(s) com estoque abaixo do mínimo'});
+  if(recRuim)atencaoItems.push({cls:'danger',msg:recRuim+' recurso(s) em estado ruim'});
   if(prCrit)atencaoItems.push({cls:'danger',msg:prCrit+' ponto(s) de risco em nível alto ou crítico'});
   const abLotado=ab.filter(a=>a.situacao==='lotado').length;
   if(abLotado)atencaoItems.push({cls:'danger',msg:abLotado+' abrigo(s) lotado(s)'});
   document.getElementById('dash-atencao').innerHTML=atencaoItems.length?atencaoItems.map(a=>'<div class="diag diag-'+a.cls+'">'+({ok:'🟢',warn:'🟡',danger:'🔴'}[a.cls])+' '+a.msg+'</div>').join(''):'<div class="diag diag-ok">🟢 Tudo dentro do esperado.</div>';
 
-  document.getElementById('dash-equipes').innerHTML=eq.length?eq.map(e=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px;"><span><strong>'+e.nome+'</strong>'+(e.lider?' — '+e.lider:'')+'</span><span>'+pill(String(e.disponivel),e.disponivel?'Disponível':'Indisponível')+'</span></div>').join(''):'<p style="color:var(--muted);font-size:12px;">Nenhuma equipe cadastrada.</p>';
+  document.getElementById('dash-equipes').innerHTML=eq.length?eq.map(e=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px;"><span><strong>'+e.nome+'</strong>'+(e.responsavel?' — '+e.responsavel:'')+'</span><span>'+pill(e.disponibilidade||'—')+'</span></div>').join(''):'<p style="color:var(--muted);font-size:12px;">Nenhuma equipe cadastrada.</p>';
 }catch(e){document.getElementById('dash-kpi').innerHTML='<div class="diag diag-danger">Erro: '+e.message.slice(0,200)+'</div>';}}
 
 async function loadAuditoria(){try{const rows=await sbGet('dc_auditoria','select=*&order=data.desc&limit=100');document.getElementById('cnt-audit').textContent=rows.length+' registro(s)';document.getElementById('tbl-audit').innerHTML=rows.length?rows.map(r=>'<tr><td>'+fmtDateTime(r.data)+'</td><td>'+(r.usuario||'—')+'</td><td>'+(r.acao||'—')+'</td><td>'+(r.modulo||'—')+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.detalhes||'—')+'</td></tr>').join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Sem registros.</td></tr>';}catch(e){}}
@@ -448,8 +464,8 @@ async function gerarRelatorioGeral(){
       sbGet('dc_alertas','select=id,ativo').catch(()=>[]),
       sbGet('dc_ocorrencias','select=id,status,prioridade').catch(()=>[]),
       sbGet('dc_abrigos','select=id,situacao,vagas_disponiveis').catch(()=>[]),
-      sbGet('dc_equipes','select=id,disponivel').catch(()=>[]),
-      sbGet('dc_recursos','select=id,quantidade,estoque_minimo').catch(()=>[]),
+      sbGet('dc_equipes','select=id,disponibilidade').catch(()=>[]),
+      sbGet('dc_recursos','select=id,quantidade,situacao').catch(()=>[]),
       sbGet('dc_pontos_risco','select=id,nivel_risco').catch(()=>[]),
       sbGet('dc_danos','select=id,pessoas_afetadas,valor_estimado').catch(()=>[]),
     ]);
@@ -462,8 +478,8 @@ async function gerarRelatorioGeral(){
       ['Abrigos disponíveis',ab.filter(a=>a.situacao==='disponivel').length],
       ['Vagas em abrigos',ab.reduce((s,a)=>s+(Number(a.vagas_disponiveis)||0),0)],
       ['Equipes cadastradas',eq.length],
-      ['Equipes disponíveis',eq.filter(e=>e.disponivel).length],
-      ['Recursos com estoque baixo',rec.filter(r=>r.quantidade!=null&&r.estoque_minimo!=null&&Number(r.quantidade)<=Number(r.estoque_minimo)).length],
+      ['Equipes disponíveis',eq.filter(e=>e.disponibilidade==='disponivel').length],
+      ['Recursos em estado ruim',rec.filter(r=>r.situacao==='ruim').length],
       ['Pontos de risco alto/crítico',pr.filter(p=>p.nivel_risco==='critico'||p.nivel_risco==='alto').length],
       ['Pessoas afetadas (danos)',dan.reduce((s,d)=>s+(Number(d.pessoas_afetadas)||0),0)],
       ['Danos estimados (R$)',money(dan.reduce((s,d)=>s+(Number(d.valor_estimado)||0),0))],
