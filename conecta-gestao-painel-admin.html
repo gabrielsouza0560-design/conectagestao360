@@ -1267,6 +1267,7 @@ function enterApp(){
 // Módulos dedicados por secretaria: só aparecem pra Admin Master / Prefeito / Chefe de Gabinete
 // (acesso total) ou pra quem é da própria secretaria — cada link abre um app separado com login próprio.
 const MODULOS_SECRETARIA = [
+  { padrao: /defesa civil/i, href: 'conecta-gestao-defesa-civil.html', label: '🚨 Defesa Civil ↗', prioridade: true },
   { padrao: /sa[uú]de/i, href: 'conecta-gestao-saude.html', label: '🏥 Saúde ↗' },
   { padrao: /ind[uú]stria/i, href: 'conecta-gestao-industria-comercio.html', label: '🏭 Indústria e Comércio ↗' },
   { padrao: /educa[cç][aã]o/i, href: 'conecta-gestao-educacao.html', label: '🎓 Educação ↗' },
@@ -1275,7 +1276,6 @@ const MODULOS_SECRETARIA = [
   { padrao: /^cultura$/i, href: 'conecta-gestao-cultura.html', label: '🎭 Cultura ↗' },
   { padrao: /assist.ncia social/i, href: 'conecta-gestao-assistencia-social.html', label: '🤝 Assistência Social ↗' },
   { padrao: /meio ambiente/i, href: 'conecta-gestao-meio-ambiente.html', label: '🌳 Meio Ambiente ↗' },
-  { padrao: /defesa civil/i, href: 'conecta-gestao-defesa-civil.html', label: '🚨 Defesa Civil ↗' },
 ];
 
 async function carregarModulosSecretaria(perfil){
@@ -1305,14 +1305,23 @@ async function loadNotificacoes(){
       if(!usuarios.length) return;
       currentUsuarioId = usuarios[0].id;
     }
-    const notifs = await sbGet('notificacoes', 'select=id,titulo,corpo,lida,criado_em&usuario_id=eq.' + currentUsuarioId + '&order=criado_em.desc&limit=20');
-    const unread = notifs.filter(n => !n.lida).length;
+    const [notifs, dcAlertas, dcOcorrencias] = await Promise.all([
+      sbGet('notificacoes', 'select=id,titulo,corpo,lida,criado_em&usuario_id=eq.' + currentUsuarioId + '&order=criado_em.desc&limit=20').catch(()=>[]),
+      sbGet('dc_alertas', 'select=id,titulo,nivel,criado_em&ativo=eq.true&order=criado_em.desc&limit=5').catch(()=>[]),
+      sbGet('dc_ocorrencias', 'select=id,protocolo,tipo,status,prioridade,criado_em&status=neq.resolvida&status=neq.encerrada&order=criado_em.desc&limit=10').catch(()=>[]),
+    ]);
+    const dcItems = [];
+    dcAlertas.forEach(a => { dcItems.push({titulo:'🚨 ALERTA DC: '+a.titulo, corpo:'Nível: '+(a.nivel||'—'), urgente:true}); });
+    dcOcorrencias.forEach(o => { dcItems.push({titulo:'📍 Ocorrência: '+(o.protocolo||o.tipo), corpo:(o.tipo||'')+ ' — '+(o.status||'').replace(/_/g,' '), urgente:o.prioridade==='critica'||o.prioridade==='alta'}); });
+    const unread = notifs.filter(n => !n.lida).length + dcItems.length;
     const badge = document.getElementById('notif-badge');
     badge.style.display = unread > 0 ? 'inline-block' : 'none';
     badge.textContent = unread;
-    document.getElementById('notif-panel').innerHTML = notifs.length
-      ? notifs.map(n => '<div class="notif-item ' + (n.lida ? '' : 'unread') + '" onclick="marcarNotifLida(\'' + n.id + '\')"><div class="nt">' + n.titulo + '</div><div class="nb">' + (n.corpo||'') + '</div></div>').join('')
-      : '<div class="notif-empty">Nenhum alerta por enquanto.</div>';
+    if(dcItems.length) badge.style.background = '#DC2626';
+    let html = '';
+    if(dcItems.length) html += '<div style="padding:8px 12px;background:linear-gradient(135deg,#7F1D1D,#991B1B);color:#FCA5A5;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">🚨 Defesa Civil</div>' + dcItems.map(d => '<div class="notif-item unread" style="border-left:3px solid #DC2626;"><div class="nt">' + d.titulo + '</div><div class="nb">' + d.corpo + '</div></div>').join('');
+    if(notifs.length) html += notifs.map(n => '<div class="notif-item ' + (n.lida ? '' : 'unread') + '" onclick="marcarNotifLida(\'' + n.id + '\')"><div class="nt">' + n.titulo + '</div><div class="nb">' + (n.corpo||'') + '</div></div>').join('');
+    document.getElementById('notif-panel').innerHTML = html || '<div class="notif-empty">Nenhum alerta por enquanto.</div>';
   } catch (e) {
     document.getElementById('notif-panel').innerHTML = '<div class="notif-empty">Não foi possível carregar alertas.</div>';
   }

@@ -163,7 +163,7 @@ body{padding-bottom:70px;}
         <option>Alagamento</option><option>Enchente</option><option>Árvore caída</option>
         <option>Estrada interditada</option><option>Problema elétrico</option><option>Risco em residência</option>
         <option>Incêndio em área rural</option><option>Vendaval</option><option>Desabamento</option>
-        <option>Vazamento / alagamento</option><option>Outros</option>
+        <option>Vazamento / alagamento</option><option>Falta de água</option><option>Falta de energia</option><option>Outros</option>
       </select>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -277,7 +277,7 @@ const HELP_TYPES=[
   ['🌧️','Alagamento','199'],['🌊','Enchente','199'],['🌳','Árvore caída','199'],
   ['🛣️','Estrada interditada','199'],['⚡','Problema elétrico',''],['🏠','Risco em residência','199'],
   ['🔥','Incêndio rural','193'],['🌪️','Vendaval','199'],['🧱','Desabamento','193'],
-  ['💧','Vazamento','199'],['📌','Outros','199']
+  ['💧','Vazamento','199'],['🚰','Falta de água',''],['💡','Falta de energia',''],['📌','Outros','199']
 ];
 function buildHelpGrid(){const g=document.getElementById('help-grid');g.innerHTML=HELP_TYPES.map(([ico,lbl,tel],i)=>'<div class="help-item" onclick="selectHelp('+i+')"><span class="hi-ico">'+ico+'</span>'+lbl+'</div>').join('');}
 function selectHelp(i){document.querySelectorAll('.help-item').forEach(el=>el.classList.remove('selected'));document.querySelectorAll('.help-item')[i].classList.add('selected');const[ico,lbl,tel]=HELP_TYPES[i];const act=document.getElementById('help-action');act.style.display='block';const link=document.getElementById('help-ligar');if(tel){link.href='tel:'+tel;link.textContent='📞 Ligar '+tel;link.style.display='block';}else{link.style.display='none';}}

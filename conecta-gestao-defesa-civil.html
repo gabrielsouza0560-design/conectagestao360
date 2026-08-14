@@ -324,10 +324,43 @@ async function submitCrud(k){
     else v=el.tagName==='TEXTAREA'?(el.value.trim()||null):(el.value.trim()||null);
     data[f.id]=v;});
   const btn=document.getElementById('sb-'+k);btn.disabled=true;
-  try{if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);editingId[k]=null;}else{await sbPost(m.table,data);}toggleForm(k);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
+  try{
+    if(editingId[k]){await sbPatch(m.table,'id=eq.'+editingId[k],data);
+      if(k==='ocorrencias_dc'&&data.status&&data.solicitante_telefone){ofereceWhatsApp(data);}
+      editingId[k]=null;
+    }else{
+      const res=await sbPost(m.table,data);
+      if(k==='ocorrencias_dc'&&res[0]&&res[0].solicitante_telefone){ofereceWhatsApp(res[0]);}
+    }
+    toggleForm(k);loadData(k);
+  }catch(e){alert('Erro: '+e.message.slice(0,200));}finally{btn.disabled=false;}}
 async function editCrud(k,id){const m=MODULES[k];try{const rows=await sbGet(m.table,'id=eq.'+id);const r=rows[0];if(!r)return;editingId[k]=id;document.getElementById('form-'+k).style.display='block';document.getElementById('ft-'+k).textContent='Editar registro';document.getElementById('sb-'+k).textContent='Salvar alterações';await loadRefs(k);m.fields.forEach(f=>{const el=document.getElementById('cf-'+k+'-'+f.id);if(!el)return;if(f.type==='checkbox')el.checked=!!r[f.id];else if(f.type==='select'&&(f.id==='ativo'||f.id==='disponivel'||f.id==='monitorado'||f.id==='enviado'))el.value=String(r[f.id]);else el.value=r[f.id]??'';});}catch(e){alert('Erro: '+e.message.slice(0,200));}}
 async function deleteCrud(k,id){if(!confirm('Excluir?'))return;try{await sbDel(MODULES[k].table,'id=eq.'+id);loadData(k);}catch(e){alert('Erro: '+e.message.slice(0,200));}}
-async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;"><button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
+
+const STATUS_MSG={
+  recebida:'foi *recebida* pela Defesa Civil e será analisada em breve',
+  em_analise:'está *em análise* pela equipe da Defesa Civil',
+  equipe_acionada:'teve a *equipe acionada* e está a caminho do local',
+  em_atendimento:'está *em atendimento* — nossa equipe está no local',
+  resolvida:'foi *resolvida* com sucesso. Obrigado por comunicar!',
+  encerrada:'foi *encerrada*. Caso persista, registre uma nova ocorrência'
+};
+function formatFone(tel){if(!tel)return'';return tel.replace(/\D/g,'').replace(/^0+/,'').replace(/^(\d{10,11})$/,'55$1');}
+function ofereceWhatsApp(data){
+  const tel=formatFone(data.solicitante_telefone);if(!tel)return;
+  const st=STATUS_MSG[data.status]||'teve o status atualizado para *'+((data.status||'').replace(/_/g,' '))+'*';
+  const msg='🚨 *Defesa Civil — Ivatuba Protegida*\n\nOlá'+(data.solicitante_nome?', '+data.solicitante_nome:'')+',\n\nSua ocorrência'+(data.protocolo?' (protocolo *'+data.protocolo+'*)':'')+' do tipo *'+(data.tipo||'—')+'* '+st+'.\n\n📍 '+(data.endereco||'')+(data.bairro?' — '+data.bairro:'')+'\n\nPrefeitura Municipal de Ivatuba\nDefesa Civil';
+  const url='https://api.whatsapp.com/send?phone='+encodeURIComponent(tel)+'&text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+}
+function enviarWhatsApp(id){
+  const data=(caches['ocorrencias_dc_data']||[]).find(r=>r.id===id);
+  if(!data){alert('Ocorrência não encontrada.');return;}
+  if(!data.solicitante_telefone){alert('Essa ocorrência não possui telefone do solicitante.');return;}
+  ofereceWhatsApp(data);
+}
+
+async function loadData(k){const m=MODULES[k];try{const data=await sbGet(m.table,'select=*&'+(m.query||'order=criado_em.desc'));caches[k+'_data']=data;document.getElementById('cnt-'+k).textContent=data.length+' registro(s)';const tb=document.getElementById('tbl-'+k);tb.innerHTML=data.length?data.map(r=>{let row='<tr>';m.cols.forEach(c=>{row+='<td>'+m.renderCol(r,c)+'</td>';});row+='<td style="white-space:nowrap;">';if(k==='ocorrencias_dc'&&r.solicitante_telefone)row+='<button style="padding:4px 8px;font-size:11px;margin-right:4px;background:#25D366;color:#fff;border:none;border-radius:7px;font-weight:700;cursor:pointer;" onclick="enviarWhatsApp(\''+r.id+'\')">WhatsApp</button>';row+='<button class="btn-ghost" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editCrud(\''+k+'\',\''+r.id+'\')">Editar</button><button class="btn-danger" onclick="deleteCrud(\''+k+'\',\''+r.id+'\')">Excluir</button></td></tr>';return row;}).join(''):'<tr><td colspan="'+(m.cols.length+1)+'" style="text-align:center;color:var(--muted);padding:24px;">Nenhum registro.</td></tr>';buildKpis(k,data);}catch(e){document.getElementById('tbl-'+k).innerHTML='<tr><td colspan="'+(m.cols.length+1)+'" style="color:var(--danger);">Erro: '+e.message.slice(0,100)+'</td></tr>';}}
 
 function buildKpis(k,data){const el=document.getElementById('kpi-'+k);if(!el)return;const n=data.length;let h='<div class="kpi"><div class="ico">Total</div><div class="num">'+n+'</div><div class="lbl">registros</div></div>';
   if(k==='ocorrencias_dc'){
