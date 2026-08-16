@@ -8,6 +8,7 @@
     { "source": "/educacao", "destination": "/conecta-gestao-educacao.html" },
     { "source": "/esporte", "destination": "/conecta-gestao-esporte.html" },
     { "source": "/defesa-civil", "destination": "/conecta-gestao-defesa-civil.html" },
-    { "source": "/ivatuba-protegida", "destination": "/conecta-gestao-ivatuba-protegida.html" }
+    { "source": "/ivatuba-protegida", "destination": "/conecta-gestao-ivatuba-protegida.html" },
+    { "source": "/camara", "destination": "/conecta-gestao-dashboard-camara.html" }
   ]
 }

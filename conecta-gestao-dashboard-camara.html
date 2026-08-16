@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conecta Gestao — Camara Municipal · Gabriel Oliveira</title>
+<meta name="description" content="Painel de acompanhamento da Camara Municipal — visao das acoes e desenvolvimento de cada secretaria.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0B3B70">
+<style>
+:root{
+  --azul:#0B3B70;--azul-dark:#082B52;--azul-dest:#0057A8;--cyan:#00AEEF;
+  --bg:#F4F6F8;--surface:#FFFFFF;--gray:#E8EBEF;--line:rgba(11,59,112,.07);
+  --ink:#183B5D;--ink-soft:#64748B;--muted:#94A3B8;
+  --ok:#059669;--warn:#D97706;--danger:#DC2626;--info:#0057A8;
+  --radius:16px;--radius-sm:10px;--radius-lg:24px;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'SF Mono','Consolas',monospace;
+  --shadow-xs:0 1px 2px rgba(8,43,82,.04);
+  --shadow-sm:0 1px 3px rgba(8,43,82,.06),0 1px 2px rgba(8,43,82,.04);
+  --shadow-md:0 4px 16px rgba(8,43,82,.08),0 1px 3px rgba(8,43,82,.04);
+  --shadow-lg:0 10px 40px rgba(8,43,82,.1),0 2px 6px rgba(8,43,82,.04);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;}
+img{max-width:100%;display:block;}
+a{color:var(--azul-dest);text-decoration:none;}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:grid;grid-template-columns:1.15fr 1fr;background:var(--surface);}
+@media(max-width:860px){#login-screen{grid-template-columns:1fr;}}
+.login-brand{background:linear-gradient(160deg,var(--azul-dark) 0%,var(--azul) 50%,var(--azul-dest) 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:60px;position:relative;overflow:hidden;}
+.login-brand::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;border-radius:50%;background:rgba(0,174,239,.08);}
+.login-brand::after{content:'';position:absolute;bottom:-120px;left:-60px;width:400px;height:400px;border-radius:50%;background:rgba(0,87,168,.1);}
+.brand-top{display:flex;align-items:center;gap:16px;position:relative;z-index:1;}
+.brand-logo{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;letter-spacing:-.5px;border:1px solid rgba(255,255,255,.15);}
+.brand-title{font-size:18px;font-weight:800;letter-spacing:-.02em;}
+.brand-title small{display:block;font-size:10.5px;letter-spacing:2.5px;color:rgba(255,255,255,.5);text-transform:uppercase;margin-top:3px;font-weight:600;}
+.brand-hero{position:relative;z-index:1;max-width:440px;}
+.brand-hero h1{font-weight:800;font-size:34px;line-height:1.22;letter-spacing:-.03em;margin-bottom:16px;}
+.brand-hero h1 span{color:var(--cyan);}
+.brand-hero p{color:rgba(255,255,255,.6);font-size:14.5px;line-height:1.7;}
+.brand-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,.08);border-radius:30px;font-size:11.5px;color:rgba(255,255,255,.7);margin-top:20px;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.08);}
+.brand-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.3;}}
+.brand-foot{position:relative;z-index:1;font-size:11px;color:rgba(255,255,255,.3);}
+.login-form-wrap{display:flex;align-items:center;justify-content:center;padding:48px 40px;}
+.login-form{width:100%;max-width:380px;}
+.login-form h2{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--azul);margin-bottom:6px;}
+.login-form .sub{color:var(--ink-soft);font-size:13.5px;margin-bottom:32px;}
+.field{margin-bottom:20px;}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-soft);margin-bottom:7px;font-weight:700;}
+.field input{width:100%;padding:12px 14px;border:1.5px solid var(--gray);border-radius:var(--radius-sm);font-size:14.5px;background:var(--surface);color:var(--ink);transition:border-color .2s,box-shadow .2s;}
+.field input:focus{outline:none;border-color:var(--azul-dest);box-shadow:0 0 0 3px rgba(0,87,168,.1);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--azul),var(--azul-dest));color:#fff;padding:13px;border-radius:var(--radius-sm);font-size:14.5px;font-weight:700;box-shadow:0 6px 20px rgba(11,59,112,.3);transition:transform .2s var(--ease),box-shadow .2s var(--ease);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(11,59,112,.25);}
+.btn-primary:disabled{opacity:.6;pointer-events:none;}
+.login-error{margin-top:14px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:var(--radius-sm);font-size:12.5px;color:#991B1B;line-height:1.6;display:none;}
+.login-error.show{display:block;}
+
+/* HEADER */
+.app-header{background:var(--azul-dark);color:#fff;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.06);}
+.hd-inner{max-width:1440px;margin:0 auto;padding:0 40px;display:flex;align-items:center;height:64px;gap:20px;}
+@media(max-width:768px){.hd-inner{padding:0 16px;gap:12px;}}
+.hd-brand{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.hd-logo{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;border:1px solid rgba(255,255,255,.12);}
+.hd-name{font-size:15px;font-weight:800;letter-spacing:-.02em;}
+.hd-name small{display:block;font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.4);text-transform:uppercase;font-weight:600;margin-top:1px;}
+.hd-actions{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.hd-user{display:flex;align-items:center;gap:10px;padding:4px 12px 4px 4px;border-radius:8px;}
+.hd-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--azul-dest),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff;}
+.hd-user-info{line-height:1.3;}
+.hd-user-info .name{font-size:12.5px;font-weight:700;color:#fff;}
+.hd-user-info .role{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;}
+.logout-btn{font-size:11px;color:rgba(255,255,255,.4);padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);transition:all .15s;}
+.logout-btn:hover{color:#fff;border-color:rgba(255,255,255,.25);}
+.badge-ro{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;background:rgba(0,174,239,.12);color:var(--cyan);border:1px solid rgba(0,174,239,.2);}
+
+/* MAIN */
+.app-main{max-width:1440px;margin:0 auto;padding:0 40px 60px;}
+@media(max-width:768px){.app-main{padding:0 16px 40px;}}
+.section{margin-bottom:48px;}
+.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.section-title{font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--azul);}
+.section-sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+
+/* HERO */
+.hero{padding:40px 0 0;margin-bottom:48px;}
+.hero h1{font-size:30px;font-weight:800;line-height:1.2;letter-spacing:-.03em;margin-bottom:12px;}
+.hero h1 .greeting{display:block;font-size:16px;font-weight:600;color:var(--azul-dest);letter-spacing:0;margin-bottom:4px;}
+.hero .desc{font-size:14.5px;color:var(--ink-soft);line-height:1.7;max-width:600px;margin-bottom:16px;}
+.hero-meta{display:flex;gap:16px;flex-wrap:wrap;}
+.hero-meta span{font-size:12px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.kpi-grid{grid-template-columns:1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-xs);transition:all .25s var(--ease);position:relative;overflow:hidden;}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:rgba(0,87,168,.12);}
+.kpi::after{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--azul-dest);opacity:0;transition:opacity .2s;}
+.kpi:hover::after{opacity:1;}
+.kpi .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:16px;background:rgba(0,87,168,.08);}
+.kpi .num{font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--azul);}
+.kpi .label{font-size:12.5px;color:var(--ink-soft);margin-top:6px;font-weight:500;}
+
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-xs);transition:box-shadow .2s;}
+.panel:hover{box-shadow:var(--shadow-sm);}
+.panel-title{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:4px;}
+.panel-sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+
+/* SECRETARIA CARDS */
+.sec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media(max-width:1100px){.sec-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.sec-grid{grid-template-columns:1fr;}}
+.sec-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;transition:all .25s var(--ease);position:relative;overflow:hidden;}
+.sec-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:rgba(0,87,168,.15);}
+.sec-card .sec-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;background:rgba(0,87,168,.06);}
+.sec-card .sec-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;}
+.sec-card .sec-stats{display:flex;gap:16px;font-size:11px;color:var(--ink-soft);flex-wrap:wrap;}
+.sec-card .sec-stats strong{display:block;font-size:16px;color:var(--azul);font-weight:800;}
+.sec-card .sec-bar{height:6px;background:var(--gray);border-radius:6px;margin-top:14px;overflow:hidden;}
+.sec-card .sec-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--azul-dest),var(--cyan));}
+.sec-card .sec-pct{font-size:12px;font-weight:700;color:var(--azul-dest);margin-top:6px;}
+
+/* ACOES TABLE */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:0 12px 12px;border-bottom:1px solid var(--line);font-weight:700;}
+td{padding:12px;border-bottom:1px solid var(--line);color:var(--ink);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(0,87,168,.015);}
+.status-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;}
+.status-em_andamento{background:rgba(0,87,168,.08);color:var(--azul-dest);}
+.status-concluido{background:rgba(5,150,105,.08);color:var(--ok);}
+.status-planejado{background:rgba(148,163,184,.1);color:var(--muted);}
+.status-cancelado{background:rgba(220,38,38,.08);color:var(--danger);}
+
+/* BARS */
+.bar-chart{display:flex;flex-direction:column;gap:14px;}
+.bar-row{display:grid;grid-template-columns:140px 1fr 50px;align-items:center;gap:12px;font-size:12.5px;}
+.bar-row .name{font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bar-track{background:var(--gray);border-radius:6px;height:8px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--azul-dest),var(--cyan));transition:width .6s var(--ease);}
+.bar-row .val{text-align:right;color:var(--ink-soft);font-family:var(--mono);font-size:11.5px;font-weight:600;}
+
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;gap:24px;}
+.donut-legend{display:flex;flex-direction:column;gap:10px;font-size:12px;}
+.donut-legend .li{display:flex;align-items:center;gap:8px;color:var(--ink-soft);font-weight:500;}
+.donut-legend .dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;}
+.grid-equal{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:1000px){.grid-2,.grid-equal{grid-template-columns:1fr;}}
+
+/* EMPTY */
+.empty{text-align:center;padding:32px 20px;color:var(--muted);font-size:12.5px;}
+
+/* FOOTER */
+.app-footer{background:var(--azul-dark);color:rgba(255,255,255,.5);padding:40px;margin-top:40px;}
+.footer-inner{max-width:1440px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-size:15px;font-weight:800;color:#fff;}
+.footer-brand small{display:block;font-size:11px;color:rgba(255,255,255,.3);font-weight:500;margin-top:4px;}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{font-size:12px;color:rgba(255,255,255,.4);transition:color .15s;}
+.footer-links a:hover{color:var(--cyan);}
+
+@media(max-width:700px){table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-brand">
+    <div class="brand-top">
+      <div class="brand-logo">CG</div>
+      <div class="brand-title">Conecta <span style="color:var(--cyan)">Gestao</span><small>Camara Municipal</small></div>
+    </div>
+    <div class="brand-hero">
+      <h1>Acompanhamento <span>legislativo.</span></h1>
+      <p>Painel de acompanhamento das acoes e desenvolvimento de cada secretaria da Prefeitura Municipal de Ivatuba. Acesso restrito ao Presidente da Camara e Admin Master.</p>
+      <div class="brand-badge"><span class="dot"></span> Somente leitura</div>
+    </div>
+    <div class="brand-foot">CONECTA GESTAO &copy; 2026 &mdash; Camara Municipal de Ivatuba</div>
+  </div>
+  <div class="login-form-wrap">
+    <div class="login-form">
+      <h2>Acessar painel</h2>
+      <p class="sub">Entre com sua conta institucional.</p>
+      <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="nome@camara.ivatuba.pr.gov.br"></div>
+      <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"></div>
+      <button class="btn-primary" id="login-btn" onclick="doLogin()">Entrar</button>
+      <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-wrap" style="display:none;">
+
+<header class="app-header">
+  <div class="hd-inner">
+    <div class="hd-brand">
+      <div class="hd-logo">CG</div>
+      <div class="hd-name">Conecta <span style="color:var(--cyan)">Gestao</span><small>Camara Municipal</small></div>
+    </div>
+    <div class="hd-actions">
+      <span class="badge-ro">Somente leitura</span>
+      <div class="hd-user">
+        <div class="hd-avatar" id="hd-avatar">P</div>
+        <div class="hd-user-info"><span class="name" id="hd-user-name">Presidente</span><span class="role" id="hd-user-role">camara</span></div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+</header>
+
+<div class="app-main">
+
+<!-- HERO -->
+<div class="hero section">
+  <h1><span class="greeting" id="hero-greeting">Bom dia, Presidente!</span>Acoes e desenvolvimento das <span style="color:var(--azul-dest)">secretarias.</span></h1>
+  <p class="desc">Acompanhe em tempo real o desempenho, investimentos e realizacoes de cada secretaria da Prefeitura Municipal de Ivatuba. Este painel e somente leitura.</p>
+  <div class="hero-meta">
+    <span id="hero-date"></span>
+    <span>Prefeitura de Ivatuba</span>
+    <span>Gestao 2025-2028</span>
+  </div>
+</div>
+
+<!-- KPIs GERAIS -->
+<div class="section">
+  <div class="section-header"><div><div class="section-title">Resumo Geral</div><div class="section-sub">Indicadores consolidados de toda a administracao</div></div></div>
+  <div class="kpi-grid" id="kpi-grid"></div>
+</div>
+
+<!-- PANORAMA -->
+<div class="section">
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">Investimento por Secretaria</div>
+      <div class="panel-sub">Distribuicao do investimento no ano corrente</div>
+      <div class="bar-chart" id="bars-secretarias"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Status das Acoes</div>
+      <div class="panel-sub">Distribuicao geral</div>
+      <div class="donut-wrap">
+        <svg width="140" height="140" viewBox="0 0 140 140" id="donut-svg"></svg>
+        <div class="donut-legend" id="donut-legend"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECRETARIAS -->
+<div class="section">
+  <div class="section-header"><div><div class="section-title">Desempenho das Secretarias</div><div class="section-sub">Acoes, investimentos e taxa de conclusao por secretaria</div></div></div>
+  <div class="sec-grid" id="sec-grid"></div>
+</div>
+
+<!-- ULTIMAS ACOES -->
+<div class="section">
+  <div class="section-header"><div><div class="section-title">Ultimas Acoes Realizadas</div><div class="section-sub">Acoes mais recentes em todas as secretarias</div></div></div>
+  <div class="panel">
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Acao</th><th>Secretaria</th><th>Bairro</th><th>Data</th><th>Status</th><th>Investimento</th></tr></thead>
+        <tbody id="acoes-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- PLANO DE GOVERNO -->
+<div class="section">
+  <div class="section-header"><div><div class="section-title">Plano de Governo</div><div class="section-sub">Cumprimento das promessas de campanha por secretaria</div></div></div>
+  <div class="grid-equal">
+    <div class="panel">
+      <div id="promessas-resumo"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Por Secretaria</div>
+      <div class="panel-sub">Taxa de cumprimento</div>
+      <div class="bar-chart" id="promessas-bars"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app-main -->
+
+<footer class="app-footer" id="app-footer" style="display:none;">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">Conecta Gestao<small>Camara Municipal de Ivatuba</small></div>
+    </div>
+    <div class="footer-links">
+      <a href="conecta-gestao-dashboard-prefeito.html">Dashboard Prefeito</a>
+      <a href="conecta-gestao-painel-admin.html">Painel Admin</a>
+      <a href="conecta-gestao-ivatuba-protegida.html">Ivatuba Protegida</a>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /app-wrap -->
+
+<div style="position:fixed;bottom:8px;right:12px;font-family:var(--sans);font-size:10px;color:rgba(100,116,139,.6);background:rgba(255,255,255,.8);padding:4px 10px;border-radius:20px;backdrop-filter:blur(4px);z-index:99;pointer-events:none;">Desenvolvido por <strong>Gabriel Oliveira</strong></div>
+
+<script>
+const SUPABASE_URL="https://kfvkembarvsbtveksiag.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_r4FgIemkyEcQiWCjj23cew_MdN2GVuL";
+
+const SECRETARIAS_LABELS=["Gabinete","Administracao","Financas","Educacao","Saude","Agricultura","Industria e Comercio","Turismo","Cultura","Esporte","Meio Ambiente","Assistencia Social","Obras e Servicos Publicos","Planejamento","Inovacao e Tecnologia","Defesa Civil"];
+const SEC_ICONS={"Gabinete":"\u{1F3DB}","Administracao":"\u{1F4C1}","Financas":"\u{1F4B0}","Educacao":"\u{1F393}","Saude":"\u{1F3E5}","Agricultura":"\u{1F33E}","Industria e Comercio":"\u{1F3ED}","Turismo":"\u{2708}","Cultura":"\u{1F3AD}","Esporte":"\u{26BD}","Meio Ambiente":"\u{1F333}","Assistencia Social":"\u{1F91D}","Obras e Servicos Publicos":"\u{1F3D7}","Planejamento":"\u{1F4CB}","Inovacao e Tecnologia":"\u{1F4BB}","Defesa Civil":"\u{1F6A8}"};
+const DONUT_COLORS={concluido:"#059669",em_andamento:"#0057A8",planejado:"#94A3B8",cancelado:"#DC2626"};
+const DONUT_LABEL={concluido:"Concluido",em_andamento:"Em andamento",planejado:"Planejado",cancelado:"Cancelado"};
+const ALLOWED_PROFILES=['admin_master','presidente_camara','prefeito','vice_prefeito','controladoria'];
+let session=null;
+
+function decodeJwt(token){
+  try{const p=token.split('.')[1];const j=decodeURIComponent(atob(p.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));return JSON.parse(j);}catch(e){return{};}
+}
+
+function setGreeting(){
+  const h=new Date().getHours();
+  const g=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  document.getElementById('hero-greeting').textContent=g+', Presidente!';
+  document.getElementById('hero-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const senha=document.getElementById('login-senha').value;
+  const errBox=document.getElementById('login-error');
+  const btn=document.getElementById('login-btn');
+  errBox.classList.remove('show');
+  if(!email||!senha){errBox.textContent='Preencha e-mail e senha.';errBox.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{
+    const res=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const data=await res.json();
+    if(!res.ok){errBox.textContent=data.error_description||data.msg||'E-mail ou senha invalidos.';errBox.classList.add('show');return;}
+    const claims=decodeJwt(data.access_token);
+    if(ALLOWED_PROFILES.indexOf(claims.perfil)===-1){errBox.textContent='Seu perfil nao tem acesso a este painel.';errBox.classList.add('show');return;}
+    session={access_token:data.access_token,claims};
+    localStorage.setItem('cg_session_camara',JSON.stringify({access_token:data.access_token,refresh_token:data.refresh_token||''}));
+    showApp(email,claims);
+    await populate();
+  }catch(e){errBox.textContent='Nao foi possivel conectar ao servidor.';errBox.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+
+function showApp(email,claims){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-wrap').style.display='block';
+  document.getElementById('app-footer').style.display='block';
+  document.getElementById('hd-user-role').textContent=(claims.perfil||'').replace(/_/g,' ');
+  document.getElementById('hd-avatar').textContent=(email[0]||'P').toUpperCase();
+  setGreeting();
+}
+
+function doLogout(){
+  session=null;localStorage.removeItem('cg_session_camara');
+  document.getElementById('app-wrap').style.display='none';
+  document.getElementById('app-footer').style.display='none';
+  document.getElementById('login-screen').style.display='grid';
+  document.getElementById('login-email').value='';
+  document.getElementById('login-senha').value='';
+}
+
+async function sbGet(table,query){
+  const res=await fetch(SUPABASE_URL+'/rest/v1/'+table+'?'+(query||''),{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+session.access_token,'Accept-Profile':'gestao360'}});
+  if(!res.ok)throw new Error(await res.text());
+  return res.json();
+}
+
+function money(v){return v?'R$ '+Number(v).toLocaleString('pt-BR'):'—';}
+function moneyShort(v){if(!v)return'R$ 0';const n=Number(v);if(n>=1e6)return'R$ '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'R$ '+(n/1e3).toFixed(0)+'k';return'R$ '+n.toFixed(0);}
+function statusPill(s){const m={planejado:'Planejado',em_andamento:'Em andamento',concluido:'Concluido',cancelado:'Cancelado'};return'<span class="status-pill status-'+s+'">'+(m[s]||s)+'</span>';}
+
+async function populate(){
+  try{
+    const[acoes,indicadores,avaliacoes]=await Promise.all([
+      sbGet('acoes','select=id,titulo,ano,data,status,valor_investido,bairro,quantidade_beneficiados,eh_evento,secretarias(nome)&order=criado_em.desc'),
+      sbGet('indicadores','select=chave,valor,secretarias(nome)'),
+      sbGet('avaliacoes','select=nota,secretaria_id,secretarias(nome)'),
+    ]);
+
+    const totalAcoes=acoes.length;
+    const investTotal=acoes.reduce((s,a)=>s+(Number(a.valor_investido)||0),0);
+    const obrasConcl=acoes.filter(a=>a.status==='concluido').length;
+    const obrasAnd=acoes.filter(a=>a.status==='em_andamento').length;
+    const benef=acoes.reduce((s,a)=>s+(Number(a.quantidade_beneficiados)||0),0);
+    const ind=(c)=>(indicadores.find(i=>i.chave===c)?.valor)||0;
+
+    // KPIs
+    document.getElementById('kpi-grid').innerHTML=[
+      ['&#x1F4CB;','Acoes Totais',totalAcoes],
+      ['&#x1F4B0;','Investimento',moneyShort(investTotal)],
+      ['&#x1F3D7;','Obras Concluidas',obrasConcl],
+      ['&#x2699;','Em Andamento',obrasAnd],
+      ['&#x1F465;','Beneficiados',benef.toLocaleString('pt-BR')],
+      ['&#x1F393;','Alunos Atendidos',Number(ind('alunos_atendidos')).toLocaleString('pt-BR')],
+      ['&#x1F3E5;','Consultas Saude',Number(ind('consultas_realizadas')).toLocaleString('pt-BR')],
+      ['&#x1F333;','Arvores Plantadas',Number(ind('arvores_plantadas')).toLocaleString('pt-BR')],
+    ].map(k=>'<div class="kpi"><div class="icon">'+k[0]+'</div><div class="num">'+k[2]+'</div><div class="label">'+k[1]+'</div></div>').join('');
+
+    // Donut
+    const statusCounts={};
+    acoes.forEach(a=>{statusCounts[a.status]=(statusCounts[a.status]||0)+1;});
+    const donutData=Object.entries(statusCounts).map(([k,v])=>[DONUT_LABEL[k]||k,v,DONUT_COLORS[k]||'#94A3B8']);
+    const totalD=donutData.reduce((s,d)=>s+d[1],0);
+    let acc=0;const r=55,cx=70,cy=70,circ=2*Math.PI*r;
+    let svg='';
+    donutData.forEach(([l,val,color])=>{if(!totalD)return;const dash=(val/totalD)*circ;svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="18" stroke-dasharray="'+dash+' '+(circ-dash)+'" stroke-dashoffset="'+(-acc)+'" transform="rotate(-90 '+cx+' '+cy+')"/>';acc+=dash;});
+    document.getElementById('donut-svg').innerHTML=svg+'<circle cx="'+cx+'" cy="'+cy+'" r="34" fill="#fff"/><text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" font-family="Inter" font-weight="800" font-size="16" fill="#183B5D">'+totalD+'</text>';
+    document.getElementById('donut-legend').innerHTML=donutData.length?donutData.map(([l,v,c])=>'<div class="li"><span class="dot" style="background:'+c+'"></span>'+l+' &mdash; '+v+'</div>').join(''):'<div class="li">Nenhuma acao cadastrada</div>';
+
+    // Secretarias cards
+    const bySec={};
+    acoes.forEach(a=>{const n=a.secretarias?.nome||'Outros';if(!bySec[n])bySec[n]={total:0,inv:0,concl:0,and:0};bySec[n].total++;bySec[n].inv+=(Number(a.valor_investido)||0);if(a.status==='concluido')bySec[n].concl++;if(a.status==='em_andamento')bySec[n].and++;});
+    const secCards=Object.entries(bySec).sort((a,b)=>b[1].total-a[1].total);
+    document.getElementById('sec-grid').innerHTML=secCards.length?secCards.map(([n,d])=>{
+      const pct=Math.round(d.concl/Math.max(1,d.total)*100);
+      return'<div class="sec-card"><div class="sec-icon">'+(SEC_ICONS[n]||'&#x1F4C1;')+'</div><div class="sec-name">'+n+'</div><div class="sec-stats"><div><strong>'+d.total+'</strong> acoes</div><div><strong>'+d.concl+'</strong> concluidas</div><div><strong>'+d.and+'</strong> em andamento</div></div><div class="sec-bar"><div class="sec-fill" style="width:'+pct+'%"></div></div><div class="sec-pct">'+pct+'% concluido &middot; '+moneyShort(d.inv)+' investido</div></div>';
+    }).join(''):'<div class="empty" style="grid-column:1/-1;"><p>Nenhuma secretaria com acoes cadastradas.</p></div>';
+
+    // Investment bars
+    const secInv=Object.entries(bySec).sort((a,b)=>b[1].inv-a[1].inv).slice(0,10);
+    const maxS=Math.max(1,...secInv.map(s=>s[1].inv));
+    document.getElementById('bars-secretarias').innerHTML=secInv.length?secInv.map(([n,d])=>'<div class="bar-row"><span class="name">'+n+'</span><div class="bar-track"><div class="bar-fill" style="width:'+(d.inv/maxS*100).toFixed(0)+'%"></div></div><span class="val">'+moneyShort(d.inv)+'</span></div>').join(''):'<div class="empty"><p>Sem dados de investimento.</p></div>';
+
+    // Acoes table
+    const recents=acoes.slice(0,15);
+    document.getElementById('acoes-table').innerHTML=recents.length?recents.map(a=>{
+      const dt=a.data?new Date(a.data).toLocaleDateString('pt-BR'):'—';
+      return'<tr><td style="font-weight:600;">'+a.titulo+'</td><td>'+(a.secretarias?.nome||'—')+'</td><td>'+(a.bairro||'—')+'</td><td>'+dt+'</td><td>'+statusPill(a.status)+'</td><td style="font-family:var(--mono);font-weight:600;">'+money(a.valor_investido)+'</td></tr>';
+    }).join(''):'<tr><td colspan="6" class="empty">Nenhuma acao cadastrada.</td></tr>';
+
+    // Plano de Governo
+    try{
+      const prom=await sbGet('promessas_campanha','select=id,titulo,status,secretarias(nome)');
+      const tP=prom.length;const cumpr=prom.filter(p=>p.status==='cumprida').length;const parc=prom.filter(p=>p.status==='parcialmente_cumprida').length;
+      const pctC=tP?Math.round(((cumpr+parc*0.5)/tP)*100):0;
+      document.getElementById('promessas-resumo').innerHTML='<div style="display:flex;align-items:center;gap:32px;"><svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--gray)" stroke-width="12"/><circle cx="60" cy="60" r="50" fill="none" stroke="var(--azul-dest)" stroke-width="12" stroke-dasharray="'+(pctC/100*314)+' 314" stroke-dashoffset="0" transform="rotate(-90 60 60)" stroke-linecap="round"/><text x="60" y="60" text-anchor="middle" dominant-baseline="central" font-family="Inter" font-weight="800" font-size="22" fill="var(--azul)">'+pctC+'%</text></svg><div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--ink-soft);"><div><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--ok);margin-right:8px;"></span><strong>'+cumpr+'</strong> cumpridas</div><div><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--warn);margin-right:8px;"></span><strong>'+parc+'</strong> parciais</div><div><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--muted);margin-right:8px;"></span><strong>'+(tP-cumpr-parc)+'</strong> pendentes</div><div><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--azul-dest);margin-right:8px;"></span><strong>'+tP+'</strong> total</div></div></div>';
+      const bS={};
+      prom.forEach(p=>{const s=p.secretarias?.nome||'Geral';if(!bS[s])bS[s]={total:0,cumpridas:0};bS[s].total++;if(p.status==='cumprida')bS[s].cumpridas++;if(p.status==='parcialmente_cumprida')bS[s].cumpridas+=0.5;});
+      const sB=Object.entries(bS).sort((a,b)=>(b[1].cumpridas/b[1].total)-(a[1].cumpridas/a[1].total));
+      document.getElementById('promessas-bars').innerHTML=sB.length?sB.map(([n,o])=>{const pct=Math.round(o.cumpridas/o.total*100);return'<div class="bar-row"><span class="name">'+n+'</span><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,var(--ok),#34D399);"></div></div><span class="val">'+pct+'%</span></div>';}).join(''):'<div class="empty"><p>Nenhuma promessa cadastrada.</p></div>';
+    }catch(e){console.warn('Promessas:',e.message);}
+
+  }catch(e){alert('Erro ao carregar dados: '+e.message.slice(0,200));}
+}
+
+// Auto-login
+(function(){
+  const stored=localStorage.getItem('cg_session_camara');
+  if(stored){
+    try{
+      const s=JSON.parse(stored);
+      const claims=decodeJwt(s.access_token);
+      if(claims.exp&&claims.exp*1000>Date.now()&&ALLOWED_PROFILES.indexOf(claims.perfil)!==-1){
+        session={access_token:s.access_token,claims};
+        showApp('',claims);
+        populate();
+      }
+    }catch(e){}
+  }
+})();
+</script>
+</body>
+</html>
