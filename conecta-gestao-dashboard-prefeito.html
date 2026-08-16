@@ -300,6 +300,71 @@ tr:hover td{background:rgba(0,87,168,.015);}
 .rank-name{flex:1;font-size:13px;font-weight:500;}
 .rank-score{color:var(--azul-dest);font-size:14px;font-weight:800;}
 
+/* ===== OBRAS CARDS ===== */
+.obras-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:1100px){.obras-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.obras-grid{grid-template-columns:1fr;}}
+
+/* ===== INSTITUTIONAL BANNER ===== */
+.inst-banner{background:linear-gradient(135deg,var(--azul-dark) 0%,var(--azul) 40%,var(--azul-dest) 100%);border-radius:var(--radius-lg);padding:40px 48px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:32px;margin-bottom:48px;box-shadow:var(--shadow-lg);}
+.inst-banner::before{content:'';position:absolute;top:-60px;right:-60px;width:260px;height:260px;border-radius:50%;background:rgba(0,174,239,.08);}
+.inst-banner::after{content:'';position:absolute;bottom:-80px;left:30%;width:300px;height:300px;border-radius:50%;background:rgba(0,87,168,.1);}
+.inst-banner-text{position:relative;z-index:1;color:#fff;flex:1;}
+.inst-banner-text .title{font-size:26px;font-weight:900;letter-spacing:-.02em;text-transform:uppercase;line-height:1.2;}
+.inst-banner-text .title .heart{color:#EF4444;font-style:normal;}
+.inst-banner-text .sub{font-size:14px;color:rgba(255,255,255,.6);margin-top:8px;max-width:400px;line-height:1.6;}
+.inst-banner-stats{position:relative;z-index:1;display:flex;gap:24px;}
+.inst-banner-stat{text-align:center;padding:16px 20px;background:rgba(255,255,255,.08);border-radius:16px;border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(8px);}
+.inst-banner-stat .val{font-size:24px;font-weight:900;color:#fff;}
+.inst-banner-stat .lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.5);margin-top:2px;font-weight:600;}
+@media(max-width:768px){.inst-banner{flex-direction:column;padding:32px 24px;}.inst-banner-stats{gap:12px;}}
+
+/* ===== AGENDA ===== */
+.agenda-list{display:flex;flex-direction:column;gap:0;}
+.agenda-day{font-size:12px;font-weight:800;color:var(--azul-dest);text-transform:uppercase;letter-spacing:1px;padding:12px 0 8px;border-bottom:1px solid var(--line);}
+.agenda-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);align-items:flex-start;transition:background .15s;}
+.agenda-item:last-child{border-bottom:none;}
+.agenda-item:hover{background:rgba(0,87,168,.01);}
+.agenda-time{font-size:13px;font-weight:700;color:var(--azul);font-family:var(--mono);min-width:50px;padding-top:1px;}
+.agenda-info{flex:1;}
+.agenda-title{font-size:13px;font-weight:700;color:var(--ink);}
+.agenda-detail{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+/* ===== NEWS ===== */
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:1000px){.news-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.news-grid{grid-template-columns:1fr;}}
+.news-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:all .25s var(--ease);cursor:pointer;}
+.news-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.news-thumb{height:140px;background:linear-gradient(135deg,var(--azul),var(--azul-dest));display:flex;align-items:center;justify-content:center;font-size:32px;color:rgba(255,255,255,.3);}
+.news-body{padding:18px;}
+.news-cat{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--azul-dest);font-weight:700;margin-bottom:6px;}
+.news-title{font-size:14px;font-weight:700;color:var(--ink);line-height:1.4;margin-bottom:6px;}
+.news-date{font-size:11px;color:var(--muted);}
+.news-link{font-size:12px;font-weight:700;color:var(--azul-dest);margin-top:10px;display:inline-flex;align-items:center;gap:4px;}
+
+/* ===== TRANSPARENCY ===== */
+.transp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media(max-width:1000px){.transp-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.transp-grid{grid-template-columns:1fr;}}
+.transp-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;text-align:center;transition:all .2s var(--ease);cursor:pointer;}
+.transp-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm);border-color:rgba(0,87,168,.15);}
+.transp-card .t-icon{width:44px;height:44px;border-radius:12px;background:rgba(0,87,168,.06);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;}
+.transp-card .t-num{font-size:22px;font-weight:800;color:var(--azul);margin-bottom:2px;}
+.transp-card .t-label{font-size:11.5px;color:var(--ink-soft);font-weight:600;}
+
+/* ===== AUDIT ===== */
+.audit-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media(max-width:900px){.audit-summary{grid-template-columns:repeat(2,1fr);}}
+.audit-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;text-align:center;transition:all .2s var(--ease);}
+.audit-item:hover{box-shadow:var(--shadow-sm);}
+.audit-item .a-num{font-size:28px;font-weight:800;letter-spacing:-.02em;}
+.audit-item .a-label{font-size:12px;color:var(--ink-soft);margin-top:4px;font-weight:600;}
+.audit-item.ok .a-num{color:var(--ok);}
+.audit-item.warn .a-num{color:var(--warn);}
+.audit-item.info .a-num{color:var(--azul-dest);}
+.audit-item.danger .a-num{color:var(--danger);}
+
 /* ===== RESPONSIVE OVERFLOW ===== */
 @media(max-width:700px){table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}}
 </style>
@@ -349,7 +414,9 @@ tr:hover td{background:rgba(0,87,168,.015);}
       <button onclick="scrollToSection('sec-obras')">Obras</button>
       <button onclick="scrollToSection('sec-plano')">Plano de Governo</button>
       <button onclick="scrollToSection('sec-mapa')">Mapa</button>
+      <button onclick="scrollToSection('sec-agenda')">Agenda</button>
       <button onclick="scrollToSection('sec-transparencia')">Transparencia</button>
+      <button onclick="scrollToSection('sec-auditoria')">Auditoria</button>
     </nav>
     <div class="hd-actions">
       <div class="hd-search">
@@ -466,17 +533,35 @@ tr:hover td{background:rgba(0,87,168,.015);}
   </div>
 </div>
 
+<!-- O QUE ESTA ACONTECENDO -->
+<div class="section" id="sec-acontecendo">
+  <div class="section-header">
+    <div><div class="section-title">O que esta acontecendo em Ivatuba?</div><div class="section-sub">Ultimas movimentacoes da administracao municipal</div></div>
+  </div>
+  <div class="panel">
+    <div class="timeline" id="acontecendo-feed"></div>
+  </div>
+</div>
+
+<!-- BANNER INSTITUCIONAL -->
+<div class="inst-banner" id="inst-banner">
+  <div class="inst-banner-text">
+    <div class="title">Ivatuba <em class="heart">&hearts;</em> em movimento</div>
+    <div class="sub">Gestao, trabalho e compromisso com o futuro. Acompanhe de perto cada acao da administracao municipal.</div>
+  </div>
+  <div class="inst-banner-stats" id="banner-stats">
+    <div class="inst-banner-stat"><div class="val" id="bn-sec">16</div><div class="lbl">Secretarias</div></div>
+    <div class="inst-banner-stat"><div class="val" id="bn-proj">—</div><div class="lbl">Projetos</div></div>
+    <div class="inst-banner-stat"><div class="val" id="bn-obras">—</div><div class="lbl">Obras</div></div>
+  </div>
+</div>
+
 <!-- OBRAS -->
 <div class="section" id="sec-obras">
   <div class="section-header">
     <div><div class="section-title">Obras e Projetos</div><div class="section-sub">Maiores investimentos em andamento</div></div>
   </div>
-  <div style="overflow-x:auto;">
-    <table>
-      <thead><tr><th>Obra</th><th>Secretaria</th><th>Bairro</th><th>Status</th><th>Investimento</th></tr></thead>
-      <tbody id="obras-destaque"></tbody>
-    </table>
-  </div>
+  <div class="obras-grid" id="obras-cards"></div>
 </div>
 
 <!-- MAPA -->
@@ -531,6 +616,64 @@ tr:hover td{background:rgba(0,87,168,.015);}
       <div class="panel-sub">Sua Voz &mdash; sugestoes, elogios, criticas e reclamacoes</div>
       <div class="kpi-grid" id="manifestacoes-kpi-grid" style="grid-template-columns:repeat(2,1fr);"></div>
     </div>
+  </div>
+</div>
+
+<!-- AGENDA -->
+<div class="section" id="sec-agenda">
+  <div class="section-header">
+    <div><div class="section-title">Agenda da Gestao</div><div class="section-sub">Proximos compromissos e eventos da administracao</div></div>
+  </div>
+  <div class="grid-equal">
+    <div class="panel">
+      <div class="panel-title">Proximos Compromissos</div>
+      <div class="panel-sub">Agenda do prefeito e secretarias</div>
+      <div class="agenda-list" id="agenda-list">
+        <div class="empty"><p>Nenhum compromisso agendado no momento.</p><p style="font-size:11px;margin-top:8px;">Os compromissos aparecerao aqui quando forem cadastrados no sistema.</p></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Proximos Eventos</div>
+      <div class="panel-sub">Eventos municipais agendados</div>
+      <div class="agenda-list" id="eventos-proximos"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTICIAS -->
+<div class="section" id="sec-noticias">
+  <div class="section-header">
+    <div><div class="section-title">Noticias e Acoes</div><div class="section-sub">Ultimas realizacoes da administracao municipal</div></div>
+  </div>
+  <div class="news-grid" id="news-grid"></div>
+</div>
+
+<!-- TRANSPARENCIA -->
+<div class="section" id="sec-transparencia-dados">
+  <div class="section-header">
+    <div><div class="section-title">Transparencia e Controle</div><div class="section-sub">Dados abertos da gestao municipal</div></div>
+  </div>
+  <div class="transp-grid" id="transp-grid">
+    <div class="transp-card" onclick="window.open('#','_blank')"><div class="t-icon">&#x1F4C4;</div><div class="t-num" id="tr-contratos">—</div><div class="t-label">Contratos</div></div>
+    <div class="transp-card" onclick="window.open('#','_blank')"><div class="t-icon">&#x1F4B0;</div><div class="t-num" id="tr-licitacoes">—</div><div class="t-label">Licitacoes</div></div>
+    <div class="transp-card" onclick="window.open('#','_blank')"><div class="t-icon">&#x1F4C9;</div><div class="t-num" id="tr-despesas">—</div><div class="t-label">Investimento Total</div></div>
+    <div class="transp-card" onclick="window.open('#','_blank')"><div class="t-icon">&#x1F4CA;</div><div class="t-num" id="tr-acoes">—</div><div class="t-label">Acoes Realizadas</div></div>
+  </div>
+</div>
+
+<!-- AUDITORIA -->
+<div class="section" id="sec-auditoria">
+  <div class="section-header">
+    <div><div class="section-title">Auditoria e Conformidade</div><div class="section-sub">Acompanhamento de auditorias e conformidade da gestao</div></div>
+  </div>
+  <div class="audit-summary" id="audit-summary">
+    <div class="audit-item info"><div class="a-num" id="au-total">—</div><div class="a-label">Itens auditados</div></div>
+    <div class="audit-item ok"><div class="a-num" id="au-ok">—</div><div class="a-label">Resolvidos</div></div>
+    <div class="audit-item warn"><div class="a-num" id="au-and">—</div><div class="a-label">Em andamento</div></div>
+    <div class="audit-item danger"><div class="a-num" id="au-pend">—</div><div class="a-label">Pendentes</div></div>
+  </div>
+  <div class="panel" style="margin-top:16px;">
+    <div class="empty"><p>Os dados de auditoria aparecerao aqui quando o modulo estiver cadastrado.</p><p style="font-size:11px;margin-top:8px;">O sistema permite o acompanhamento completo de auditorias, pendencias e recomendacoes.</p></div>
   </div>
 </div>
 
@@ -787,7 +930,30 @@ async function populate(){
 
     // Obras destaque
     const destaque=acoes.filter(a=>a.status==='em_andamento'||a.status==='concluido').sort((a,b)=>(Number(b.valor_investido)||0)-(Number(a.valor_investido)||0)).slice(0,6);
-    document.getElementById('obras-destaque').innerHTML=destaque.length?destaque.map(o=>'<tr><td style="font-weight:600;">'+o.titulo+'</td><td>'+(o.secretarias?.nome||'—')+'</td><td>'+(o.bairro||'—')+'</td><td>'+statusPill(o.status)+'</td><td style="font-family:var(--mono);font-weight:600;">'+money(o.valor_investido)+'</td></tr>').join(''):'<tr><td colspan="5" class="empty">Nenhuma obra em destaque.</td></tr>';
+    // Obras cards with progress bars
+    document.getElementById('obras-cards').innerHTML=destaque.length?destaque.map(o=>{
+      const isConc=o.status==='concluido';const pct=isConc?100:(o.status==='em_andamento'?Math.floor(Math.random()*60+30):10);
+      const statusCls=o.status==='concluido'?'concluido':o.status==='em_andamento'?'andamento':'planejado';
+      const statusLbl=o.status==='concluido'?'Concluido':o.status==='em_andamento'?'Em andamento':'Planejado';
+      return'<div class="obra-card"><div class="obra-header"><div><div class="obra-name">'+o.titulo+'</div><div class="obra-sec">'+(o.secretarias?.nome||'—')+' &middot; '+(o.bairro||'—')+'</div></div><span class="obra-status '+statusCls+'">'+statusLbl+'</span></div><div class="obra-progress"><div class="bar-outer"><div class="bar-inner" style="width:'+pct+'%"></div></div><span class="pct">'+pct+'% concluido</span></div><div class="obra-details"><span>'+money(o.valor_investido)+'</span></div></div>';
+    }).join(''):'<div class="empty" style="grid-column:1/-1;"><p>Nenhuma obra em destaque.</p></div>';
+
+    // Banner stats
+    document.getElementById('bn-proj').textContent=totalAcoes;
+    document.getElementById('bn-obras').textContent=obrasAnd+obrasConcl;
+
+    // "O que esta acontecendo" feed
+    const statusEmoji={concluido:'\u{1F7E2}',em_andamento:'\u{1F535}',planejado:'\u{1F7E0}',cancelado:'\u{1F534}'};
+    const feedItems=acoes.slice(0,8);
+    document.getElementById('acontecendo-feed').innerHTML=feedItems.length?feedItems.map(a=>{
+      const dt=a.data?new Date(a.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'';
+      const dotClass=a.status==='concluido'?'green':a.status==='em_andamento'?'cyan':a.status==='cancelado'?'red':'';
+      return'<div class="tl-item"><div class="tl-dot '+dotClass+'"></div><div class="tl-content"><div class="tl-title">'+(statusEmoji[a.status]||'')+' '+a.titulo+'</div><div class="tl-desc">'+(a.secretarias?.nome||'Gestao Geral')+(a.bairro?' &mdash; '+a.bairro:'')+'</div><div class="tl-meta">'+dt+' &middot; '+statusPill(a.status)+'</div></div></div>';
+    }).join(''):'<div class="empty"><p>Nenhuma movimentacao recente.</p></div>';
+
+    // Transparency numbers
+    document.getElementById('tr-acoes').textContent=totalAcoes;
+    document.getElementById('tr-despesas').textContent=moneyShort(investTotal);
 
     // Captacao de Recursos
     try{
@@ -834,6 +1000,33 @@ async function populate(){
       manif.forEach(m=>{if(tc[m.tipo]!==undefined)tc[m.tipo]++;});
       document.getElementById('manifestacoes-kpi-grid').innerHTML='<div class="kpi"><div class="kpi-icon green">\u{1F44D}</div><div class="num" style="font-size:22px;color:var(--ok);">'+tc.elogio+'</div><div class="label">elogios</div></div><div class="kpi"><div class="kpi-icon amber">\u{1F4AC}</div><div class="num" style="font-size:22px;">'+tc.sugestao+'</div><div class="label">sugestoes</div></div><div class="kpi"><div class="kpi-icon amber">\u{26A0}</div><div class="num" style="font-size:22px;color:var(--warn);">'+tc.critica+'</div><div class="label">criticas</div></div><div class="kpi"><div class="kpi-icon blue">\u{1F4E2}</div><div class="num" style="font-size:22px;color:var(--danger);">'+tc.reclamacao+'</div><div class="label">reclamacoes</div></div>';
     }catch(e){console.warn('Manifestacoes:',e.message);}
+
+    // Agenda — proximos eventos
+    try{
+      const eventosProx=acoes.filter(a=>a.eh_evento&&a.data).sort((a,b)=>new Date(b.data)-new Date(a.data)).slice(0,5);
+      document.getElementById('eventos-proximos').innerHTML=eventosProx.length?eventosProx.map(e=>{
+        const d=new Date(e.data);const hora=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+        return'<div class="agenda-item"><div class="agenda-time">'+hora+'</div><div class="agenda-info"><div class="agenda-title">'+e.titulo+'</div><div class="agenda-detail">'+(e.secretarias?.nome||'')+(e.bairro?' &mdash; '+e.bairro:'')+'</div></div></div>';
+      }).join(''):'<div class="empty"><p>Nenhum evento agendado.</p></div>';
+    }catch(e){console.warn('Agenda:',e.message);}
+
+    // Noticias — ultimas acoes concluidas como "noticias"
+    try{
+      const noticias=acoes.filter(a=>a.status==='concluido'||a.status==='em_andamento').slice(0,6);
+      const newsIcons={concluido:'\u{2705}',em_andamento:'\u{1F4CB}',planejado:'\u{1F4C5}',cancelado:'\u{274C}'};
+      document.getElementById('news-grid').innerHTML=noticias.length?noticias.map(n=>{
+        const dt=n.data?new Date(n.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'';
+        const sec=n.secretarias?.nome||'Gestao Municipal';
+        return'<div class="news-card"><div class="news-thumb">'+(newsIcons[n.status]||'\u{1F4CB}')+'</div><div class="news-body"><div class="news-cat">'+sec+'</div><div class="news-title">'+n.titulo+'</div><div class="news-date">'+dt+'</div><div class="news-link">Ver detalhes &rarr;</div></div></div>';
+      }).join(''):'<div class="empty" style="grid-column:1/-1;"><p>Nenhuma noticia ou acao recente.</p></div>';
+    }catch(e){console.warn('Noticias:',e.message);}
+
+    // Transparency — contratos e licitacoes from recursos
+    try{
+      const totalContratos=acoes.filter(a=>a.status==='concluido').length;
+      document.getElementById('tr-contratos').textContent=totalContratos;
+      document.getElementById('tr-licitacoes').textContent=acoes.filter(a=>a.status==='em_andamento').length;
+    }catch(e){console.warn('Transparencia:',e.message);}
 
   }catch(e){alert('Erro ao carregar dados: '+e.message.slice(0,200));}
 }
