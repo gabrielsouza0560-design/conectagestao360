@@ -9,6 +9,14 @@
     { "source": "/esporte", "destination": "/conecta-gestao-esporte.html" },
     { "source": "/defesa-civil", "destination": "/conecta-gestao-defesa-civil.html" },
     { "source": "/ivatuba-protegida", "destination": "/conecta-gestao-ivatuba-protegida.html" },
-    { "source": "/camara", "destination": "/conecta-gestao-dashboard-camara.html" }
+    { "source": "/camara", "destination": "/conecta-gestao-dashboard-camara.html" },
+    { "source": "/saude-publica", "destination": "/conecta-gestao-saude-publica.html" },
+    { "source": "/educacao-publica", "destination": "/conecta-gestao-educacao-publica.html" },
+    { "source": "/agricultura-publica", "destination": "/conecta-gestao-agricultura-publica.html" },
+    { "source": "/meio-ambiente-publico", "destination": "/conecta-gestao-meio-ambiente-publico.html" },
+    { "source": "/assistencia-social-publica", "destination": "/conecta-gestao-assistencia-social-publica.html" },
+    { "source": "/industria-comercio-publico", "destination": "/conecta-gestao-industria-comercio-publico.html" },
+    { "source": "/cultura-publica", "destination": "/conecta-gestao-cultura-publica.html" },
+    { "source": "/esporte-publico", "destination": "/conecta-gestao-esporte-publico.html" }
   ]
 }
